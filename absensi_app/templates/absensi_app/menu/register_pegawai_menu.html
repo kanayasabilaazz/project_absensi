@@ -1,0 +1,420 @@
+{% extends 'absensi_app/base.html' %}
+
+{% block title %}Registrasi Pegawai{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .dashboard-card-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border: none;
+    }
+
+    .dashboard-card-header h4 {
+        font-size: var(--font-lg);
+        font-weight: 600;
+        margin: 0 0 var(--spacing-xs) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .dashboard-card-header h4 i {
+        font-size: var(--font-base);
+    }
+
+    .dashboard-card-header p {
+        font-size: var(--font-xs);
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .dashboard-card-body {
+        padding: var(--spacing-xl);
+    }
+
+    /* ==================== CARDS GRID - LEBIH KECIL ==================== */
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .registration-card {
+        background: white;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-200);
+        padding: var(--spacing-md);
+        display: flex;
+        flex-direction: column;
+        transition: all var(--transition-base);
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+        min-height: 220px;
+    }
+
+    .registration-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary);
+    }
+
+    .registration-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--spacing-sm);
+        font-size: var(--font-base);
+        box-shadow: var(--shadow-md);
+    }
+
+    .manual-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .fingerprint-icon {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .sync-icon {
+        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+        color: white;
+    }
+
+    .transfer-icon {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+
+    .registration-body {
+        flex: 1;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-title {
+        font-size: var(--font-sm);
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+        color: var(--gray-900);
+        line-height: 1.3;
+    }
+
+    .card-description {
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-sm);
+        font-size: 0.6rem;
+        line-height: 1.4;
+    }
+
+    .feature-list {
+        text-align: left;
+        margin: var(--spacing-xs) 0;
+        padding: 0;
+        list-style: none;
+        flex: 1;
+    }
+
+    .feature-list li {
+        padding: 2px 0;
+        color: var(--gray-700);
+        font-size: 0.6rem;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        line-height: 1.3;
+    }
+
+    .feature-list i {
+        color: var(--success);
+        font-size: 0.55rem;
+        flex-shrink: 0;
+    }
+
+    .btn-choose {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.65rem;
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+        transition: all var(--transition-base);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-xs);
+        margin-top: auto;
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-choose i {
+        font-size: 0.6rem;
+    }
+
+    .btn-choose:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-primary.btn-choose {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .btn-primary.btn-choose:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #5a4a8f 100%);
+    }
+
+    .btn-danger.btn-choose {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .btn-danger.btn-choose:hover {
+        background: linear-gradient(135deg, #f5576c 0%, #d93f57 100%);
+    }
+
+    .btn-info.btn-choose {
+        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    }
+
+    .btn-info.btn-choose:hover {
+        background: linear-gradient(135deg, #3a7bd5 0%, #2d62a8 100%);
+    }
+
+    .btn-purple.btn-choose {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+
+    .btn-purple.btn-choose:hover {
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-card-header,
+        .dashboard-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-sm);
+        }
+
+        .registration-card {
+            padding: var(--spacing-sm);
+            min-height: 200px;
+        }
+
+        .registration-icon {
+            width: 36px;
+            height: 36px;
+            font-size: var(--font-sm);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .cards-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .registration-card {
+            min-height: 190px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="dashboard-card">
+        <div class="dashboard-card-header">
+            <h4>
+                <i class="fas fa-user-plus"></i>
+                Pilih Metode Registrasi Pegawai
+            </h4>
+            <p>Pilih cara yang paling sesuai untuk mendaftarkan pegawai baru atau mengelola data pegawai</p>
+        </div>
+
+        <div class="dashboard-card-body">
+            <div class="cards-grid">
+                
+                <div class="registration-card">
+                    <div class="registration-body">
+                        <div class="registration-icon manual-icon">
+                            <i class="fas fa-keyboard"></i>
+                        </div>
+                        
+                        <h5 class="card-title">Registrasi Manual</h5>
+                        
+                        <p class="card-description">
+                            Daftarkan pegawai baru dengan mengisi form secara manual.
+                            Cocok untuk pendaftaran individual dan data lengkap.
+                        </p>
+
+                        <ul class="feature-list">
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Input data lengkap pegawai
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Validasi otomatis User ID
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Tanpa koneksi mesin
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Proses cepat dan mudah
+                            </li>
+                        </ul>
+                    </div>
+
+                    <a href="{% url 'register_Pegawai_manual' %}" class="btn btn-primary btn-choose">
+                        <i class="fas fa-pen"></i>
+                        Pilih Metode Ini
+                    </a>
+                </div>
+
+                <div class="registration-card">
+                    <div class="registration-body">
+                        <div class="registration-icon fingerprint-icon">
+                            <i class="fas fa-fingerprint"></i>
+                        </div>
+                        
+                        <h5 class="card-title">Import dari Mesin</h5>
+                        
+                        <p class="card-description">
+                            Impor data pegawai yang sudah terdaftar di mesin fingerprint.
+                            Fingerprint otomatis tersinkronisasi.
+                        </p>
+
+                        <ul class="feature-list">
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Data dari mesin fingerprint
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Auto-sync fingerprint
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Hemat waktu input
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Data sudah terverifikasi
+                            </li>
+                        </ul>
+                    </div>
+
+                    <a href="{% url 'register_Pegawai_dari_mesin' %}" class="btn btn-danger btn-choose">
+                        <i class="fas fa-download"></i>
+                        Pilih Metode Ini
+                    </a>
+                </div>
+
+                <div class="registration-card">
+                    <div class="registration-body">
+                        <div class="registration-icon sync-icon">
+                            <i class="fas fa-sync"></i>
+                        </div>
+                        
+                        <h5 class="card-title">Sinkronisasi ke Mesin</h5>
+                        
+                        <p class="card-description">
+                            Daftarkan pegawai yang sudah ada di sistem ke mesin fingerprint.
+                            Untuk pegawai hasil registrasi manual.
+                        </p>
+
+                        <ul class="feature-list">
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Pegawai sudah di sistem
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Daftar ke mesin fingerprint
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Bulk registration tersedia
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Siap scan fingerprint
+                            </li>
+                        </ul>
+                    </div>
+
+                    <a href="{% url 'sinkron_ke_mesin' %}" class="btn btn-info btn-choose">
+                        <i class="fas fa-sync"></i>
+                        Pilih Metode Ini
+                    </a>
+                </div>
+
+                <div class="registration-card">
+                    <div class="registration-body">
+                        <div class="registration-icon transfer-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        
+                        <h5 class="card-title">Transfer Pegawai</h5>
+                        
+                        <p class="card-description">
+                            Pindahkan pegawai dan fingerprint ke mesin/cabang lain.
+                            Cocok untuk pegawai yang dipindahtugaskan.
+                        </p>
+
+                        <ul class="feature-list">
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Transfer antar mesin
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Fingerprint otomatis pindah
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Opsi hapus dari mesin asal
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                Data tetap tersimpan
+                            </li>
+                        </ul>
+                    </div>
+
+                    <a href="{% url 'transfer_pegawai_ke_mesin' %}" class="btn btn-purple btn-choose">
+                        <i class="fas fa-exchange-alt"></i>
+                        Pilih Metode Ini
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

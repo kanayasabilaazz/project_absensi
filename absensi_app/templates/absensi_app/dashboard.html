@@ -1,0 +1,1420 @@
+{% extends 'absensi_app/base.html' %}
+{% load static %}
+{% load tz %}
+{% load humanize %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== VARIABLES (KONSISTEN DENGAN BASE) ==================== */
+    :root {
+        --card-radius: var(--radius-md);
+        --card-shadow: var(--shadow-sm);
+        --card-shadow-hover: var(--shadow-md);
+    }
+
+    /* ==================== MODE TODAY CARD (SIMPLIFIED) ==================== */
+    .mode-today-card {
+        background: white;
+        border-radius: var(--card-radius);
+        overflow: hidden;
+        margin-bottom: var(--spacing-xl);
+        box-shadow: var(--card-shadow);
+        transition: var(--transition-base);
+        border: 1px solid var(--gray-200);
+    }
+
+    .mode-today-card:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .mode-header {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-lg);
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    }
+
+    .mode-info {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg);
+        flex: 1;
+        min-width: 0;
+    }
+
+    .mode-icon-wrap {
+        width: 42px;
+        height: 42px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--font-xl);
+        flex-shrink: 0;
+    }
+
+    .mode-text h5 {
+        margin: 0;
+        font-weight: 700;
+        font-size: var(--font-lg);
+        line-height: 1.2;
+    }
+
+    .mode-text small {
+        opacity: 0.9;
+        font-size: var(--font-xs);
+        display: block;
+        margin-top: 2px;
+    }
+
+    .btn-mode-manage {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-sm);
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition-base);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        white-space: nowrap;
+    }
+
+    .btn-mode-manage:hover {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .mode-body {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg);
+        flex-wrap: wrap;
+    }
+
+    .upcoming-label {
+        font-size: var(--font-xs);
+        color: var(--gray-600);
+        font-weight: 600;
+    }
+
+    .upcoming-modes {
+        display: flex;
+        gap: var(--spacing-sm);
+        flex-wrap: wrap;
+        flex: 1;
+    }
+
+    .mode-badge {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-xs);
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ==================== STATS CARDS ==================== */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: var(--card-radius);
+        padding: var(--spacing-lg);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        text-decoration: none !important;
+        color: white !important;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition-base);
+        min-height: 110px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid transparent;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .stat-card h6 {
+        font-size: var(--font-xs);
+        margin-bottom: var(--spacing-sm);
+        font-weight: 600;
+        text-transform: uppercase;
+        opacity: 0.9;
+        letter-spacing: 0.4px;
+    }
+
+    .stat-card .number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.15;
+        position: absolute;
+        right: var(--spacing-lg);
+        top: var(--spacing-lg);
+    }
+
+    .stat-footer {
+        font-size: var(--font-xs);
+        margin: 0;
+        opacity: 0.9;
+        margin-top: var(--spacing-md);
+        padding-top: var(--spacing-md);
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    }
+
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #059669 0%, var(--success) 100%);
+    }
+
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #d97706 0%, var(--warning) 100%);
+    }
+
+    /* Info Grid dalam Stat Card */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-md);
+        padding-top: var(--spacing-md);
+        border-top: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        cursor: pointer;
+        transition: opacity var(--transition-fast);
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .info-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .info-item .number {
+        font-size: var(--font-lg);
+        font-weight: 700;
+    }
+
+    .info-item .label {
+        font-size: var(--font-xs);
+        opacity: 0.9;
+        font-weight: 500;
+    }
+
+    /* ==================== SECTION CARD ==================== */
+    .section-card {
+        background: white;
+        border-radius: var(--card-radius);
+        box-shadow: var(--card-shadow);
+        margin-bottom: var(--spacing-xl);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+    }
+
+    .section-card:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border-bottom: 1px solid var(--gray-200);
+        flex-wrap: wrap;
+        gap: var(--spacing-lg);
+    }
+
+    .section-title {
+        font-size: var(--font-base);
+        font-weight: 600;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin: 0;
+    }
+
+    .section-title i {
+        color: var(--primary);
+        font-size: var(--font-base);
+    }
+
+    .section-body {
+        padding: var(--spacing-xl);
+    }
+
+    .section-footer {
+        padding: var(--spacing-md) var(--spacing-xl);
+        background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+        font-size: var(--font-sm);
+        color: var(--gray-600);
+    }
+
+    .section-footer strong {
+        color: var(--gray-900);
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .btn-refresh {
+        background: var(--gray-900);
+        color: white;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-sm);
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        transition: var(--transition-base);
+        cursor: pointer;
+    }
+
+    .btn-refresh:hover {
+        background: var(--gray-800);
+        transform: translateY(-1px);
+        color: white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-filter {
+        background: white;
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-sm);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-base);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .btn-filter:hover {
+        background: var(--gray-50);
+        border-color: var(--gray-400);
+        color: var(--gray-900);
+    }
+
+    .btn-filter.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .btn-filter-group {
+        display: flex;
+        gap: var(--spacing-sm);
+        flex-wrap: wrap;
+    }
+
+    /* ==================== SEARCH BOX ==================== */
+    .search-box {
+        position: relative;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 36px;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-sm);
+        transition: var(--transition-base);
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-light);
+    }
+
+    .search-box i {
+        position: absolute;
+        left: var(--spacing-lg);
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-500);
+        font-size: var(--font-sm);
+    }
+
+    /* ==================== TABLE ==================== */
+    .table-wrapper {
+        background: white;
+        border-radius: var(--card-radius);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+    }
+
+    .table {
+        margin-bottom: 0;
+        font-size: var(--font-sm);
+        width: 100%;
+    }
+
+    .table thead th {
+        background: var(--gray-800);
+        color: white;
+        font-weight: 600;
+        padding: var(--spacing-md);
+        font-size: var(--font-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        border: none;
+        white-space: nowrap;
+    }
+
+    .table tbody td {
+        padding: var(--spacing-md);
+        vertical-align: middle;
+        border-bottom: 1px solid var(--gray-200);
+        color: var(--gray-700);
+    }
+
+    .table tbody tr {
+        transition: var(--transition-fast);
+    }
+
+    .table tbody tr:hover {
+        background: var(--gray-50);
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* ==================== BADGES ==================== */
+    .badge-userid {
+        background: var(--primary);
+        color: white;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: var(--font-xs);
+        font-family: 'Consolas', monospace;
+    }
+
+    .badge {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: var(--font-xs);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        white-space: nowrap;
+    }
+
+    /* Jam Kerja Styles - Konsisten dengan Riwayat */
+    .jam-text {
+        font-weight: 700;
+        font-size: var(--font-sm);
+        color: var(--gray-600);
+    }
+
+    .jam-text.violation {
+        color: var(--danger) !important;
+    }
+
+    .total-jam-card {
+        display: inline-block;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: var(--font-sm);
+        background: var(--gray-100);
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+    }
+
+    .total-jam-card.violation {
+        background: #fee2e2;
+        color: #991b1b;
+        border-color: #fca5a5;
+    }
+
+    /* ==================== USER NAME ==================== */
+    .user-name {
+        font-weight: 600;
+        color: var(--gray-900);
+        text-decoration: none;
+    }
+
+    .user-name:hover {
+        color: var(--primary);
+    }
+
+    /* ==================== CHART ==================== */
+    .chart-container {
+        position: relative;
+        height: 300px;
+        padding: var(--spacing-md);
+    }
+
+    /* ==================== SUMMARY GRID ==================== */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-xl);
+    }
+
+    .summary-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-lg);
+        background: white;
+        border-radius: var(--radius-sm);
+        box-shadow: var(--card-shadow);
+        transition: var(--transition-base);
+        cursor: pointer;
+        border: 1px solid var(--gray-200);
+    }
+
+    .summary-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--card-shadow-hover);
+        border-color: var(--primary);
+    }
+
+    .summary-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--font-base);
+        flex-shrink: 0;
+        color: white;
+    }
+
+    .summary-content h6 {
+        font-size: var(--font-base);
+        margin-bottom: 2px;
+        font-weight: 700;
+        color: var(--gray-900);
+    }
+
+    .summary-content small {
+        font-size: var(--font-xs);
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+
+    /* ==================== LOADING & EMPTY ==================== */
+    .loading-state,
+    .empty-state {
+        text-align: center;
+        padding: 48px var(--spacing-xl);
+    }
+
+    .loading-state i,
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--gray-300);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .empty-state h6 {
+        font-size: var(--font-base);
+        color: var(--gray-700);
+        margin-bottom: var(--spacing-sm);
+        font-weight: 600;
+    }
+
+    .empty-state p {
+        font-size: var(--font-sm);
+        color: var(--gray-600);
+        margin: 0;
+    }
+
+    .spinner-border {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    /* ==================== MODAL ==================== */
+    .modal-content {
+        border: none;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: var(--gray-800);
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border: none;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        font-size: var(--font-base);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .modal-body {
+        padding: var(--spacing-xl);
+    }
+
+    .modal-footer {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 992px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .mode-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .btn-filter-group {
+            width: 100%;
+        }
+
+        .btn-filter {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .mode-body {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .upcoming-modes {
+            width: 100%;
+        }
+
+        .chart-container {
+            height: 250px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .section-body {
+            padding: var(--spacing-lg);
+        }
+
+        .stat-card {
+            min-height: auto;
+        }
+
+        .stat-card .number {
+            font-size: 1.6rem;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- ==================== MODE TODAY CARD ==================== -->
+    <div class="mode-today-card">
+        <div class="mode-header" id="modeHeader">
+            <div class="mode-info">
+                <div class="mode-icon-wrap">
+                    <i class="fas fa-clock" id="modeIcon"></i>
+                </div>
+                <div class="mode-text">
+                    <h5 id="modeName">Memuat...</h5>
+                    <small id="modePeriode">Memuat informasi mode...</small>
+                </div>
+            </div>
+            <a href="{% url 'daftar_mode_jam_kerja' %}" class="btn-mode-manage">
+                <i class="fas fa-cog"></i>
+                Kelola
+            </a>
+        </div>
+        <div class="mode-body">
+            <span class="upcoming-label">Mode Mendatang:</span>
+            <div class="upcoming-modes" id="upcomingModes">
+                <span class="badge bg-secondary">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== STATS CARDS ==================== -->
+    <div class="stats-grid">
+        <a href="{% url 'daftar_Pegawai' %}" class="stat-card bg-gradient-primary">
+            <i class="fas fa-users stat-icon"></i>
+            <div>
+                <h6>Total Pegawai</h6>
+                <div class="number">{{ total_pegawai|default:"0" }}</div>
+            </div>
+            <p class="stat-footer">
+                <i class="fas fa-user-check"></i> Pegawai aktif
+            </p>
+        </a>
+
+        <div class="stat-card bg-gradient-success">
+            <i class="fas fa-calendar-check stat-icon"></i>
+            <div>
+                <h6>Kehadiran Hari Ini</h6>
+                <div class="number">{{ pegawai_hadir|default:"0" }}</div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item" onclick="showDetail('Hadir', '#10b981')">
+                    <span class="number">{{ hadir_count|default:"0" }}</span>
+                    <span class="label">Hadir</span>
+                </div>
+                <div class="info-item" onclick="showDetail('Sakit', '#f59e0b')">
+                    <span class="number">{{ sakit_count|default:"0" }}</span>
+                    <span class="label">Sakit</span>
+                </div>
+                <div class="info-item" onclick="showDetail('Izin', '#3b82f6')">
+                    <span class="number">{{ izin_count|default:"0" }}</span>
+                    <span class="label">Izin</span>
+                </div>
+                <div class="info-item" onclick="showDetail('Absen', '#ef4444')">
+                    <span class="number">{{ absen_count|default:"0" }}</span>
+                    <span class="label">Absen</span>
+                </div>
+            </div>
+        </div>
+
+        <a href="{% url 'register_Pegawai_menu' %}" class="stat-card bg-gradient-warning">
+            <i class="fas fa-user-plus stat-icon"></i>
+            <div>
+                <h6>Registrasi</h6>
+                <div class="number"><i class="fas fa-user-plus"></i></div>
+            </div>
+            <p class="stat-footer">
+                <i class="fas fa-id-badge"></i> Pegawai baru
+            </p>
+        </a>
+    </div>
+
+    <!-- ==================== RIWAYAT KEHADIRAN HARI INI ==================== -->
+    <div class="section-card">
+        <div class="section-header">
+            <h5 class="section-title">
+                <i class="fas fa-clock"></i>
+                Riwayat Kehadiran Hari Ini
+            </h5>
+            <button class="btn-refresh" onclick="loadRiwayatAbsensiHariIni()">
+                <i class="fas fa-sync-alt"></i>
+                Refresh
+            </button>
+        </div>
+
+        <div class="section-body">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchRiwayat" placeholder="Cari User ID, Nama, atau Departemen...">
+            </div>
+
+            <div id="loadingSpinner" class="loading-state" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3" style="color: var(--gray-600);">Memuat data...</p>
+            </div>
+
+            <div class="table-wrapper" id="tableContainer" style="display: none;">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 50px;">No</th>
+                                <th class="text-center" style="width: 100px;">User ID</th>
+                                <th>Nama Pegawai</th>
+                                <th class="text-center">Departemen</th>
+                                <th class="text-center">Tanggal</th>
+                                <th class="text-center">Masuk</th>
+                                <th class="text-center">Ist. Keluar</th>
+                                <th class="text-center">Ist. Masuk</th>
+                                <th class="text-center">Pulang</th>
+                                <th class="text-center">Total Jam</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="riwayatBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="emptyRiwayat" class="empty-state" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <h6>Belum Ada Absensi Hari Ini</h6>
+                <p>Pegawai belum ada yang melakukan absensi</p>
+            </div>
+        </div>
+
+        <div class="section-footer">
+            Total: <strong id="totalRiwayat">0</strong> Pegawai
+            {% if cabang_aktif %}
+            <span style="margin-left: var(--spacing-lg);">| Cabang: <strong>{{ cabang_aktif.nama }}</strong></span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ==================== STATISTIK ABSENSI ==================== -->
+    <div class="section-card">
+        <div class="section-header">
+            <h5 class="section-title">
+                <i class="fas fa-chart-line"></i>
+                {{ chart_title|default:"Statistik Absensi" }}
+            </h5>
+            <div class="btn-filter-group">
+                <a href="{% url 'dashboard' %}?period=hari" class="btn-filter {% if current_period == 'hari' %}active{% endif %}">
+                    <i class="fas fa-calendar-day"></i>
+                    Harian
+                </a>
+                <a href="{% url 'dashboard' %}?period=bulan" class="btn-filter {% if current_period == 'bulan' or not current_period %}active{% endif %}">
+                    <i class="fas fa-calendar-alt"></i>
+                    Bulanan
+                </a>
+                <a href="{% url 'dashboard' %}?period=tahun" class="btn-filter {% if current_period == 'tahun' %}active{% endif %}">
+                    <i class="fas fa-calendar"></i>
+                    Tahunan
+                </a>
+            </div>
+        </div>
+
+        <div class="section-body">
+            <div class="chart-container">
+                <canvas id="absensiChart"></canvas>
+            </div>
+
+            <div class="summary-grid" id="statsSummary"></div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL DETAIL ==================== -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-list-alt"></i>
+                        <span id="modalTitle">Detail Data</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Cari nama, User ID, atau departemen...">
+                    </div>
+
+                    <div class="table-wrapper">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" style="width: 50px;">No</th>
+                                        <th class="text-center" style="width: 100px;">User ID</th>
+                                        <th>Nama Pegawai</th>
+                                        <th class="text-center">Departemen</th>
+                                        <th class="text-center">Tanggal</th>
+                                        <th class="text-center">Masuk</th>
+                                        <th class="text-center">Ist. Keluar</th>
+                                        <th class="text-center">Ist. Masuk</th>
+                                        <th class="text-center">Pulang</th>
+                                        <th class="text-center">Total Jam</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="text-center">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="empty-state" id="emptyState" style="display: none;">
+                        <i class="fas fa-search"></i>
+                        <p style="margin: 0; color: var(--gray-600);">Tidak ada data ditemukan</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <small style="margin-right: auto; color: var(--gray-600);">
+                        Total: <strong id="totalData">0</strong> Pegawai
+                        {% if cabang_aktif %}
+                        | Cabang: <strong>{{ cabang_aktif.nama }}</strong>
+                        {% endif %}
+                    </small>
+                    <button type="button" class="btn-filter" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+let lastLoadedDate = null;
+
+const COLORS = {
+    HADIR: { line: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', icon: 'check-circle' },
+    SAKIT: { line: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)', icon: 'thermometer-half' },
+    IZIN: { line: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', icon: 'file-signature' },
+    ABSEN: { line: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', icon: 'times-circle' },
+};
+
+// ==================== LOAD MODE TODAY ====================
+function loadModeToday() {
+    fetch('{% url "api_get_mode_today" %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const mode = data.mode;
+                
+                const modeHeader = document.getElementById('modeHeader');
+                modeHeader.style.background = `linear-gradient(135deg, ${mode.warna} 0%, ${mode.warna}dd 100%)`;
+                
+                document.getElementById('modeIcon').className = `fas ${mode.icon || 'fa-clock'}`;
+                document.getElementById('modeName').textContent = mode.nama;
+                document.getElementById('modePeriode').textContent = mode.periode || 'Mode Hari Ini';
+                
+                const upcomingContainer = document.getElementById('upcomingModes');
+                if (data.upcoming && data.upcoming.length > 0) {
+                    upcomingContainer.innerHTML = data.upcoming.slice(0, 3).map(u => `
+                        <span class="mode-badge" style="background: ${u.warna};">
+                            <i class="fas ${u.icon || 'fa-clock'}"></i>
+                            ${u.mode}: ${u.tanggal_mulai}
+                        </span>
+                    `).join('');
+                } else {
+                    upcomingContainer.innerHTML = '<span class="badge bg-secondary">Tidak ada</span>';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading mode:', error);
+            document.getElementById('modeName').textContent = 'Normal';
+            document.getElementById('modePeriode').textContent = 'Mode Default';
+        });
+}
+
+// ==================== LOAD RIWAYAT ABSENSI ====================
+function loadRiwayatAbsensiHariIni() {
+    const today = new Date().toISOString().split('T')[0];
+    if (lastLoadedDate && lastLoadedDate !== today) {
+        document.getElementById('riwayatBody').innerHTML = '';
+        document.getElementById('totalRiwayat').textContent = '0';
+    }
+    lastLoadedDate = today;
+
+    const spinner = document.getElementById('loadingSpinner');
+    const container = document.getElementById('tableContainer');
+    const emptyState = document.getElementById('emptyRiwayat');
+
+    spinner.style.display = 'block';
+    container.style.display = 'none';
+    emptyState.style.display = 'none';
+
+    fetch('{% url "riwayat_absensi_hari_ini" %}')
+        .then(response => response.json())
+        .then(data => {
+            spinner.style.display = 'none';
+            if (data.status === 'success' && data.data.length > 0) {
+                renderRiwayatTable(data.data);
+                container.style.display = 'block';
+            } else {
+                emptyState.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            spinner.style.display = 'none';
+            emptyState.style.display = 'block';
+        });
+}
+
+// ==================== RENDER TABLE ====================
+function renderRiwayatTable(data) {
+    const tbody = document.getElementById('riwayatBody');
+    tbody.innerHTML = '';
+
+    data.forEach((item, index) => {
+        const statusColors = {
+            'Hadir': 'success',
+            'Sakit': 'warning',
+            'Izin': 'info',
+            'Absen': 'danger'
+        };
+        const statusColor = statusColors[item.status] || 'secondary';
+        const statusIcon = COLORS[item.status.toUpperCase()]?.icon || 'question-circle';
+
+        // Jam Masuk
+        const masukDisplay = item.tap_masuk !== '-' 
+            ? `<span class="jam-text${item.is_late ? ' violation' : ''}">${item.tap_masuk}</span>`
+            : `<span class="badge bg-secondary">-</span>`;
+
+        // Istirahat Keluar
+        const istKeluarDisplay = item.tap_istirahat_keluar && item.tap_istirahat_keluar !== '-'
+            ? `<span class="jam-text">${item.tap_istirahat_keluar}</span>`
+            : (item.tap_masuk !== '-' && item.tap_pulang !== '-' 
+                ? `<span class="jam-text violation" title="Tidak tap istirahat">12:00 <i class="fas fa-exclamation-circle" style="font-size: 0.65rem;"></i></span>`
+                : `<span class="badge bg-secondary">-</span>`);
+
+        // Istirahat Masuk
+        const istMasukDisplay = item.tap_istirahat_masuk && item.tap_istirahat_masuk !== '-'
+            ? `<span class="jam-text">${item.tap_istirahat_masuk}</span>`
+            : (item.tap_masuk !== '-' && item.tap_pulang !== '-'
+                ? `<span class="jam-text violation" title="Tidak tap istirahat">14:00 <i class="fas fa-exclamation-circle" style="font-size: 0.65rem;"></i></span>`
+                : `<span class="badge bg-secondary">-</span>`);
+
+        // Jam Pulang
+        const pulangDisplay = item.tap_pulang !== '-'
+            ? `<span class="jam-text${item.is_early_departure ? ' violation' : ''}">${item.tap_pulang}</span>`
+            : `<span class="badge bg-secondary">-</span>`;
+
+        // Total Jam Kerja
+        const totalJamDisplay = item.total_jam_kerja && item.total_jam_kerja !== '-'
+            ? `<span class="total-jam-card${item.has_violation ? ' violation' : ''}">${item.total_jam_kerja}</span>`
+            : `<span class="badge bg-secondary">-</span>`;
+
+        tbody.innerHTML += `
+        <tr>
+            <td class="text-center"><strong>${index + 1}</strong></td>
+            <td class="text-center"><span class="badge-userid">${item.userid}</span></td>
+            <td><span class="user-name">${item.nama}</span></td>
+            <td class="text-center"><span class="badge bg-light">${item.departemen}</span></td>
+            <td class="text-center"><small>${item.tanggal || '-'}</small></td>
+            <td class="text-center">${masukDisplay}</td>
+            <td class="text-center">${istKeluarDisplay}</td>
+            <td class="text-center">${istMasukDisplay}</td>
+            <td class="text-center">${pulangDisplay}</td>
+            <td class="text-center">${totalJamDisplay}</td>
+            <td class="text-center">
+                <span class="badge bg-${statusColor}">
+                    <i class="fas fa-${statusIcon}"></i>
+                    ${item.status}
+                </span>
+            </td>
+            <td class="text-center">
+                <small style="color: var(--gray-600);">${item.keterangan || '-'}</small>
+            </td>
+        </tr>`;
+    });
+
+    document.getElementById('totalRiwayat').textContent = data.length;
+}
+
+// ==================== SEARCH RIWAYAT ====================
+document.getElementById('searchRiwayat').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#riwayatBody tr');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        if (row.textContent.toLowerCase().includes(searchTerm)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    document.getElementById('totalRiwayat').textContent = visibleCount;
+});
+
+// ==================== SHOW DETAIL MODAL ====================
+function showDetail(status, color) {
+    document.getElementById('modalTitle').innerHTML = `Data Pegawai - ${status}`;
+    const tbody = document.getElementById('tableBody');
+    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="12" class="text-center" style="padding: 48px 20px;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 mb-0" style="color: var(--gray-600);">Memuat data...</p>
+            </td>
+        </tr>`;
+
+    document.getElementById('searchInput').value = '';
+    document.getElementById('emptyState').style.display = 'none';
+    modal.show();
+
+    fetch(`{% url 'detail_absensi_by_status' %}?status=${status}`)
+        .then(response => response.json())
+        .then(data => {
+            tbody.innerHTML = '';
+
+            const pegawaiList = data.pegawai || data.Pegawai || [];
+            
+            if (pegawaiList && pegawaiList.length > 0) {
+                pegawaiList.forEach((item, index) => {
+                    // Format tanggal
+                    const tanggal = item.tanggal || '-';
+
+                    // Jam Masuk
+                    const masukDisplay = item.tap_masuk !== '-' 
+                        ? `<span class="jam-text${item.is_late ? ' violation' : ''}">${item.tap_masuk}</span>`
+                        : `<span class="badge bg-secondary">-</span>`;
+
+                    // Istirahat Keluar
+                    const istKeluarDisplay = item.tap_istirahat_keluar && item.tap_istirahat_keluar !== '-'
+                        ? `<span class="jam-text">${item.tap_istirahat_keluar}</span>`
+                        : (item.tap_masuk !== '-' && item.tap_pulang !== '-' 
+                            ? `<span class="jam-text violation" title="Tidak tap istirahat">12:00 <i class="fas fa-exclamation-circle" style="font-size: 0.65rem;"></i></span>`
+                            : `<span class="badge bg-secondary">-</span>`);
+
+                    // Istirahat Masuk
+                    const istMasukDisplay = item.tap_istirahat_masuk && item.tap_istirahat_masuk !== '-'
+                        ? `<span class="jam-text">${item.tap_istirahat_masuk}</span>`
+                        : (item.tap_masuk !== '-' && item.tap_pulang !== '-'
+                            ? `<span class="jam-text violation" title="Tidak tap istirahat">14:00 <i class="fas fa-exclamation-circle" style="font-size: 0.65rem;"></i></span>`
+                            : `<span class="badge bg-secondary">-</span>`);
+
+                    // Jam Pulang
+                    const pulangDisplay = item.tap_pulang !== '-'
+                        ? `<span class="jam-text${item.is_early_departure ? ' violation' : ''}">${item.tap_pulang}</span>`
+                        : `<span class="badge bg-secondary">-</span>`;
+
+                    // Total Jam Kerja
+                    const totalJamDisplay = item.total_jam_kerja && item.total_jam_kerja !== '-'
+                        ? `<span class="total-jam-card${item.has_violation ? ' violation' : ''}">${item.total_jam_kerja}</span>`
+                        : `<span class="badge bg-secondary">-</span>`;
+
+                    tbody.innerHTML += `
+                    <tr>
+                        <td class="text-center"><strong>${index + 1}</strong></td>
+                        <td class="text-center"><span class="badge-userid">${item.userid}</span></td>
+                        <td>
+                            <span class="user-name">${item.nama}</span>
+                            <small style="display: block; color: var(--gray-600);">${item.jabatan || ''}</small>
+                        </td>
+                        <td class="text-center"><span class="badge bg-light">${item.departemen}</span></td>
+                        <td class="text-center"><small>${tanggal}</small></td>
+                        <td class="text-center">${masukDisplay}</td>
+                        <td class="text-center">${istKeluarDisplay}</td>
+                        <td class="text-center">${istMasukDisplay}</td>
+                        <td class="text-center">${pulangDisplay}</td>
+                        <td class="text-center">${totalJamDisplay}</td>
+                        <td class="text-center">
+                            <span class="badge" style="background-color: ${color}; color: white;">
+                                <i class="fas fa-${COLORS[status.toUpperCase()]?.icon || 'circle'}"></i>
+                                ${status}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <small style="color: var(--gray-600);">${item.keterangan || '-'}</small>
+                        </td>
+                    </tr>`;
+                });
+                document.getElementById('totalData').textContent = pegawaiList.length;
+            } else {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="12" class="text-center" style="padding: 48px 20px;">
+                            <i class="fas fa-inbox" style="font-size: 2.5rem; color: var(--gray-300); display: block; margin-bottom: 16px;"></i>
+                            <p style="margin: 0; color: var(--gray-600);">Tidak ada data pegawai dengan status <strong>${status}</strong></p>
+                        </td>
+                    </tr>`;
+                document.getElementById('totalData').textContent = '0';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="12" class="text-center" style="padding: 48px 20px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; color: var(--danger); display: block; margin-bottom: 16px;"></i>
+                        <p style="margin: 0; color: var(--danger);">Gagal memuat data. Silakan coba lagi.</p>
+                    </td>
+                </tr>`;
+        });
+}
+
+// ==================== SEARCH IN MODAL ====================
+document.getElementById('searchInput').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#tableBody tr');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        if (row.cells.length < 12) {
+            row.style.display = 'none';
+            return;
+        }
+
+        if (row.textContent.toLowerCase().includes(searchTerm)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    document.getElementById('totalData').textContent = visibleCount;
+    const emptyState = document.getElementById('emptyState');
+
+    if (rows.length > 0 && !rows[0].querySelector('.spinner-border')) {
+        emptyState.style.display = visibleCount === 0 && searchTerm.length > 0 ? 'block' : 'none';
+    }
+});
+
+// ==================== INITIALIZE ====================
+document.addEventListener('DOMContentLoaded', function() {
+    loadModeToday();
+    loadRiwayatAbsensiHariIni();
+
+    const ctx = document.getElementById('absensiChart');
+
+    let chartLabels = [];
+    let chartDataHadir = [];
+    let chartDataSakit = [];
+    let chartDataIzin = [];
+    let chartDataAbsen = [];
+    
+    try {
+        chartLabels = JSON.parse('{{ chart_labels|escapejs|default:"[]" }}');
+        chartDataHadir = JSON.parse('{{ chart_data_hadir|escapejs|default:"[]" }}');
+        chartDataSakit = JSON.parse('{{ chart_data_sakit|escapejs|default:"[]" }}');
+        chartDataIzin = JSON.parse('{{ chart_data_izin|escapejs|default:"[]" }}');
+        chartDataAbsen = JSON.parse('{{ chart_data_absen|escapejs|default:"[]" }}');
+    } catch (e) {
+        console.error('Error parsing chart data:', e);
+    }
+
+    if (chartLabels && chartLabels.length > 0) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [
+                    {
+                        label: 'Hadir',
+                        data: chartDataHadir,
+                        borderColor: COLORS.HADIR.line,
+                        backgroundColor: COLORS.HADIR.bg,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: COLORS.HADIR.line,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: 'Sakit',
+                        data: chartDataSakit,
+                        borderColor: COLORS.SAKIT.line,
+                        backgroundColor: COLORS.SAKIT.bg,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: COLORS.SAKIT.line,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: 'Izin',
+                        data: chartDataIzin,
+                        borderColor: COLORS.IZIN.line,
+                        backgroundColor: COLORS.IZIN.bg,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: COLORS.IZIN.line,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: 'Absen',
+                        data: chartDataAbsen,
+                        borderColor: COLORS.ABSEN.line,
+                        backgroundColor: COLORS.ABSEN.bg,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: COLORS.ABSEN.line,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 16,
+                            font: {
+                                size: 11,
+                                weight: '600'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                        padding: 12,
+                        titleFont: { size: 12, weight: 'bold' },
+                        bodyFont: { size: 11 },
+                        cornerRadius: 6,
+                        callbacks: {
+                            label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y} orang`,
+                            footer: (items) => '\nTotal: ' + items.reduce((sum, item) => sum + item.parsed.y, 0) + ' orang'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { 
+                            display: false 
+                        },
+                        ticks: { 
+                            font: { size: 10, weight: '500' },
+                            color: '#6b7280'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#f3f4f6'
+                        },
+                        ticks: {
+                            stepSize: 1,
+                            font: { size: 10, weight: '500' },
+                            color: '#6b7280',
+                            callback: (val) => Number.isInteger(val) ? val : null
+                        }
+                    }
+                }
+            }
+        });
+
+        const summaryContainer = document.getElementById('statsSummary');
+        const summaryItems = [
+            { status: 'Hadir', color: COLORS.HADIR.line, label: 'Total Hadir', icon: COLORS.HADIR.icon },
+            { status: 'Sakit', color: COLORS.SAKIT.line, label: 'Total Sakit', icon: COLORS.SAKIT.icon },
+            { status: 'Izin', color: COLORS.IZIN.line, label: 'Total Izin', icon: COLORS.IZIN.icon },
+            { status: 'Absen', color: COLORS.ABSEN.line, label: 'Total Absen', icon: COLORS.ABSEN.icon },
+        ];
+
+        summaryContainer.innerHTML = summaryItems.map(item => `
+            <div class="summary-item" onclick="showDetail('${item.status}', '${item.color}')">
+                <div class="summary-icon" style="background-color: ${item.color}">
+                    <i class="fas fa-${item.icon}"></i>
+                </div>
+                <div class="summary-content">
+                    <h6>${item.label}</h6>
+                    <small>Klik untuk detail</small>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        ctx.parentElement.innerHTML = `
+            <div style="background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%); 
+                        color: #1e40af; 
+                        border: 2px solid #93c5fd; 
+                        border-radius: var(--radius-md); 
+                        padding: 40px 20px; 
+                        text-align: center;">
+                <i class="fas fa-chart-line" style="font-size: 2.5rem; margin-bottom: 12px; display: block; opacity: 0.7;"></i>
+                <h5 style="font-weight: 700; margin-bottom: 6px; font-size: var(--font-base);">Belum Ada Data Absensi</h5>
+                <p style="margin: 0; font-size: var(--font-sm); opacity: 0.8;">Silakan cek koneksi mesin atau ubah periode filter.</p>
+            </div>`;
+        document.getElementById('statsSummary').style.display = 'none';
+    }
+});
+
+// Auto refresh every 5 minutes
+setInterval(loadRiwayatAbsensiHariIni, 300000);
+</script>
+{% endblock %}

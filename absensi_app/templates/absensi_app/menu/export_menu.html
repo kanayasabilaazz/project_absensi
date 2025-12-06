@@ -1,0 +1,684 @@
+{% extends 'absensi_app/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Export Data Absensi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: var(--spacing-lg);
+        border: 1px solid var(--gray-200);
+    }
+
+    .filter-card h5 {
+        font-size: var(--font-size-md);
+        font-weight: 600;
+        margin-bottom: var(--spacing-md);
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .filter-card h5 i {
+        color: var(--primary);
+        font-size: var(--font-size-sm);
+    }
+
+    .dashboard-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+    }
+
+    .dashboard-card-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        color: white;
+        padding: var(--spacing-lg);
+        border: none;
+    }
+
+    .dashboard-card-header h4 {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        margin: 0 0 var(--spacing-xs) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .dashboard-card-header h4 i {
+        font-size: var(--font-size-md);
+    }
+
+    .dashboard-card-header p {
+        font-size: var(--font-size-xs);
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .dashboard-card-body {
+        padding: var(--spacing-lg);
+    }
+
+    .form-control, .form-select {
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-xs);
+        transition: all 0.2s;
+        height: 38px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-light);
+        outline: none;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: var(--font-size-xs);
+        margin-bottom: var(--spacing-xs);
+        color: var(--gray-700);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .form-label i {
+        color: var(--primary);
+        font-size: 0.7rem;
+    }
+
+    small.text-muted {
+        font-size: 0.7rem;
+        display: block;
+        margin-top: var(--spacing-xs);
+        color: var(--gray-500);
+    }
+
+    .periode-section {
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+        border: 1px solid var(--gray-200);
+    }
+
+    .btn-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: var(--spacing-xs);
+        width: 100%;
+    }
+
+    .btn-group .btn-check {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .btn-group .btn-check + label {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.7rem;
+        font-weight: 600;
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        background: white;
+        color: var(--gray-700);
+        transition: all 0.2s;
+        text-align: center;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-xs);
+    }
+
+    .btn-group .btn-check + label i {
+        font-size: 0.7rem;
+    }
+
+    .btn-group .btn-check:checked + label {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .btn-group .btn-check + label:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-1px);
+    }
+
+    .btn {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: var(--font-size-xs);
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-xs);
+    }
+
+    .btn i {
+        font-size: 0.7rem;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        color: white;
+    }
+
+    .btn-info:hover {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: white;
+    }
+
+    .btn-export {
+        width: 100%;
+    }
+
+    .btn-export-csv {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+
+    .btn-export-csv:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+    }
+
+    .control-section {
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+        border: 1px solid var(--gray-200);
+    }
+
+    .preview-box {
+        display: none;
+        margin-top: var(--spacing-md);
+    }
+
+    .preview-box h6 {
+        font-size: var(--font-size-md);
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-md);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .preview-box h6 i {
+        color: var(--primary);
+        font-size: var(--font-size-sm);
+    }
+
+    .table-wrapper {
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        max-height: 400px;
+        overflow-y: auto;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .table {
+        margin-bottom: 0;
+        font-size: 0.7rem;
+        width: 100%;
+    }
+
+    .table thead th {
+        background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%);
+        color: white;
+        font-weight: 600;
+        padding: var(--spacing-md);
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border: none;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table tbody td {
+        padding: var(--spacing-md);
+        vertical-align: middle;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .table tbody tr:hover {
+        background: var(--gray-50);
+    }
+
+    .badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+    }
+
+    .badge-userid {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 0.7rem;
+        display: inline-block;
+    }
+
+    .badge.bg-success {
+        background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+        color: white;
+    }
+
+    .badge.bg-info {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        color: white;
+    }
+
+    .badge.bg-warning {
+        background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+        color: white;
+    }
+
+    .badge.bg-danger {
+        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+        color: white;
+    }
+
+    .alert {
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        font-size: 0.7rem;
+        border: none;
+    }
+
+    .alert i {
+        font-size: var(--font-size-sm);
+        flex-shrink: 0;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+        border-left: 4px solid var(--success);
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+        border-left: 4px solid var(--primary);
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        border-left: 4px solid var(--warning);
+    }
+
+    @media (max-width: 768px) {
+        .filter-card,
+        .dashboard-card-header,
+        .dashboard-card-body {
+            padding: var(--spacing-md);
+        }
+
+        .btn-group {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .table {
+            font-size: 0.65rem;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: var(--spacing-sm);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .btn-group {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <div class="dashboard-card mb-3">
+        <div class="dashboard-card-header">
+            <h4>
+                <i class="fas fa-download"></i>
+                Export Data Absensi
+            </h4>
+            <p>Pilih filter dan format export yang diinginkan</p>
+        </div>
+    </div>
+
+    <form method="get" id="exportForm">
+        
+        <div class="filter-card">
+            <h5>
+                <i class="fas fa-user-friends"></i>
+                Filter Pegawai
+            </h5>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i>
+                        Pilih Pegawai 
+                    </label>
+                    <select name="pegawai_id" class="form-select" id="pegawai_select">
+                        <option value="">-- Semua Pegawai --</option>
+                        {% for pegawai in pegawai_list %}
+                        <option value="{{ pegawai.id }}">{{ pegawai.userid }} - {{ pegawai.nama_lengkap }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Kosongkan untuk export semua pegawai</small>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-building"></i>
+                        Pilih Departemen 
+                    </label>
+                    <select name="departemen" class="form-select" id="departemen_select">
+                        <option value="">-- Semua Departemen --</option>
+                        {% for dept in departemen_list %}
+                        <option value="{{ dept.nama }}">{{ dept.nama }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Kosongkan untuk export semua departemen</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-card">
+            <h5>
+                <i class="fas fa-calendar-alt"></i>
+                Filter Periode Waktu
+            </h5>
+            
+            <div class="periode-section">
+                <label class="form-label">Pilih Periode:</label>
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="periode" id="periode_hari" value="hari_ini" autocomplete="off">
+                    <label class="btn" for="periode_hari">
+                        <i class="fas fa-calendar-day"></i>
+                        Hari Ini
+                    </label>
+
+                    <input type="radio" class="btn-check" name="periode" id="periode_minggu" value="minggu_ini" autocomplete="off">
+                    <label class="btn" for="periode_minggu">
+                        <i class="fas fa-calendar-week"></i>
+                        Minggu Ini
+                    </label>
+
+                    <input type="radio" class="btn-check" name="periode" id="periode_bulan" value="bulan_ini" autocomplete="off">
+                    <label class="btn" for="periode_bulan">
+                        <i class="fas fa-calendar"></i>
+                        Bulan Ini
+                    </label>
+
+                    <input type="radio" class="btn-check" name="periode" id="periode_tahun" value="tahun_ini" autocomplete="off">
+                    <label class="btn" for="periode_tahun">
+                        <i class="fas fa-calendar-alt"></i>
+                        Tahun Ini
+                    </label>
+
+                    <input type="radio" class="btn-check" name="periode" id="periode_custom" value="custom" autocomplete="off" checked>
+                    <label class="btn" for="periode_custom">
+                        <i class="fas fa-calendar-check"></i>
+                        Custom
+                    </label>
+                </div>
+            </div>
+
+            <div class="row g-2" id="custom_date_range">
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-calendar"></i>
+                        Tanggal Mulai
+                    </label>
+                    <input type="date" name="tanggal_mulai" class="form-control" id="tanggal_mulai">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-calendar"></i>
+                        Tanggal Akhir
+                    </label>
+                    <input type="date" name="tanggal_akhir" class="form-control" id="tanggal_akhir">
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h4>
+                    <i class="fas fa-eye"></i>
+                    Preview & Export Data
+                </h4>
+                <p>Lihat preview data sebelum melakukan export</p>
+            </div>
+
+            <div class="dashboard-card-body">
+
+                <div class="control-section">
+                    <div class="row g-2 align-items-end w-100">
+                        <div class="col-md-8">
+                            <label class="form-label">
+                                <i class="fas fa-list-ol"></i>
+                                Jumlah Data Preview
+                            </label>
+                            <select class="form-select" id="previewLimit">
+                                <option value="10">10 Data</option>
+                                <option value="25">25 Data</option>
+                                <option value="50" selected>50 Data</option>
+                                <option value="100">100 Data</option>
+                                <option value="200">200 Data</option>
+                                <option value="all">Semua Data</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-info w-100" id="btnPreview">
+                                <i class="fas fa-eye"></i>Preview Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preview-box" id="previewBox">
+                    <h6 id="previewTitle">
+                        <i class="fas fa-table"></i>
+                        Preview Data:
+                    </h6>
+                    <div id="previewContent"></div>
+                </div>
+
+                <div class="row g-2 mt-2">
+                    <div class="col-md-12">
+                        <button type="button" class="btn btn-export btn-export-csv" id="btnExportCSV">
+                            <i class="fas fa-file-csv"></i>Export ke CSV (.csv)
+                        </button>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>Format universal untuk semua aplikasi
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    
+    $('input[name="periode"]').change(function() {
+        if ($(this).val() === 'custom') {
+            $('#custom_date_range').slideDown();
+        } else {
+            $('#custom_date_range').slideUp();
+            $('#tanggal_mulai, #tanggal_akhir').val('');
+        }
+    });
+
+    $('#pegawai_select').change(function() {
+        if ($(this).val()) {
+            $('#departemen_select').prop('disabled', true).val('');
+        } else {
+            $('#departemen_select').prop('disabled', false);
+        }
+    });
+
+    $('#departemen_select').change(function() {
+        if ($(this).val()) {
+            $('#pegawai_select').prop('disabled', true).val('');
+        } else {
+            $('#pegawai_select').prop('disabled', false);
+        }
+    });
+    
+    $('#btnPreview').click(function() {
+        const formData = $('#exportForm').serialize();
+        const previewLimit = $('#previewLimit').val();
+        
+        $.ajax({
+            url: '{% url "preview_export_data" %}',
+            method: 'GET',
+            data: formData + '&limit=' + previewLimit,
+            beforeSend: function() {
+                $('#btnPreview').html('<i class="fas fa-spinner fa-spin"></i>Loading...').prop('disabled', true);
+                $('#previewBox').slideUp();
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    let limitText = previewLimit === 'all' ? 'Semua' : previewLimit;
+                    $('#previewTitle').html('<i class="fas fa-table"></i>Preview Data (' + limitText + ' dari ' + response.total + ' total):');
+                    
+                    let html = '<div class="alert alert-success">';
+                    html += '<i class="fas fa-check-circle"></i>';
+                    html += '<div>';
+                    html += '<strong>Total Data: ' + response.total + ' record</strong><br>';
+                    html += 'Ditampilkan: ' + response.preview.length + ' record';
+                    html += '</div></div>';
+                    
+                    if (response.preview.length > 0) {
+                        html += '<div class="table-wrapper">';
+                        html += '<table class="table table-hover">';
+                        html += '<thead><tr>';
+                        html += '<th class="text-center" width="5%">No</th>';
+                        html += '<th width="10%">User ID</th>';
+                        html += '<th width="20%">Nama</th>';
+                        html += '<th width="15%">Departemen</th>';
+                        html += '<th width="12%">Tanggal</th>';
+                        html += '<th width="12%">Shift</th>';
+                        html += '<th class="text-center" width="10%">Status</th>';
+                        html += '</tr></thead><tbody>';
+                        
+                        response.preview.forEach(function(item, index) {
+                            html += '<tr>';
+                            html += '<td class="text-center fw-bold text-muted">' + (index + 1) + '</td>';
+                            html += '<td class="text-center"><span class="badge-userid">' + item.userid + '</span></td>';
+                            html += '<td><strong>' + item.nama + '</strong></td>';
+                            html += '<td>' + item.departemen + '</td>';
+                            html += '<td>' + item.tanggal + '</td>';
+                            html += '<td>' + item.shift + '</td>';
+                            
+                            let statusClass = 'secondary';
+                            let statusIcon = 'fas fa-question-circle';
+                            
+                            if (item.status === 'Hadir') {
+                                statusClass = 'success';
+                                statusIcon = 'fas fa-check-circle';
+                            } else if (item.status === 'Sakit') {
+                                statusClass = 'info';
+                                statusIcon = 'fas fa-notes-medical';
+                            } else if (item.status === 'Izin') {
+                                statusClass = 'warning';
+                                statusIcon = 'fas fa-file-alt';
+                            } else if (item.status === 'Absen') {
+                                statusClass = 'danger';
+                                statusIcon = 'fas fa-times-circle';
+                            }
+                            
+                            html += '<td class="text-center">';
+                            html += '<span class="badge bg-' + statusClass + '">';
+                            html += '<i class="' + statusIcon + ' me-1"></i>' + item.status;
+                            html += '</span></td></tr>';
+                        });
+                        
+                        html += '</tbody></table></div>';
+                        
+                        if (response.total > response.preview.length) {
+                            let sisaData = response.total - response.preview.length;
+                            html += '<div class="alert alert-info">';
+                            html += '<i class="fas fa-info-circle"></i>';
+                            html += '<div><strong>Info:</strong> Masih ada <strong>' + sisaData + ' data lagi</strong> yang tidak ditampilkan.</div>';
+                            html += '</div>';
+                        }
+                    } else {
+                        html += '<div class="alert alert-warning">';
+                        html += '<i class="fas fa-exclamation-triangle"></i>';
+                        html += '<div><strong>Tidak ada data</strong> yang sesuai dengan filter.</div>';
+                        html += '</div>';
+                    }
+                    
+                    $('#previewContent').html(html);
+                    $('#previewBox').slideDown();
+                } else {
+                    alert('Error: ' + response.msg);
+                }
+            },
+            error: function(xhr) {
+                alert('Gagal mengambil preview data');
+            },
+            complete: function() {
+                $('#btnPreview').html('<i class="fas fa-eye"></i>Preview Data').prop('disabled', false);
+            }
+        });
+    });
+
+    $('#btnExportCSV').click(function() {
+        const formData = $('#exportForm').serialize();
+        window.location.href = '{% url "export_absensi_csv_advanced" %}?' + formData;
+    });
+});
+</script>
+{% endblock %}

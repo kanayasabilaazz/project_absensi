@@ -1,0 +1,775 @@
+{% extends 'absensi_app/base.html' %}
+{% load static %}
+
+{% block title %}Edit Data Absensi{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== FORM CARD ==================== */
+    .form-card {
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+    }
+
+    .form-card-header h5 {
+        margin: 0;
+        font-size: var(--font-lg);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .form-card-body {
+        padding: var(--spacing-xl);
+    }
+
+    /* ==================== FORM SECTIONS ==================== */
+    .form-section {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 2px solid var(--gray-100);
+    }
+
+    .section-header h6 {
+        margin: 0;
+        font-size: var(--font-base);
+        font-weight: 600;
+        color: var(--gray-900);
+    }
+
+    .section-divider {
+        border-top: 2px solid var(--gray-100);
+        margin: var(--spacing-xl) 0;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* ==================== FORM CONTROLS ==================== */
+    .form-label {
+        font-weight: 600;
+        font-size: var(--font-sm);
+        margin-bottom: var(--spacing-sm);
+        color: var(--gray-700);
+        display: block;
+    }
+
+    .form-label .text-danger {
+        color: var(--danger);
+        margin-left: var(--spacing-xs);
+    }
+
+    .form-label .text-muted {
+        color: var(--gray-500);
+        font-weight: 500;
+    }
+
+    .form-control,
+    .form-select {
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: 0.5rem var(--spacing-lg);
+        font-size: var(--font-sm);
+        transition: all var(--transition-base);
+        font-family: 'Inter', system-ui, sans-serif;
+        width: 100%;
+        background: white;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-light);
+        outline: none;
+    }
+
+    .form-control.bg-light {
+        background: var(--gray-50) !important;
+        cursor: not-allowed;
+        border-color: var(--gray-200);
+    }
+
+    .form-control-lg {
+        padding: 0.625rem var(--spacing-lg);
+        font-size: var(--font-base);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    small.text-muted {
+        display: block;
+        margin-top: var(--spacing-xs);
+        font-size: var(--font-xs);
+        color: var(--gray-500);
+    }
+
+    /* ==================== RADIO BUTTONS ==================== */
+    .radio-group {
+        display: flex;
+        gap: var(--spacing-xl);
+    }
+
+    .form-check {
+        padding-left: 0;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .form-check-input {
+        width: 1rem;
+        height: 1rem;
+        margin-right: var(--spacing-sm);
+        border: 2px solid var(--gray-300);
+        cursor: pointer;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 2px var(--primary-light);
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        font-size: var(--font-sm);
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+
+    /* ==================== ALERTS ==================== */
+    .alert {
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-lg) var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        font-size: var(--font-sm);
+        border: 1px solid transparent;
+        font-weight: 500;
+    }
+
+    .alert i {
+        font-size: var(--font-base);
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+    }
+
+    .alert-danger {
+        background: var(--danger-light);
+        color: #991b1b;
+        border-color: var(--danger);
+    }
+
+    .alert-warning {
+        background: var(--warning-light);
+        color: #92400e;
+        border-color: var(--warning);
+    }
+
+    .alert-info {
+        background: var(--info-light);
+        color: #1e40af;
+        border-color: var(--info);
+    }
+
+    .alert-success {
+        background: var(--success-light);
+        color: #065f46;
+        border-color: var(--success);
+    }
+
+    .alert strong {
+        display: block;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .alert p {
+        margin: 0;
+    }
+
+    /* ==================== INFO BOXES ==================== */
+    .info-box {
+        background: var(--gray-50);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-lg);
+    }
+
+    .info-box strong {
+        display: block;
+        font-size: var(--font-xs);
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-xs);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .info-box .value {
+        font-size: var(--font-lg);
+        font-weight: 600;
+        color: var(--gray-900);
+        margin: 0;
+    }
+
+    /* ==================== BADGES ==================== */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.3rem 0.6rem;
+        font-size: var(--font-xs);
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+        white-space: nowrap;
+    }
+
+    .badge.bg-success {
+        background: var(--success-light);
+        color: #065f46;
+    }
+
+    .badge.bg-danger {
+        background: var(--danger-light);
+        color: #991b1b;
+    }
+
+    .badge.bg-warning {
+        background: var(--warning-light);
+        color: #92400e;
+    }
+
+    .badge.bg-info {
+        background: var(--info-light);
+        color: #1e40af;
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .btn-group-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+        padding-top: var(--spacing-lg);
+        border-top: 2px solid var(--gray-100);
+        margin-top: var(--spacing-xl);
+    }
+
+    .btn-secondary {
+        background: var(--gray-500);
+        color: white;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background: var(--gray-600);
+        transform: translateY(-1px);
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+        .form-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .radio-group {
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .btn-group-actions {
+            flex-direction: column;
+        }
+
+        .btn-group-actions .btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .form-card-header {
+            padding: var(--spacing-md) var(--spacing-lg);
+        }
+
+        .form-card-body {
+            padding: var(--spacing-md);
+        }
+
+        .form-card-header h5 {
+            font-size: var(--font-base);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h5>
+                        <i class="fas fa-edit"></i>
+                        Edit Data Absensi
+                    </h5>
+                </div>
+
+                <div class="form-card-body">
+                    <form method="POST" id="formEditAbsensi" novalidate>
+                        {% csrf_token %}
+
+                        <!-- ERROR MESSAGES -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <div>
+                                    <strong>Error!</strong>
+                                    <p>{{ form.non_field_errors }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- INFO PEGAWAI -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <i class="fas fa-user"></i>
+                                <h6>Informasi Pegawai</h6>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Pegawai</label>
+                                    <input type="text" class="form-control bg-light" 
+                                           value="{{ absensi.pegawai.nama_lengkap }}" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">User ID</label>
+                                    <input type="text" class="form-control bg-light" 
+                                           value="{{ absensi.pegawai.userid }}" readonly>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <label class="form-label">Tanggal Absensi</label>
+                                    <input type="text" class="form-control bg-light" 
+                                           value="{{ absensi.tanggal|date:'d F Y' }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <!-- STATUS ABSENSI -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <i class="fas fa-check-circle"></i>
+                                <h6>Status Absensi</h6>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <label class="form-label">
+                                        Status <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="status" id="id_status" class="form-control form-control-lg" required>
+                                        <option value="">-- Pilih Status --</option>
+                                        <option value="Hadir" {% if absensi.status == 'Hadir' %}selected{% endif %}>Hadir</option>
+                                        <option value="Sakit" {% if absensi.status == 'Sakit' %}selected{% endif %}>Sakit</option>
+                                        <option value="Izin" {% if absensi.status == 'Izin' %}selected{% endif %}>Izin</option>
+                                        <option value="Absen" {% if absensi.status == 'Absen' %}selected{% endif %}>Absen</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <!-- WAKTU KEHADIRAN -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <i class="fas fa-clock"></i>
+                                <h6>Waktu Kehadiran</h6>
+                            </div>
+
+                            <!-- SECTION HADIR -->
+                            <div id="hadirSection" class="hidden">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            Waktu Masuk <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="time" name="tap_masuk" id="id_tap_masuk" 
+                                               class="form-control" 
+                                               value="{% if absensi.tap_masuk %}{{ absensi.tap_masuk|time:'H:i' }}{% endif %}">
+                                        <small class="text-muted">Jam masuk karyawan</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            Waktu Keluar <span class="text-muted">(Opsional)</span>
+                                        </label>
+                                        <input type="time" name="tap_pulang" id="id_tap_pulang" 
+                                               class="form-control" 
+                                               value="{% if absensi.tap_pulang %}{{ absensi.tap_pulang|time:'H:i' }}{% endif %}">
+                                        <small class="text-muted">Jam pulang karyawan</small>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            Istirahat Keluar <span class="text-muted">(Opsional)</span>
+                                        </label>
+                                        <input type="time" name="tap_istirahat_keluar" id="id_tap_istirahat_keluar" 
+                                               class="form-control" 
+                                               value="{% if absensi.tap_istirahat_keluar %}{{ absensi.tap_istirahat_keluar|time:'H:i' }}{% endif %}">
+                                        <small class="text-muted">Jam keluar istirahat</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            Istirahat Masuk <span class="text-muted">(Opsional)</span>
+                                        </label>
+                                        <input type="time" name="tap_istirahat_masuk" id="id_tap_istirahat_masuk" 
+                                               class="form-control" 
+                                               value="{% if absensi.tap_istirahat_masuk %}{{ absensi.tap_istirahat_masuk|time:'H:i' }}{% endif %}">
+                                        <small class="text-muted">Jam masuk kembali istirahat</small>
+                                    </div>
+                                </div>
+
+                                <!-- Info Jam Kerja -->
+                                <div class="row mt-3">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-box">
+                                            <strong>Total Jam Kerja</strong>
+                                            <p class="value" id="totalJamKerja">-</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="info-box">
+                                            <strong>Total Istirahat</strong>
+                                            <p class="value" id="totalIstirahat">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECTION ABSEN -->
+                            <div id="absenSection" class="hidden">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div>
+                                        <strong>Status Absen</strong>
+                                        <p>Karyawan tidak masuk dan tidak ada informasi jam kerja.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECTION IZIN/SAKIT -->
+                            <div id="izinSakitSection" class="hidden">
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label">
+                                            Pilih Tipe <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="radio-group">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="tipe_izin" 
+                                                       id="fullDay" value="full" 
+                                                       {% if not absensi.tap_masuk and not absensi.tap_pulang %}checked{% endif %}>
+                                                <label class="form-check-label" for="fullDay">
+                                                    <span class="badge bg-info">Full Day</span>
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="tipe_izin" 
+                                                       id="halfDay" value="half"
+                                                       {% if absensi.tap_masuk or absensi.tap_pulang %}checked{% endif %}>
+                                                <label class="form-check-label" for="halfDay">
+                                                    <span class="badge bg-info">Half Day</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Half Day Time Input -->
+                                <div id="halfDayTimeSection" class="{% if not absensi.tap_masuk and not absensi.tap_pulang %}hidden{% endif %}">
+                                    <div class="alert alert-info mb-3">
+                                        <i class="fas fa-info-circle"></i>
+                                        <div>
+                                            <strong>Half Day</strong>
+                                            <p>Masukkan rentang waktu izin/sakit dimulai</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Waktu Mulai</label>
+                                            <input type="time" name="tap_masuk_half" id="id_tap_masuk_half" 
+                                                   class="form-control"
+                                                   value="{% if absensi.tap_masuk %}{{ absensi.tap_masuk|time:'H:i' }}{% endif %}">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Waktu Selesai</label>
+                                            <input type="time" name="tap_pulang_half" id="id_tap_pulang_half" 
+                                                   class="form-control"
+                                                   value="{% if absensi.tap_pulang %}{{ absensi.tap_pulang|time:'H:i' }}{% endif %}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <!-- KETERANGAN -->
+                        <div class="form-section">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label class="form-label">
+                                        Keterangan <span class="text-muted">(Opsional)</span>
+                                    </label>
+                                    <textarea name="keterangan" class="form-control" 
+                                              placeholder="Tambahkan keterangan jika diperlukan...">{{ absensi.keterangan }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- INFO STATUS SAAT INI -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <strong>Status Saat Ini</strong>
+                                <p>
+                                    {% if absensi.is_late %}
+                                        <span class="badge bg-danger">Terlambat</span>
+                                    {% endif %}
+                                    {% if absensi.is_early_departure %}
+                                        <span class="badge bg-warning">Pulang Cepat</span>
+                                    {% endif %}
+                                    {% if not absensi.is_late and not absensi.is_early_departure %}
+                                        <span class="badge bg-success">Normal</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- BUTTONS -->
+                        <div class="btn-group-actions">
+                            <a href="{% url 'riwayat_absensi' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Kembali
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="btnSubmit">
+                                <i class="fas fa-save"></i> Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statusSelect = document.getElementById('id_status');
+    const hadirSection = document.getElementById('hadirSection');
+    const absenSection = document.getElementById('absenSection');
+    const izinSakitSection = document.getElementById('izinSakitSection');
+    const fullDayRadio = document.getElementById('fullDay');
+    const halfDayRadio = document.getElementById('halfDay');
+    const halfDayTimeSection = document.getElementById('halfDayTimeSection');
+    const btnSubmit = document.getElementById('btnSubmit');
+    
+    // Time inputs - Hadir
+    const tapMasuk = document.getElementById('id_tap_masuk');
+    const tapKeluar = document.getElementById('id_tap_pulang');
+    const tapIstirahatKeluar = document.getElementById('id_tap_istirahat_keluar');
+    const tapIstirahatMasuk = document.getElementById('id_tap_istirahat_masuk');
+    
+    // Time inputs - Half Day
+    const tapMasukHalf = document.getElementById('id_tap_masuk_half');
+    const tapKeluarHalf = document.getElementById('id_tap_pulang_half');
+
+    // Helper: Convert time to minutes
+    function timeToMinutes(timeStr) {
+        if (!timeStr) return 0;
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+    }
+
+    // Calculate work hours
+    function calculateWorkHours() {
+        const masuk = timeToMinutes(tapMasuk.value);
+        const keluar = timeToMinutes(tapKeluar.value);
+        const istirahatKeluar = timeToMinutes(tapIstirahatKeluar.value);
+        const istirahatMasuk = timeToMinutes(tapIstirahatMasuk.value);
+
+        if (!masuk || !keluar) {
+            document.getElementById('totalJamKerja').textContent = '-';
+            document.getElementById('totalIstirahat').textContent = '-';
+            return;
+        }
+
+        let workMinutes = keluar - masuk;
+        let breakMinutes = 0;
+
+        if (istirahatKeluar > 0 && istirahatMasuk > 0) {
+            breakMinutes = istirahatMasuk - istirahatKeluar;
+            workMinutes -= breakMinutes;
+        }
+
+        const workHours = Math.floor(workMinutes / 60);
+        const workMins = workMinutes % 60;
+        const breakHours = Math.floor(breakMinutes / 60);
+        const breakMins = breakMinutes % 60;
+
+        document.getElementById('totalJamKerja').textContent = `${workHours}j ${workMins}m`;
+        document.getElementById('totalIstirahat').textContent = breakMinutes > 0 ? `${breakHours}j ${breakMins}m` : '-';
+    }
+
+    // Toggle sections
+    function toggleSections() {
+        const status = statusSelect.value;
+        
+        hadirSection.classList.add('hidden');
+        absenSection.classList.add('hidden');
+        izinSakitSection.classList.add('hidden');
+        
+        tapMasuk.removeAttribute('required');
+        tapMasukHalf.removeAttribute('required');
+        tapKeluarHalf.removeAttribute('required');
+        
+        if (status !== 'Hadir') {
+            tapMasuk.value = '';
+            tapKeluar.value = '';
+            tapIstirahatKeluar.value = '';
+            tapIstirahatMasuk.value = '';
+            document.getElementById('totalJamKerja').textContent = '-';
+            document.getElementById('totalIstirahat').textContent = '-';
+        }
+        
+        if (status === 'Hadir') {
+            hadirSection.classList.remove('hidden');
+            tapMasuk.setAttribute('required', 'required');
+        } else if (status === 'Absen') {
+            absenSection.classList.remove('hidden');
+        } else if (status === 'Izin' || status === 'Sakit') {
+            izinSakitSection.classList.remove('hidden');
+            
+            if (tapMasukHalf.value || tapKeluarHalf.value) {
+                halfDayRadio.checked = true;
+                halfDayTimeSection.classList.remove('hidden');
+            } else {
+                fullDayRadio.checked = true;
+                halfDayTimeSection.classList.add('hidden');
+            }
+        }
+    }
+
+    // Event listeners
+    statusSelect.addEventListener('change', toggleSections);
+
+    if (fullDayRadio) {
+        fullDayRadio.addEventListener('change', function() {
+            if (this.checked) {
+                halfDayTimeSection.classList.add('hidden');
+                tapMasukHalf.value = '';
+                tapKeluarHalf.value = '';
+                tapMasukHalf.removeAttribute('required');
+                tapKeluarHalf.removeAttribute('required');
+            }
+        });
+    }
+
+    if (halfDayRadio) {
+        halfDayRadio.addEventListener('change', function() {
+            if (this.checked) {
+                halfDayTimeSection.classList.remove('hidden');
+                tapMasukHalf.setAttribute('required', 'required');
+                tapKeluarHalf.setAttribute('required', 'required');
+            }
+        });
+    }
+
+    // Validation: Waktu Keluar > Waktu Masuk
+    if (tapKeluar) {
+        tapKeluar.addEventListener('change', function() {
+            if (tapMasuk.value && tapKeluar.value) {
+                if (tapKeluar.value <= tapMasuk.value) {
+                    alert('⚠️ Waktu keluar harus lebih besar dari waktu masuk!');
+                    tapKeluar.value = '';
+                    calculateWorkHours();
+                    return;
+                }
+                calculateWorkHours();
+            }
+        });
+    }
+
+    // Validation: Istirahat Masuk > Istirahat Keluar
+    if (tapIstirahatMasuk) {
+        tapIstirahatMasuk.addEventListener('change', function() {
+            if (tapIstirahatKeluar.value && tapIstirahatMasuk.value) {
+                if (tapIstirahatMasuk.value <= tapIstirahatKeluar.value) {
+                    alert('⚠️ Waktu istirahat masuk harus lebih besar dari istirahat keluar!');
+                    tapIstirahatMasuk.value = '';
+                    calculateWorkHours();
+                    return;
+                }
+                calculateWorkHours();
+            }
+        });
+    }
+
+    // Validation: Half Day Times
+    if (tapKeluarHalf) {
+        tapKeluarHalf.addEventListener('change', function() {
+            if (tapMasukHalf.value && tapKeluarHalf.value) {
+                if (tapKeluarHalf.value <= tapMasukHalf.value) {
+                    alert('⚠️ Waktu selesai harus lebih besar dari waktu mulai!');
+                    tapKeluarHalf.value = '';
+                }
+            }
+        });
+    }
+
+    // Time input change events
+    if (tapMasuk) tapMasuk.addEventListener('change', calculateWorkHours);
+    if (tapIstirahatKeluar) tapIstirahatKeluar.addEventListener('change', calculateWorkHours);
+    if (tapIstirahatMasuk) tapIstirahatMasuk.addEventListener('change', calculateWorkHours);
+
+    // Submit handler
+    document.getElementById('formEditAbsensi').addEventListener('submit', function(e) {
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+    });
+
+    // Initialize on page load
+    toggleSections();
+    calculateWorkHours();
+});
+</script>
+{% endblock %}

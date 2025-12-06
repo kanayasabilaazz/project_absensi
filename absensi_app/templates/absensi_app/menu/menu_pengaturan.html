@@ -1,0 +1,405 @@
+{% extends 'absensi_app/base.html' %}
+
+{% block title %}Menu Pengaturan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .dashboard-card-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border: none;
+    }
+
+    .dashboard-card-header h4 {
+        font-size: var(--font-lg);
+        font-weight: 600;
+        margin: 0 0 var(--spacing-xs) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .dashboard-card-header h4 i {
+        font-size: var(--font-base);
+    }
+
+    .dashboard-card-header p {
+        font-size: var(--font-xs);
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .dashboard-card-body {
+        padding: var(--spacing-xl);
+    }
+
+    /* Cards Grid - More Compact */
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .settings-card {
+        background: white;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-200);
+        padding: var(--spacing-md);
+        display: flex;
+        flex-direction: column;
+        transition: all var(--transition-base);
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+        position: relative;
+        min-height: 180px;
+    }
+
+    .settings-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary);
+    }
+
+    /* Compact Icon */
+    .settings-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--spacing-sm);
+        font-size: var(--font-base);
+        box-shadow: var(--shadow-md);
+        color: white;
+    }
+
+    .icon-blue { 
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
+    }
+    .icon-green { 
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+    }
+    .icon-purple { 
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); 
+    }
+    .icon-cyan { 
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); 
+    }
+    .icon-orange {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    .icon-indigo {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+
+    .settings-body {
+        flex: 1;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-title {
+        font-size: var(--font-sm);
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+        color: var(--gray-900);
+        line-height: 1.3;
+    }
+
+    .card-description {
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-sm);
+        font-size: 0.6rem;
+        line-height: 1.4;
+        flex: 1;
+    }
+
+    /* Compact Stats Badge */
+    .stats-badge {
+        position: absolute;
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+        background: var(--primary);
+        color: white;
+        padding: 2px var(--spacing-xs);
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 0.6rem;
+        box-shadow: var(--shadow-sm);
+        min-width: 24px;
+        text-align: center;
+    }
+
+    .btn-choose {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.65rem;
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+        transition: all var(--transition-base);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-xs);
+        margin-top: auto;
+        color: white;
+        text-decoration: none;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+
+    .btn-choose i {
+        font-size: 0.6rem;
+    }
+
+    .btn-choose:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        color: white;
+        text-decoration: none;
+        background: linear-gradient(135deg, var(--primary-dark) 0%, #1e40af 100%);
+    }
+
+    /* Compact Section Title */
+    .section-title {
+        font-size: var(--font-sm);
+        font-weight: 600;
+        color: var(--gray-900);
+        margin: var(--spacing-lg) 0 var(--spacing-md) 0;
+        padding-bottom: var(--spacing-xs);
+        border-bottom: 2px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .section-title i {
+        color: var(--primary);
+        font-size: var(--font-sm);
+    }
+
+    .section-title:first-of-type {
+        margin-top: 0;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-card-header,
+        .dashboard-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-sm);
+        }
+
+        .settings-card {
+            padding: var(--spacing-sm);
+            min-height: 170px;
+        }
+
+        .settings-icon {
+            width: 36px;
+            height: 36px;
+            font-size: var(--font-sm);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .cards-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .settings-card {
+            min-height: 160px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="dashboard-card">
+        <div class="dashboard-card-header">
+            <h4>
+                <i class="fas fa-cog"></i>
+                Pengaturan Sistem
+            </h4>
+            <p>Kelola master data dan konfigurasi sistem absensi pegawai</p>
+        </div>
+        <div class="dashboard-card-body">
+        
+            <!-- SECTION: MASTER DATA PEGAWAI -->
+            <h5 class="section-title">
+                <i class="fas fa-database"></i>
+                Master Data Pegawai
+            </h5>
+
+            <div class="cards-grid">
+                <!-- Departemen -->
+                <div class="settings-card">
+                    <span class="stats-badge">{{ total_departemen }}</span>
+                    <div class="settings-body">
+                        <div class="settings-icon icon-blue">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        
+                        <h5 class="card-title">Departemen</h5>
+                        
+                        <p class="card-description">
+                            Kelola departemen perusahaan. Unit organisasi level tertinggi dalam struktur.
+                        </p>
+                    </div>
+
+                    <a href="{% url 'daftar_departemen' %}" class="btn-choose">
+                        <i class="fas fa-cog"></i>
+                        Kelola
+                    </a>
+                </div>
+
+                <!-- Jabatan -->
+                <div class="settings-card">
+                    <span class="stats-badge">{{ total_jabatan }}</span>
+                    <div class="settings-body">
+                        <div class="settings-icon icon-green">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        
+                        <h5 class="card-title">Jabatan</h5>
+                        
+                        <p class="card-description">
+                            Kelola tingkat jabatan pegawai. Level dalam hierarki organisasi perusahaan.
+                        </p>
+                    </div>
+
+                    <a href="{% url 'daftar_jabatan' %}" class="btn-choose">
+                        <i class="fas fa-cog"></i>
+                        Kelola
+                    </a>
+                </div>
+
+                <!-- Cabang -->
+                <div class="settings-card">
+                    <span class="stats-badge">{{ total_cabang }}</span>
+                    <div class="settings-body">
+                        <div class="settings-icon icon-purple">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        
+                        <h5 class="card-title">Cabang</h5>
+                        
+                        <p class="card-description">
+                            Kelola lokasi cabang perusahaan. Konfigurasi IP mesin fingerprint per cabang.
+                        </p>
+                    </div>
+
+                    <a href="{% url 'daftar_cabang' %}" class="btn-choose">
+                        <i class="fas fa-cog"></i>
+                        Kelola
+                    </a>
+                </div>
+            </div>
+
+            <!-- SECTION: MESIN FINGERPRINT -->
+            <h5 class="section-title">
+                <i class="fas fa-fingerprint"></i>
+                Mesin Fingerprint
+            </h5>
+
+            <div class="cards-grid">
+                <!-- Master Mesin -->
+                <div class="settings-card">
+                    <span class="stats-badge">{{ total_mesin }}</span>
+                    <div class="settings-body">
+                        <div class="settings-icon icon-cyan">
+                            <i class="fas fa-fingerprint"></i>
+                        </div>
+                        
+                        <h5 class="card-title">Master Mesin</h5>
+                        
+                        <p class="card-description">
+                            Kelola mesin absensi fingerprint ZKTeco. Konfigurasi IP, port, dan lokasi mesin.
+                        </p>
+                    </div>
+
+                    <a href="{% url 'daftar_mesin' %}" class="btn-choose">
+                        <i class="fas fa-cog"></i>
+                        Kelola
+                    </a>
+                </div>
+            </div>
+
+            <!-- SECTION: JAM KERJA -->
+            <h5 class="section-title">
+                <i class="fas fa-clock"></i>
+                Pengaturan Jam Kerja
+            </h5>
+
+            <div class="cards-grid">
+                <!-- Mode Jam Kerja -->
+                <div class="settings-card">
+                    <span class="stats-badge">{{ total_mode_jam_kerja }}</span>
+                    <div class="settings-body">
+                        <div class="settings-icon icon-indigo">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        
+                        <h5 class="card-title">Mode Jam Kerja</h5>
+                        
+                        <p class="card-description">
+                            Kelola mode jam kerja: Normal, Ramadhan, Libur. Atur periode aktif dan jadwal.
+                        </p>
+                    </div>
+
+                    <a href="{% url 'daftar_mode_jam_kerja' %}" class="btn-choose">
+                        <i class="fas fa-cog"></i>
+                        Kelola
+                    </a>
+                </div>
+            </div>
+
+            <!-- SECTION: MANAJEMEN ADMIN -->
+            <h5 class="section-title">
+                <i class="fas fa-user-shield"></i>
+                Manajemen Admin
+            </h5>
+
+            <div class="cards-grid">
+                <!-- Kelola Admin -->
+                <div class="settings-card">
+                    <span class="stats-badge">{{ total_admin }}</span>
+                    <div class="settings-body">
+                        <div class="settings-icon icon-orange">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        
+                        <h5 class="card-title">Kelola Admin</h5>
+                        
+                        <p class="card-description">
+                            Kelola akun admin sistem. Tambah, edit, atau hapus akses admin sistem absensi.
+                        </p>
+                    </div>
+
+                    <a href="{% url 'daftar_admin' %}" class="btn-choose">
+                        <i class="fas fa-cog"></i>
+                        Kelola
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

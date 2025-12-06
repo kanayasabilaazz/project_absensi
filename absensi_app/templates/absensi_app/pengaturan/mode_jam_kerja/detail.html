@@ -1,0 +1,698 @@
+{% extends 'absensi_app/base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}{{ mode.nama }} - Detail{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .dashboard-card-header {
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border: none;
+    }
+
+    .dashboard-card-header h4 {
+        font-size: var(--font-lg);
+        font-weight: 600;
+        margin: 0 0 var(--spacing-xs) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .dashboard-card-header h4 i {
+        font-size: var(--font-base);
+    }
+
+    .dashboard-card-header .badge {
+        background: rgba(255, 255, 255, 0.95);
+        color: #111827;
+        padding: 4px var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 0.65rem;
+        margin-right: var(--spacing-xs);
+    }
+
+    .dashboard-card-body {
+        padding: var(--spacing-xl);
+    }
+
+    /* Header Actions */
+    .header-actions {
+        display: flex;
+        gap: var(--spacing-xs);
+    }
+
+    .btn-header {
+        background: rgba(255, 255, 255, 0.95);
+        color: #111827;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-size: 0.65rem;
+        font-weight: 600;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all var(--transition-base);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        text-decoration: none;
+    }
+
+    .btn-header:hover {
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        text-decoration: none;
+    }
+
+    .btn-header.btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .btn-header.btn-success:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+        text-align: center;
+        border: 1px solid var(--gray-200);
+        transition: all var(--transition-base);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary);
+        line-height: 1;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .stat-label {
+        color: var(--gray-600);
+        font-size: 0.7rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-xs);
+    }
+
+    /* Alert Boxes */
+    .alert {
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+        border: 1px solid;
+        font-size: var(--font-xs);
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+        border-color: #10b981;
+        color: #065f46;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+        border-color: #3b82f6;
+        color: #1e40af;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
+        border-color: #f59e0b;
+        color: #92400e;
+    }
+
+    .alert-heading {
+        font-size: var(--font-sm);
+        font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    /* Section Headers */
+    .section-header {
+        font-size: var(--font-base);
+        font-weight: 700;
+        margin-bottom: var(--spacing-lg);
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    /* Group Section */
+    .group-section {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: 0;
+        margin-bottom: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+    }
+
+    .group-header {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        color: white;
+        padding: var(--spacing-md) var(--spacing-lg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .group-header h5 {
+        font-size: var(--font-sm);
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .group-header .badge {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        padding: 4px var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.65rem;
+        font-weight: 600;
+    }
+
+    /* Schedule Table */
+    .schedule-table {
+        overflow-x: auto;
+    }
+
+    .schedule-table table {
+        width: 100%;
+        margin: 0;
+    }
+
+    .schedule-table thead {
+        background: var(--gray-50);
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .schedule-table th {
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.65rem;
+        color: var(--gray-700);
+        padding: var(--spacing-md) var(--spacing-sm);
+        letter-spacing: 0.5px;
+    }
+
+    .schedule-table td {
+        padding: var(--spacing-sm);
+        vertical-align: middle;
+        font-size: 0.7rem;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .schedule-table tbody tr:hover {
+        background: var(--gray-50);
+    }
+
+    .schedule-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Time Badges */
+    .time-badge {
+        display: inline-block;
+        padding: 4px var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.65rem;
+        font-weight: 600;
+    }
+
+    .time-badge.time-in {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+        border: 1px solid #10b981;
+    }
+
+    .time-badge.time-out {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+        border: 1px solid #ef4444;
+    }
+
+    .duration-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4px var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.65rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        font-size: 0.7rem;
+        font-weight: 600;
+        border: none;
+        transition: all var(--transition-base);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        text-decoration: none;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+        color: white;
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+
+    .btn-info:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+    }
+
+    .btn-sm {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.65rem;
+    }
+
+    .btn-outline-primary {
+        background: transparent;
+        border: 1.5px solid var(--primary);
+        color: var(--primary);
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-outline-danger {
+        background: transparent;
+        border: 1.5px solid #ef4444;
+        color: #ef4444;
+    }
+
+    .btn-outline-danger:hover {
+        background: #ef4444;
+        color: white;
+    }
+
+    /* Action Bar */
+    .action-bar {
+        display: flex;
+        gap: var(--spacing-xs);
+        flex-wrap: wrap;
+        margin-top: var(--spacing-xl);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dashboard-card-header,
+        .dashboard-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            padding: var(--spacing-xs);
+            font-size: 0.65rem;
+        }
+
+        .header-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .btn-header {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .action-bar {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="dashboard-card">
+        <div class="dashboard-card-header" id="modeHeaderCard">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <span class="badge">{{ mode.kode }}</span>
+                    <h4>
+                        <i class="{{ mode.icon|default:'fas fa-clock' }}"></i> 
+                        {{ mode.nama }}
+                    </h4>
+                </div>
+                <div class="header-actions">
+                    <a href="{% url 'edit_mode_jam_kerja' mode.id %}" class="btn-header">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'tambah_periode_mode' mode.id %}" class="btn-header btn-success">
+                        <i class="fas fa-calendar-plus"></i> Tambah Periode
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card-body">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ pegawai_count }}</div>
+                    <div class="stat-label">
+                        <i class="fas fa-users"></i> 
+                        <span>Total Pegawai</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ mode.jadwal_list.count }}</div>
+                    <div class="stat-label">
+                        <i class="fas fa-calendar"></i> 
+                        <span>Total Jadwal</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ mode.periode_list.count }}</div>
+                    <div class="stat-label">
+                        <i class="fas fa-hourglass-start"></i> 
+                        <span>Total Periode</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Periode Aktif -->
+            {% if periode_aktif %}
+            <div class="alert alert-success">
+                <h5 class="alert-heading">
+                    <i class="fas fa-check-circle"></i> Periode Aktif
+                </h5>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <strong style="font-size: var(--font-sm);">{{ periode_aktif.nama }}</strong><br>
+                        <small style="opacity: 0.85;">
+                            <i class="fas fa-calendar"></i> 
+                            {{ periode_aktif.tanggal_mulai|date:"d M Y" }} - {{ periode_aktif.tanggal_selesai|date:"d M Y" }}
+                        </small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'edit_periode_mode' periode_aktif.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="{% url 'hapus_periode_mode' periode_aktif.id %}" class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Hapus periode ini?')">
+                            <i class="fas fa-trash"></i> Hapus
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Jadwal Per Grup -->
+            <h4 class="section-header">
+                <i class="fas fa-layer-group"></i> Jadwal Per Grup Jam Kerja
+            </h4>
+            
+            {% if jadwal_by_dept %}
+                {% for group_name, group_data in jadwal_by_dept.items %}
+                    {% with total_jadwal=0 %}
+                        {% for hari_idx, day_data in group_data.days.items %}
+                            {% if day_data.jadwal_list %}
+                                {% with total_jadwal=total_jadwal|add:day_data.jadwal_list|length %}
+                                {% endwith %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if group_data.days %}
+                            {% with has_schedule=False %}
+                                {% for hari_idx, day_data in group_data.days.items %}
+                                    {% if day_data.jadwal_list %}
+                                        {% with has_schedule=True %}{% endwith %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if has_schedule or group_data.days.0.jadwal_list or group_data.days.1.jadwal_list or group_data.days.2.jadwal_list or group_data.days.3.jadwal_list or group_data.days.4.jadwal_list or group_data.days.5.jadwal_list or group_data.days.6.jadwal_list %}
+                                <div class="group-section">
+                                    <div class="group-header">
+                                        <h5>
+                                            <i class="fas fa-briefcase"></i> {{ group_name|title }}
+                                        </h5>
+                                        <span class="badge">
+                                            {% with filled_days=0 %}
+                                                {% for hari_idx, day_data in group_data.days.items %}
+                                                    {% if day_data.jadwal_list %}
+                                                        {% with filled_days=filled_days|add:1 %}{% endwith %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {{ group_data.days|length }} hari kerja
+                                            {% endwith %}
+                                        </span>
+                                    </div>
+
+                                    <div class="schedule-table">
+                                        <table class="table table-hover mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 10%;">HARI</th>
+                                                    <th style="width: 15%;">JAM MASUK</th>
+                                                    <th style="width: 20%;">ISTIRAHAT</th>
+                                                    <th style="width: 15%;">JAM KELUAR</th>
+                                                    <th style="width: 15%;">DURASI</th>
+                                                    <th style="width: 15%;">TOLERANSI</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for hari_idx in "0123456" %}
+                                                    {% with hari_int=hari_idx|add:0 %}
+                                                    {% with day_info=group_data.days|dict_lookup:hari_int %}
+                                                        {% if day_info.jadwal_list %}
+                                                            {% for jadwal in day_info.jadwal_list %}
+                                                            <tr>
+                                                                {% if forloop.first %}
+                                                                <td rowspan="{{ day_info.jadwal_list|length }}" style="font-weight: 700; color: #374151;">
+                                                                    {% if hari_int == 0 %}Senin
+                                                                    {% elif hari_int == 1 %}Selasa
+                                                                    {% elif hari_int == 2 %}Rabu
+                                                                    {% elif hari_int == 3 %}Kamis
+                                                                    {% elif hari_int == 4 %}Jumat
+                                                                    {% elif hari_int == 5 %}Sabtu
+                                                                    {% elif hari_int == 6 %}Minggu
+                                                                    {% endif %}
+                                                                </td>
+                                                                {% endif %}
+                                                                
+                                                                <td>
+                                                                    {% if jadwal.jam_masuk %}
+                                                                        <span class="time-badge time-in">{{ jadwal.jam_masuk|time:"H:i" }}</span>
+                                                                    {% else %}
+                                                                        <span style="color: #9ca3af;">-</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                
+                                                                <td>
+                                                                    {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
+                                                                        <small style="color: #6b7280;">
+                                                                            {{ jadwal.jam_istirahat_keluar|time:"H:i" }} - 
+                                                                            {{ jadwal.jam_istirahat_masuk|time:"H:i" }}
+                                                                        </small>
+                                                                    {% else %}
+                                                                        <span style="color: #9ca3af; font-style: italic;">Tidak ada</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                
+                                                                <td>
+                                                                    {% if jadwal.jam_keluar %}
+                                                                        <span class="time-badge time-out">{{ jadwal.jam_keluar|time:"H:i" }}</span>
+                                                                    {% else %}
+                                                                        <span style="color: #9ca3af;">-</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                
+                                                                <td>
+                                                                    {% with duration_formatted=jadwal.get_duration_formatted %}
+                                                                        {% if duration_formatted %}
+                                                                            <span class="duration-badge">
+                                                                                <i class="fas fa-business-time"></i> {{ duration_formatted }}
+                                                                            </span>
+                                                                        {% else %}
+                                                                            <span style="color: #9ca3af;">-</span>
+                                                                        {% endif %}
+                                                                    {% endwith %}
+                                                                </td>
+                                                                
+                                                                <td>
+                                                                    <small style="color: #6b7280;">
+                                                                        <i class="fas fa-clock"></i> 
+                                                                        {{ jadwal.toleransi_terlambat }} menit
+                                                                    </small>
+                                                                </td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                    {% endwith %}
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    {% endwith %}
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> Belum ada jadwal untuk mode ini. 
+                    <a href="{% url 'edit_mode_jam_kerja' mode.id %}" style="color: inherit; font-weight: 700; text-decoration: underline;">Tambahkan jadwal sekarang</a>
+                </div>
+            {% endif %}
+
+            <!-- Periode Mendatang -->
+            {% if periode_mendatang %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="section-header">
+                        <i class="fas fa-calendar-alt"></i> Periode Mendatang
+                    </h5>
+                    {% for periode in periode_mendatang %}
+                    <div class="alert alert-info">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <strong style="font-size: var(--font-sm);">{{ periode.nama }}</strong><br>
+                                <small style="opacity: 0.85;">
+                                    <i class="fas fa-calendar"></i> 
+                                    {{ periode.tanggal_mulai|date:"d M Y" }} - {{ periode.tanggal_selesai|date:"d M Y" }}
+                                </small>
+                                {% if periode.catatan %}
+                                <br><small style="opacity: 0.75;">{{ periode.catatan }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'edit_periode_mode' periode.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'hapus_periode_mode' periode.id %}" class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Hapus periode {{ periode.nama }}?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="action-bar">
+                <a href="{% url 'daftar_mode_jam_kerja' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <a href="{% url 'duplicate_mode_jam_kerja' mode.id %}" class="btn btn-info">
+                    <i class="fas fa-copy"></i> Duplikasi Mode
+                </a>
+                {% if not mode.is_default %}
+                <a href="{% url 'hapus_mode_jam_kerja' mode.id %}" class="btn btn-danger"
+                   onclick="return confirm('Yakin hapus mode {{ mode.nama }}? Data terkait akan terhapus.')">
+                    <i class="fas fa-trash"></i> Hapus Mode
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modeColor = '{{ mode.warna|default:"#667eea" }}';
+    const headerCard = document.getElementById('modeHeaderCard');
+    if (headerCard && modeColor) {
+        headerCard.style.background = `linear-gradient(135deg, ${modeColor} 0%, ${modeColor}dd 100%)`;
+    }
+});
+</script>
+{% endblock %}

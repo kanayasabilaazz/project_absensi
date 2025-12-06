@@ -1,0 +1,601 @@
+{% extends 'absensi_app/base.html' %}
+{% load static %}
+
+{% block title %}Mode Jam Kerja{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .dashboard-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border: none;
+    }
+
+    .dashboard-card-header h4 {
+        font-size: var(--font-lg);
+        font-weight: 600;
+        margin: 0 0 var(--spacing-xs) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .dashboard-card-header h4 i {
+        font-size: var(--font-base);
+    }
+
+    .dashboard-card-header p {
+        font-size: var(--font-xs);
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .dashboard-card-body {
+        padding: var(--spacing-xl);
+    }
+
+    /* Header Actions */
+    .header-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-md);
+    }
+
+    .btn-header {
+        background: rgba(255, 255, 255, 0.95);
+        color: #667eea;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-xs);
+        font-weight: 600;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all var(--transition-base);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        text-decoration: none;
+    }
+
+    .btn-header:hover {
+        background: white;
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        text-decoration: none;
+    }
+
+    /* Today Banner */
+    .today-banner {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        margin-top: var(--spacing-lg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .today-banner small {
+        opacity: 0.85;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        font-size: 0.65rem;
+        display: block;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .today-banner h5 {
+        font-size: var(--font-base);
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .badge.bg-info {
+        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+        color: white;
+        padding: 4px var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.65rem;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0, 210, 255, 0.25);
+    }
+
+    /* Mode Cards Grid */
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-lg);
+    }
+
+    .mode-card {
+        background: white;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-200);
+        padding: var(--spacing-md);
+        display: flex;
+        flex-direction: column;
+        transition: all var(--transition-base);
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+        min-height: 240px;
+    }
+
+    .mode-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary);
+    }
+
+    .mode-card.active {
+        border-color: var(--success);
+        background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+    }
+
+    /* Mode Icon */
+    .mode-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--spacing-sm);
+        font-size: var(--font-base);
+        box-shadow: var(--shadow-md);
+        transition: transform var(--transition-base);
+    }
+
+    .mode-card:hover .mode-icon {
+        transform: scale(1.1);
+    }
+
+    /* Mode Body */
+    .mode-body {
+        flex: 1;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mode-title {
+        font-size: var(--font-sm);
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+        color: var(--gray-900);
+        line-height: 1.3;
+    }
+
+    .mode-code {
+        font-size: 0.6rem;
+        color: var(--gray-600);
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+        background: var(--gray-100);
+        padding: 2px var(--spacing-xs);
+        border-radius: var(--radius-sm);
+        display: inline-block;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    /* Mode Badges */
+    .mode-badges {
+        display: flex;
+        gap: 4px;
+        justify-content: center;
+        margin-bottom: var(--spacing-sm);
+        flex-wrap: wrap;
+    }
+
+    .mode-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px var(--spacing-xs);
+        border-radius: var(--radius-sm);
+        font-size: 0.6rem;
+        font-weight: 600;
+    }
+
+    .badge-active {
+        background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.25);
+    }
+
+    .badge-inactive {
+        background: var(--gray-200);
+        color: var(--gray-600);
+    }
+
+    .badge-default {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(251, 191, 36, 0.25);
+    }
+
+    /* Periode Info */
+    .periode-info {
+        text-align: left;
+        padding: var(--spacing-xs);
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: var(--radius-sm);
+        font-size: 0.6rem;
+        margin-bottom: var(--spacing-sm);
+        border: 1px solid #fbbf24;
+    }
+
+    .periode-info i {
+        color: #d97706;
+        margin-right: 4px;
+    }
+
+    .periode-info strong {
+        color: var(--gray-900);
+        font-weight: 700;
+    }
+
+    /* Stats */
+    .mode-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-xs);
+        margin: var(--spacing-sm) 0;
+        flex: 1;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: var(--spacing-xs);
+        background: linear-gradient(135deg, var(--gray-50) 0%, #ffffff 100%);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--gray-200);
+    }
+
+    .stat-value {
+        font-size: var(--font-lg);
+        font-weight: 700;
+        color: var(--primary);
+        line-height: 1;
+        margin-bottom: 2px;
+    }
+
+    .stat-label {
+        font-size: 0.6rem;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    /* Action Buttons */
+    .btn-choose {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.65rem;
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+        transition: all var(--transition-base);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-xs);
+        margin-top: auto;
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-choose i {
+        font-size: 0.6rem;
+    }
+
+    .btn-choose:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-primary.btn-choose {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .btn-primary.btn-choose:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #5a4a8f 100%);
+    }
+
+    .btn-warning.btn-choose {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .btn-warning.btn-choose:hover {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    }
+
+    .btn-info.btn-choose {
+        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    }
+
+    .btn-info.btn-choose:hover {
+        background: linear-gradient(135deg, #3a7bd5 0%, #2d62a8 100%);
+    }
+
+    .btn-danger.btn-choose {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .btn-danger.btn-choose:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px var(--spacing-xl);
+        background: linear-gradient(135deg, var(--gray-50) 0%, #ffffff 100%);
+        border-radius: var(--radius-lg);
+        border: 2px dashed var(--gray-300);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: var(--gray-300);
+        margin-bottom: var(--spacing-lg);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .empty-state h5 {
+        font-size: var(--font-lg);
+        color: var(--gray-700);
+        margin-bottom: var(--spacing-sm);
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        font-size: var(--font-xs);
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .btn-empty {
+        padding: var(--spacing-md) var(--spacing-xl);
+        font-size: var(--font-sm);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        transition: all var(--transition-base);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        text-decoration: none;
+    }
+
+    .btn-empty:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        background: linear-gradient(135deg, #764ba2 0%, #5a4a8f 100%);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dashboard-card-header,
+        .dashboard-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-sm);
+        }
+
+        .mode-card {
+            padding: var(--spacing-sm);
+            min-height: 220px;
+        }
+
+        .mode-icon {
+            width: 36px;
+            height: 36px;
+            font-size: var(--font-sm);
+        }
+
+        .header-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .btn-header {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .cards-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .mode-card {
+            min-height: 210px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="dashboard-card">
+        <div class="dashboard-card-header">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h4>
+                        <i class="fas fa-business-time"></i>
+                        Mode Jam Kerja
+                    </h4>
+                    <p>Kelola jadwal kerja dengan sistem yang fleksibel</p>
+                </div>
+                <div class="header-actions">
+                    <a href="{% url 'tambah_mode_jam_kerja' %}" class="btn-header">
+                        <i class="fas fa-plus"></i> Tambah Mode
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Today's Active Mode -->
+            {% if mode_today %}
+            <div class="today-banner">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <small>Mode Aktif Hari Ini</small>
+                        <h5>
+                            <i class="{{ mode_today.mode_icon|default:'fas fa-clock' }}"></i>
+                            {{ mode_today.mode_nama }}
+                        </h5>
+                    </div>
+                    {% if mode_today.periode_nama %}
+                    <span class="badge bg-info">
+                        <i class="fas fa-calendar-check"></i>
+                        {{ mode_today.periode_nama }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="dashboard-card-body">
+            {% if mode_data %}
+                <div class="cards-grid">
+                    {% for item in mode_data %}
+                    <div class="mode-card {% if item.is_applicable %}active{% endif %}">
+                        <div class="mode-body">
+                            <div class="mode-icon" data-color="{{ item.mode.warna }}" data-mode-id="{{ item.mode.id }}">
+                                <i class="{{ item.mode.icon|default:'fas fa-clock' }}"></i>
+                            </div>
+                            
+                            <h5 class="mode-title">{{ item.mode.nama }}</h5>
+                            <span class="mode-code">{{ item.mode.kode }}</span>
+                            
+                            <div class="mode-badges">
+                                {% if item.is_applicable %}
+                                <span class="mode-badge badge-active">
+                                    <i class="fas fa-check-circle"></i> 
+                                    <span>Aktif</span>
+                                </span>
+                                {% else %}
+                                <span class="mode-badge badge-inactive">
+                                    <i class="fas fa-circle"></i>
+                                    <span>Tidak Aktif</span>
+                                </span>
+                                {% endif %}
+                                
+                                {% if item.mode.is_default %}
+                                <span class="mode-badge badge-default">
+                                    <i class="fas fa-star"></i>
+                                    <span>Default</span>
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Active Period -->
+                            {% if item.periode_aktif %}
+                            <div class="periode-info">
+                                <i class="fas fa-calendar-alt"></i>
+                                <strong>{{ item.periode_aktif.nama }}</strong>
+                                <br>
+                                <span style="color: #6b7280;">
+                                    {{ item.periode_aktif.tanggal_mulai|date:"d M" }} - 
+                                    {{ item.periode_aktif.tanggal_selesai|date:"d M Y" }}
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Statistics -->
+                            <div class="mode-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">{{ item.mode.jadwal_list.count }}</div>
+                                    <div class="stat-label">Jadwal</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">{{ item.mode.periode_list.count }}</div>
+                                    <div class="stat-label">Periode</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <a href="{% url 'detail_mode_jam_kerja' item.mode.id %}" 
+                           class="btn btn-primary btn-choose">
+                            <i class="fas fa-eye"></i>
+                            Lihat Detail
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h5>Belum Ada Mode Jam Kerja</h5>
+                    <p>Buat mode jam kerja pertama untuk mengatur jadwal kerja pegawai</p>
+                    <a href="{% url 'tambah_mode_jam_kerja' %}" class="btn-empty">
+                        <i class="fas fa-plus"></i> Tambah Mode Pertama
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply dynamic colors to mode icons
+    const modeIcons = document.querySelectorAll('.mode-icon[data-color]');
+    
+    modeIcons.forEach(function(icon) {
+        const color = icon.getAttribute('data-color');
+        icon.style.backgroundColor = color + '20';
+        icon.style.color = color;
+        icon.style.border = '2px solid ' + color + '40';
+    });
+    
+    // Add loading state to buttons
+    document.querySelectorAll('.btn-choose').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.className = 'fas fa-spinner fa-spin';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

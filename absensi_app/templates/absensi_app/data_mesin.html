@@ -1,0 +1,992 @@
+{% extends 'absensi_app/base.html' %}
+{% load static %}
+
+{% block title %}Monitor Mesin Absensi{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<style>
+    /* ==================== BREADCRUMB ==================== */
+    .breadcrumb-white {
+        font-size: var(--font-xs);
+        margin-bottom: 0;
+    }
+
+    .breadcrumb-white .breadcrumb-item {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .breadcrumb-white .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255, 255, 255, 0.6);
+        content: "›";
+        font-size: var(--font-lg);
+    }
+
+    .breadcrumb-white .breadcrumb-item a {
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        transition: color var(--transition-base);
+    }
+
+    .breadcrumb-white .breadcrumb-item a:hover {
+        color: white;
+    }
+
+    .breadcrumb-white .breadcrumb-item.active {
+        color: white;
+        font-weight: 500;
+    }
+
+    /* ==================== MAIN CARD ==================== */
+    .dashboard-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .dashboard-card-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border: none;
+    }
+
+    .dashboard-card-header h4 {
+        font-size: var(--font-lg);
+        font-weight: 600;
+        margin: 0 0 var(--spacing-xs) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .dashboard-card-header h4 i {
+        font-size: var(--font-base);
+    }
+
+    .dashboard-card-header p {
+        font-size: var(--font-xs);
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .dashboard-card-body {
+        padding: var(--spacing-xl);
+    }
+
+    /* ==================== SECTION TITLE ==================== */
+    .section-title {
+        font-size: var(--font-base);
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-md);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .section-title i {
+        color: var(--primary);
+        font-size: var(--font-base);
+    }
+
+    /* ==================== ALERT INFO ==================== */
+    .alert-info {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border: 1px solid #3b82f6;
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        color: #1e40af;
+        font-size: var(--font-xs);
+        border-left: 4px solid var(--primary);
+    }
+
+    .alert-info i {
+        font-size: var(--font-base);
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .alert-info strong {
+        display: block;
+        margin-bottom: var(--spacing-xs);
+        font-size: var(--font-sm);
+    }
+
+    .alert-info small {
+        display: block;
+        margin-top: var(--spacing-sm);
+        opacity: 0.9;
+    }
+
+    /* ==================== MACHINE CARDS - LEBIH KECIL ==================== */
+    .mesin-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .mesin-card {
+        position: relative;
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        cursor: pointer;
+        transition: all var(--transition-base);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        min-height: 140px;
+        justify-content: center;
+    }
+    
+    .mesin-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary);
+    }
+    
+    .mesin-card.selected {
+        border-color: var(--primary);
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        color: white;
+        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.25);
+        transform: translateY(-4px);
+    }
+
+    .mesin-card.selected .text-muted,
+    .mesin-card.selected small {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    .mesin-card.all-machines {
+        border-color: var(--success);
+        background: linear-gradient(135deg, #059669, var(--success));
+        color: white;
+        box-shadow: 0 6px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .mesin-card.all-machines:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    .mesin-card.all-machines .text-muted,
+    .mesin-card.all-machines small {
+        color: rgba(255, 255, 255, 0.95) !important;
+    }
+
+    .mesin-card-icon {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-sm);
+        display: block;
+    }
+
+    .mesin-card.all-machines .mesin-card-icon,
+    .mesin-card.selected .mesin-card-icon {
+        color: white;
+    }
+
+    .mesin-card:not(.selected):not(.all-machines) .mesin-card-icon {
+        color: var(--primary);
+    }
+
+    .mesin-card h6 {
+        font-size: var(--font-sm);
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+        line-height: 1.3;
+    }
+
+    .mesin-card small {
+        font-size: 0.6rem;
+        display: block;
+        margin-top: var(--spacing-xs);
+        line-height: 1.2;
+    }
+
+    /* ==================== FILTER SECTION ==================== */
+    .filter-card {
+        background: var(--gray-50);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: var(--spacing-xs);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        font-size: var(--font-xs);
+    }
+
+    .form-label i {
+        font-size: 0.7rem;
+        color: var(--primary);
+    }
+
+    .form-control {
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-xs);
+        transition: all var(--transition-base);
+        height: 38px;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-light);
+        outline: none;
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .btn {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-xs);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        border: none;
+        transition: all var(--transition-base);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        cursor: pointer;
+    }
+
+    .btn i {
+        font-size: 0.7rem;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, #1e40af 100%);
+        color: white;
+    }
+
+    .btn-light {
+        background: white;
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+    }
+
+    .btn-light:hover {
+        background: var(--gray-50);
+        color: var(--gray-900);
+        border-color: var(--gray-400);
+    }
+
+    /* ==================== STATS BADGES ==================== */
+    .stats-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .stats-badge {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: var(--font-xs);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+    }
+
+    .stats-badge i {
+        font-size: 0.7rem;
+    }
+
+    .stats-badge.success {
+        background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+    }
+
+    .stats-badge.info {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+    }
+
+    .badge.bg-secondary {
+        background: var(--gray-600) !important;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: var(--font-xs);
+    }
+
+    /* ==================== DATA TABLE ==================== */
+    .table-wrapper {
+        background: white;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+    }
+
+    .table {
+        margin-bottom: 0 !important;
+        font-size: var(--font-xs);
+        width: 100% !important;
+    }
+
+    table.dataTable {
+        border-collapse: collapse !important;
+    }
+
+    table.dataTable thead th {
+        border: none !important;
+        background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%) !important;
+        color: white !important;
+        font-weight: 600;
+        padding: var(--spacing-md) !important;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    table.dataTable tbody td {
+        padding: var(--spacing-md) !important;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--gray-200) !important;
+        background: white;
+    }
+
+    table.dataTable tbody tr:hover {
+        background: var(--gray-50) !important;
+    }
+
+    table.dataTable tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    /* ==================== PUNCH BADGES ==================== */
+    .punch-badge {
+        padding: 0.2rem 0.5rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.65rem;
+        font-weight: 600;
+        display: inline-block;
+        white-space: nowrap;
+    }
+    
+    .punch-masuk { 
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #059669;
+        border: 1px solid #10b981;
+    }
+    
+    .punch-keluar { 
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+        border: 1px solid #3b82f6;
+    }
+    
+    .punch-istirahat-keluar { 
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #b45309;
+        border: 1px solid #f59e0b;
+    }
+    
+    .punch-istirahat-masuk { 
+        background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+        color: #9a3412;
+        border: 1px solid #f97316;
+    }
+
+    /* ==================== BADGE USER ID ==================== */
+    .badge-userid {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 0.7rem;
+        font-family: 'Consolas', monospace;
+        display: inline-block;
+    }
+
+    /* ==================== EMPTY STATE ==================== */
+    .empty-state {
+        background: var(--gray-50);
+        border: 2px dashed var(--gray-300);
+        border-radius: var(--radius-md);
+        padding: 48px var(--spacing-xl);
+        text-align: center;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        color: var(--gray-300);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .empty-state h6 {
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-sm);
+        font-size: var(--font-base);
+        font-weight: 600;
+    }
+
+    .empty-state p {
+        color: var(--gray-500);
+        margin: 0;
+        font-size: var(--font-sm);
+    }
+
+    /* ==================== LOADING OVERLAY ==================== */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(3px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+    
+    .loading-spinner {
+        background: white;
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-lg);
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+        max-width: 360px;
+    }
+
+    .loading-spinner .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        border-width: 0.3rem;
+    }
+
+    .loading-spinner h4 {
+        margin-top: var(--spacing-lg);
+        margin-bottom: var(--spacing-xs);
+        color: var(--gray-800);
+        font-size: var(--font-base);
+        font-weight: 600;
+    }
+
+    .loading-spinner p {
+        color: var(--gray-600);
+        margin-bottom: 0;
+        font-size: var(--font-sm);
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+        .dashboard-card-header,
+        .dashboard-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .mesin-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-sm);
+        }
+
+        .mesin-card {
+            padding: var(--spacing-sm);
+            min-height: 120px;
+        }
+
+        .mesin-card-icon {
+            font-size: 1.25rem;
+        }
+
+        .stats-container {
+            flex-direction: column;
+        }
+
+        .stats-badge {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .filter-card {
+            padding: var(--spacing-md);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .dashboard-card-header h4 {
+            font-size: var(--font-base);
+        }
+
+        .mesin-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .mesin-card {
+            min-height: 110px;
+        }
+
+        .mesin-card-icon {
+            font-size: 1.15rem;
+            margin-bottom: 4px;
+        }
+
+        .mesin-card h6 {
+            font-size: 0.65rem;
+        }
+
+        .mesin-card small {
+            font-size: 0.55rem;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: var(--spacing-sm) !important;
+            font-size: 0.6rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Main Card -->
+    <div class="dashboard-card">
+        <div class="dashboard-card-header">
+            <!-- Header Content -->
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                <div>
+                    <h4>
+                        <i class="fas fa-desktop"></i>
+                        Monitor Mesin Absensi
+                    </h4>
+                    <p>Pantau dan kelola data dari mesin fingerprint</p>
+                </div>
+                <a href="{% url 'dashboard' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali
+                </a>
+            </div>
+
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-white mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Monitor Mesin</li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="dashboard-card-body">
+
+            <!-- Machine Selection -->
+            <div class="mb-4">
+                <h6 class="section-title">
+                    <i class="fas fa-server"></i>
+                    Pilih Mesin Fingerprint
+                </h6>
+
+                {% if mesin_list %}
+                <div class="mesin-grid">
+                    <!-- Option: Semua Mesin -->
+                    <div class="mesin-card all-machines" id="allMachinesCard" onclick="selectAllMachines(this)">
+                        <i class="fas fa-server mesin-card-icon"></i>
+                        <h6>Semua Mesin</h6>
+                        <small>Gabungan data</small>
+                        <small>
+                            <i class="fas fa-database"></i>
+                            {{ mesin_list.count }} mesin
+                        </small>
+                    </div>
+
+                    <!-- Individual Machines -->
+                    {% for mesin in mesin_list %}
+                    <div class="mesin-card" onclick="selectMesin('{{ mesin.id }}', '{{ mesin.nama }}', '{{ mesin.ip_address }}', this)">
+                        <i class="fas fa-fingerprint mesin-card-icon"></i>
+                        <h6>{{ mesin.nama }}</h6>
+                        <small>{{ mesin.cabang.nama }}</small>
+                        <small>
+                            <i class="fas fa-network-wired"></i>
+                            {{ mesin.ip_address }}
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-warning" style="background: #fef3c7; border: 1px solid #f59e0b; color: #92400e;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Belum ada mesin yang terdaftar. 
+                    <a href="{% url 'tambah_mesin' %}" style="color: #92400e; font-weight: 600;">Tambahkan mesin</a> terlebih dahulu.
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Filter & Data Section -->
+            <div id="filterSection" style="display: none;">
+                <!-- Filter Controls -->
+                <div class="filter-card">
+                    <div class="row align-items-end g-2">
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                <i class="fas fa-calendar"></i>
+                                Tanggal Mulai
+                            </label>
+                            <input type="date" id="tanggalMulai" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                <i class="fas fa-calendar"></i>
+                                Tanggal Akhir
+                            </label>
+                            <input type="date" id="tanggalAkhir" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <button onclick="loadData()" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i>
+                                Tampilkan Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Info -->
+                <div id="summaryInfo" class="stats-container" style="display: none;">
+                    <span class="stats-badge">
+                        <i class="fas fa-table"></i>
+                        Total: <span id="totalRecords">0</span>
+                    </span>
+                    <span class="stats-badge success">
+                        <i class="fas fa-users"></i>
+                        Users: <span id="totalUsers">0</span>
+                    </span>
+                    <span class="stats-badge info">
+                        <i class="fas fa-calendar-day"></i>
+                        Days: <span id="totalDays">0</span>
+                    </span>
+                    <span class="badge bg-secondary">
+                        <i class="fas fa-clock"></i>
+                        Update: <span id="lastUpdate">-</span>
+                    </span>
+                </div>
+
+                <!-- Data Table -->
+                <div class="table-wrapper" id="dataTableWrapper" style="display: none;">
+                    <table class="table table-hover" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 5%;">No</th>
+                                <th class="text-center" style="width: 10%;">User ID</th>
+                                <th style="width: 20%;">Nama</th>
+                                <th class="text-center" style="width: 15%;">Departemen</th>
+                                <th class="text-center" style="width: 10%;">Tanggal</th>
+                                <th class="text-center" style="width: 10%;">Waktu</th>
+                                <th class="text-center" style="width: 15%;">Punch Type</th>
+                                <th class="text-center" style="width: 8%;">Status</th>
+                                <th class="text-center" style="width: 12%;">Mesin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Empty Message -->
+                <div id="emptyMessage" class="empty-state" style="display: none;">
+                    <i class="fas fa-inbox"></i>
+                    <h6>Tidak ada data</h6>
+                    <p>Tidak ada data untuk periode ini</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h4 id="loadingText">Mengambil data...</h4>
+        <p id="loadingSubtext">Mohon tunggu</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    let selectedMode = null;
+    let selectedMesinId = null;
+    let selectedMesinNama = '';
+    let selectedMesinIp = '';
+    let currentData = [];
+    let dataTable = null;
+
+    const API_MONITOR_SINGLE = "{% url 'api_get_absensi_dari_mesin' %}";
+    const API_MONITOR_ALL = "{% url 'api_get_absensi_all_machines' %}";
+
+    window.selectAllMachines = function(element) {
+        $('.mesin-card').removeClass('selected all-machines');
+        $(element).addClass('all-machines');
+
+        selectedMode = 'all';
+        selectedMesinId = null;
+        selectedMesinNama = 'Semua Mesin';
+
+        $('#filterSection').slideDown(300);
+
+        const today = new Date().toISOString().split('T')[0];
+        $('#tanggalMulai').val(today);
+        $('#tanggalAkhir').val(today);
+
+        loadData();
+    };
+
+    window.selectMesin = function(mesinId, nama, ip, element) {
+        $('.mesin-card').removeClass('selected all-machines');
+        $(element).addClass('selected');
+
+        selectedMode = 'single';
+        selectedMesinId = mesinId;
+        selectedMesinNama = nama;
+        selectedMesinIp = ip;
+
+        $('#filterSection').slideDown(300);
+
+        const today = new Date().toISOString().split('T')[0];
+        $('#tanggalMulai').val(today);
+        $('#tanggalAkhir').val(today);
+
+        loadData();
+    };
+
+    window.loadData = function() {
+        if (!selectedMode) {
+            alert('Pilih mesin terlebih dahulu!');
+            return;
+        }
+
+        const tanggalMulai = $('#tanggalMulai').val();
+        const tanggalAkhir = $('#tanggalAkhir').val();
+
+        if (!tanggalMulai || !tanggalAkhir) {
+            alert('Tanggal mulai dan akhir harus diisi!');
+            return;
+        }
+
+        $('#loadingOverlay').fadeIn(200);
+
+        if (selectedMode === 'single') {
+            loadSingleMachine(tanggalMulai, tanggalAkhir);
+        } else {
+            loadAllMachines(tanggalMulai, tanggalAkhir);
+        }
+    };
+
+    function loadSingleMachine(tanggalMulai, tanggalAkhir) {
+        $('#loadingText').text('Mengambil data dari ' + selectedMesinNama + '...');
+        $('#loadingSubtext').text('Mesin: ' + selectedMesinNama);
+
+        const url = `${API_MONITOR_SINGLE}?mesin_id=${selectedMesinId}&tanggal_mulai=${tanggalMulai}&tanggal_akhir=${tanggalAkhir}`;
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                $('#loadingOverlay').fadeOut(200);
+
+                if (response.status === 'success') {
+                    currentData = response.data.map(item => ({
+                        ...item,
+                        mesin_nama: response.mesin.nama
+                    }));
+                    displayData(currentData);
+                    showSuccessAlert(`Berhasil memuat ${response.data.length} records dari ${response.mesin.nama}!`);
+                } else {
+                    alert('Error: ' + response.msg);
+                }
+            },
+            error: function(xhr) {
+                $('#loadingOverlay').fadeOut(200);
+                const errorMsg = xhr.responseJSON?.msg || 'Koneksi gagal';
+                alert('Error: ' + errorMsg);
+            }
+        });
+    }
+
+    function loadAllMachines(tanggalMulai, tanggalAkhir) {
+        $('#loadingText').text('Mengambil data dari SEMUA mesin...');
+        $('#loadingSubtext').text('Mohon tunggu, sedang memproses...');
+
+        const url = `${API_MONITOR_ALL}?tanggal_mulai=${tanggalMulai}&tanggal_akhir=${tanggalAkhir}`;
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                $('#loadingOverlay').fadeOut(200);
+
+                if (response.status === 'success') {
+                    currentData = response.data;
+                    displayData(response.data);
+                    showSuccessAlert(`Berhasil memuat data dari ${response.machines_count} mesin! Total: ${response.data.length} records`);
+                } else {
+                    alert('Error: ' + response.msg);
+                }
+            },
+            error: function(xhr) {
+                $('#loadingOverlay').fadeOut(200);
+                const errorMsg = xhr.responseJSON?.msg || 'Koneksi gagal';
+                alert('Error: ' + errorMsg);
+            }
+        });
+    }
+
+    function displayData(data) {
+        if (data.length === 0) {
+            $('#dataTableWrapper').hide();
+            $('#summaryInfo').hide();
+            $('#emptyMessage').fadeIn(300);
+            return;
+        }
+
+        $('#emptyMessage').hide();
+
+        const uniqueUsers = new Set(data.map(item => item.userid)).size;
+        const uniqueDays = new Set(data.map(item => item.tanggal)).size;
+
+        $('#totalRecords').text(data.length.toLocaleString('id-ID'));
+        $('#totalUsers').text(uniqueUsers);
+        $('#totalDays').text(uniqueDays);
+        $('#lastUpdate').text(new Date().toLocaleTimeString('id-ID'));
+        $('#summaryInfo').fadeIn(300);
+
+        renderDataTable(data);
+        $('#dataTableWrapper').fadeIn(300);
+    }
+
+    function renderDataTable(data) {
+        const tbody = $('#dataTableBody');
+        tbody.empty();
+
+        if (dataTable) {
+            dataTable.destroy();
+        }
+
+        const punchBadgeMap = {
+            0: 'punch-masuk',
+            1: 'punch-keluar',
+            2: 'punch-istirahat-keluar',
+            3: 'punch-istirahat-masuk',
+            4: 'punch-masuk',
+            5: 'punch-keluar'
+        };
+
+        data.forEach(function(item, index) {
+            const statusBadge = item.is_registered 
+                ? '<span class="badge bg-success">Terdaftar</span>'
+                : '<span class="badge bg-danger">Belum</span>';
+
+            const punchClass = punchBadgeMap[item.punch_code] || 'punch-masuk';
+
+            const row = `
+                <tr>
+                    <td class="text-center"><strong>${index + 1}</strong></td>
+                    <td class="text-center"><span class="badge-userid">${item.userid}</span></td>
+                    <td><strong>${item.nama_display}</strong></td>
+                    <td class="text-center"><span class="badge bg-light text-dark" style="font-size: 0.65rem;">${item.departemen}</span></td>
+                    <td class="text-center"><small>${item.tanggal_display}</small></td>
+                    <td class="text-center"><strong style="color: var(--primary); font-size: 0.7rem;">${item.waktu}</strong></td>
+                    <td class="text-center"><span class="punch-badge ${punchClass}">${item.punch_type}</span></td>
+                    <td class="text-center">${statusBadge}</td>
+                    <td class="text-center"><small class="text-muted">${item.mesin_nama || '-'}</small></td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+
+        dataTable = $('#dataTable').DataTable({
+            language: {
+                "sProcessing": "Memproses...",
+                "sZeroRecords": "Tidak ada data",
+                "sInfo": "Menampilkan _START_ - _END_ dari _TOTAL_",
+                "sInfoEmpty": "Menampilkan 0 - 0 dari 0",
+                "sInfoFiltered": "(disaring dari _MAX_ total)",
+                "sSearch": "Cari:",
+                "sLengthMenu": "Tampilkan _MENU_",
+                "oPaginate": {
+                    "sFirst": "Pertama",
+                    "sPrevious": "←",
+                    "sNext": "→",
+                    "sLast": "Terakhir"
+                }
+            },
+            pageLength: 25,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
+            order: [[4, 'desc'], [5, 'desc']],
+            columnDefs: [
+                { orderable: false, targets: [7, 8] },
+                { className: "text-center", targets: [0, 7, 8] }
+            ],
+            responsive: true
+        });
+    }
+
+    function showSuccessAlert(message) {
+        const alertDiv = $(`
+            <div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3" 
+                 style="z-index: 10000; min-width: 320px; box-shadow: var(--shadow-lg); border-radius: var(--radius-md); font-size: var(--font-sm);">
+                <i class="fas fa-check-circle"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
+        
+        $('body').append(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.alert('close');
+        }, 4000);
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    $('#tanggalMulai').val(today);
+    $('#tanggalAkhir').val(today);
+});
+</script>
+{% endblock %}

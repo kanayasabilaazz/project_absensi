@@ -1,0 +1,1441 @@
+{% extends 'absensi_app/base.html' %}
+{% load widget_tweaks %}
+{% block title %}Riwayat Absensi{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<style>
+    /* ==================== VARIABLES ==================== */
+    :root {
+        --card-radius: var(--radius-md);
+        --card-shadow: var(--shadow-sm);
+        --card-shadow-hover: var(--shadow-md);
+    }
+
+    /* ==================== MODE INFO CARD ==================== */
+    .mode-info-card {
+        background: white;
+        border-radius: var(--card-radius);
+        overflow: hidden;
+        margin-bottom: var(--spacing-xl);
+        box-shadow: var(--card-shadow);
+        transition: var(--transition-base);
+        border: 1px solid var(--gray-200);
+    }
+
+    .mode-info-card:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .mode-info-header {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg);
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    }
+
+    .mode-info-icon {
+        width: 42px;
+        height: 42px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--font-xl);
+        flex-shrink: 0;
+    }
+
+    .mode-info-content {
+        flex: 1;
+    }
+
+    .mode-info-content h6 {
+        margin: 0 0 4px 0;
+        font-size: var(--font-xs);
+        font-weight: 600;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .mode-info-content p {
+        margin: 0;
+        font-size: var(--font-base);
+        font-weight: 700;
+    }
+
+    .mode-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: var(--font-xs);
+        font-weight: 600;
+        margin-left: 8px;
+    }
+
+    /* ==================== FILTER SECTION ==================== */
+    .filter-section {
+        background: white;
+        border-radius: var(--card-radius);
+        padding: var(--spacing-xl);
+        box-shadow: var(--card-shadow);
+        margin-bottom: var(--spacing-xl);
+        border: 1px solid var(--gray-200);
+        transition: var(--transition-base);
+    }
+
+    .filter-section:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .filter-title {
+        font-size: var(--font-base);
+        font-weight: 600;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin: 0;
+    }
+
+    .filter-title i {
+        color: var(--primary);
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .btn-sync {
+        background: var(--gray-900);
+        color: white;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-sm);
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        transition: var(--transition-base);
+        cursor: pointer;
+    }
+
+    .btn-sync:hover {
+        background: var(--gray-800);
+        transform: translateY(-1px);
+        color: white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-sm);
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+        border: none;
+        transition: var(--transition-base);
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        color: white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-action {
+        padding: 5px 10px;
+        font-size: 11px;
+        border-radius: 5px;
+        font-weight: 600;
+        border: none;
+        color: white;
+        transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+    }
+
+    .btn-action i {
+        font-size: 11px;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-action.btn-warning {
+        background: #f59e0b;
+    }
+
+    .btn-action.btn-warning:hover {
+        background: #d97706;
+        color: white;
+    }
+
+    .btn-action.btn-danger {
+        background: #ef4444;
+    }
+
+    .btn-action.btn-danger:hover {
+        background: #dc2626;
+        color: white;
+    }
+
+    /* ==================== TABLE SECTION ==================== */
+    .table-section {
+        background: white;
+        border-radius: var(--card-radius);
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+        transition: var(--transition-base);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .table-section:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border-bottom: 1px solid var(--gray-200);
+        flex-wrap: wrap;
+        gap: var(--spacing-lg);
+        background: white;
+    }
+
+    .section-title {
+        font-size: var(--font-base);
+        font-weight: 600;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin: 0;
+    }
+
+    .section-title i {
+        color: var(--primary);
+        font-size: var(--font-base);
+    }
+
+    .section-body {
+        padding: var(--spacing-xl);
+    }
+
+    .section-footer {
+        padding: var(--spacing-md) var(--spacing-xl);
+        background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+        font-size: var(--font-sm);
+        color: var(--gray-600);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+
+    .section-footer strong {
+        color: var(--gray-900);
+    }
+
+    /* ==================== VIEW CONTROLS ==================== */
+    .view-controls {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .view-controls label {
+        font-size: var(--font-sm);
+        font-weight: 600;
+        color: var(--gray-700);
+        margin: 0;
+    }
+
+    .entries-select {
+        padding: 6px 12px;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-sm);
+        font-weight: 600;
+        color: var(--gray-900);
+        background: white;
+        cursor: pointer;
+        transition: var(--transition-base);
+    }
+
+    .entries-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    /* ==================== TABLE ==================== */
+    .table-wrapper {
+        background: white;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        border: 1px solid var(--gray-200);
+    }
+
+    .table-responsive {
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        margin-bottom: 0 !important;
+        font-size: var(--font-sm);
+        width: 100% !important;
+        min-width: 1200px !important;
+        border: none !important;
+        table-layout: auto !important;
+    }
+
+    .table thead {
+        background: var(--gray-800);
+    }
+
+    .table thead th {
+        background: var(--gray-800) !important;
+        color: white;
+        font-weight: 600;
+        padding: var(--spacing-md);
+        font-size: var(--font-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        border: none !important;
+        white-space: nowrap;
+    }
+
+    .table thead th:first-child {
+        padding-left: var(--spacing-lg);
+    }
+
+    .table thead th:last-child {
+        padding-right: var(--spacing-lg);
+    }
+
+    .table tbody td {
+        padding: var(--spacing-md);
+        vertical-align: middle;
+        border-bottom: 1px solid var(--gray-200);
+        color: var(--gray-700);
+    }
+
+    .table tbody td:first-child {
+        padding-left: var(--spacing-lg);
+    }
+
+    .table tbody td:last-child {
+        padding-right: var(--spacing-lg);
+    }
+
+    .table tbody tr:hover {
+        background: var(--gray-50);
+    }
+
+    /* ==================== BADGES ==================== */
+    .badge-userid {
+        background: var(--primary);
+        color: white;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: var(--font-xs);
+        font-family: 'Consolas', monospace;
+    }
+
+    .badge {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: var(--font-xs);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        white-space: nowrap;
+    }
+
+    /* ==================== JAM KERJA ==================== */
+    .jam-text {
+        font-weight: 700;
+        font-size: var(--font-sm);
+        color: var(--gray-600);
+    }
+
+    .jam-text.violation {
+        color: var(--danger) !important;
+    }
+
+    .total-jam-card {
+        display: inline-block;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: var(--font-sm);
+        background: var(--gray-100);
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+    }
+
+    .total-jam-card.violation {
+        background: #fee2e2;
+        color: #991b1b;
+        border-color: #fca5a5;
+    }
+
+    /* ==================== USER NAME ==================== */
+    .user-name {
+        font-weight: 600;
+        color: var(--gray-900);
+        text-decoration: none;
+    }
+
+    .user-name:hover {
+        color: var(--primary);
+    }
+
+    /* ==================== FORMS ==================== */
+    .form-label {
+        font-weight: 600;
+        font-size: var(--font-sm);
+        margin-bottom: 6px;
+        color: var(--gray-700);
+    }
+
+    .form-control,
+    .form-select {
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-sm);
+        transition: var(--transition-base);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    /* ==================== MODAL ==================== */
+    .modal-content {
+        border: none;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: var(--gray-800);
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border: none;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        font-size: var(--font-base);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .modal-body {
+        padding: var(--spacing-xl);
+    }
+
+    /* ==================== SYNC MODAL ==================== */
+    .sync-info-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--spacing-lg);
+        text-align: center;
+    }
+
+    .sync-info-header h6 {
+        margin: 0 0 var(--spacing-sm) 0;
+        font-size: var(--font-base);
+        font-weight: 700;
+    }
+
+    .sync-info-header p {
+        margin: 0;
+        font-size: var(--font-sm);
+        opacity: 0.95;
+    }
+
+    .sync-machine-count {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        background: rgba(255, 255, 255, 0.2);
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: 20px;
+        margin-top: var(--spacing-md);
+        font-weight: 600;
+    }
+
+    .date-filter-card {
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .date-filter-card h6 {
+        font-size: var(--font-sm);
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-md);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .date-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .date-input-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .date-input-group label {
+        font-size: var(--font-xs);
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 6px;
+    }
+
+    .date-input-group input {
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-sm);
+        transition: var(--transition-base);
+    }
+
+    .date-input-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .date-hint {
+        margin-top: var(--spacing-md);
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: #f0f9ff;
+        border-left: 3px solid #0ea5e9;
+        border-radius: var(--radius-sm);
+    }
+
+    .date-hint small {
+        color: #0369a1;
+        font-size: var(--font-xs);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .btn-sync-start {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-sm);
+        font-weight: 700;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-sm);
+        transition: var(--transition-base);
+        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-sync-start:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-sync-start:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .sync-progress-container {
+        text-align: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-radius: var(--radius-sm);
+        margin-top: var(--spacing-lg);
+    }
+
+    .sync-spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid #e0f2fe;
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto var(--spacing-lg);
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .sync-progress-text {
+        font-size: var(--font-sm);
+        color: var(--gray-700);
+        font-weight: 500;
+    }
+
+    .sync-result-container {
+        margin-top: var(--spacing-lg);
+    }
+
+    .result-alert {
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .result-alert.success {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border: 2px solid #6ee7b7;
+        color: #065f46;
+    }
+
+    .result-alert.warning {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #fbbf24;
+        color: #92400e;
+    }
+
+    .result-alert.error {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border: 2px solid #f87171;
+        color: #991b1b;
+    }
+
+    .result-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        font-size: var(--font-base);
+        font-weight: 700;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .result-header i {
+        font-size: var(--font-xl);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .stat-box {
+        background: white;
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-lg);
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .stat-number.success { color: var(--success); }
+    .stat-number.info { color: #0ea5e9; }
+    .stat-number.warning { color: var(--warning); }
+
+    .stat-label {
+        font-size: var(--font-xs);
+        color: var(--gray-600);
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .result-info {
+        background: white;
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .result-info-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm) 0;
+        font-size: var(--font-sm);
+        color: var(--gray-700);
+    }
+
+    .result-info-item:not(:last-child) {
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .result-info-item i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .detail-toggle {
+        cursor: pointer;
+        color: var(--primary);
+        font-weight: 600;
+        font-size: var(--font-sm);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: white;
+        border-radius: var(--radius-sm);
+        transition: var(--transition-base);
+    }
+
+    .detail-toggle:hover {
+        background: #eff6ff;
+    }
+
+    .detail-content {
+        margin-top: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: white;
+        border-radius: var(--radius-sm);
+        font-size: var(--font-sm);
+        line-height: 1.6;
+        color: var(--gray-600);
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .btn-refresh {
+        background: var(--gray-900);
+        color: white;
+        border: none;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-sm);
+        font-weight: 600;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-sm);
+        transition: var(--transition-base);
+    }
+
+    .btn-refresh:hover {
+        background: var(--gray-800);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* ==================== PAGINATION ==================== */
+    .custom-pagination {
+        display: flex;
+        gap: 4px;
+        justify-content: center;
+        padding: var(--spacing-lg) 0;
+        list-style: none;
+        margin: 0;
+    }
+
+    .page-btn {
+        background: white;
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: 6px 12px;
+        font-weight: 600;
+        font-size: var(--font-sm);
+        cursor: pointer;
+        min-width: 36px;
+        text-align: center;
+        transition: var(--transition-base);
+    }
+
+    .page-btn:hover:not(.disabled):not(.active) {
+        background: var(--gray-100);
+        border-color: var(--gray-400);
+    }
+
+    .page-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+        .filter-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .table {
+            font-size: var(--font-xs);
+        }
+
+        .btn-action {
+            padding: 4px 8px;
+            font-size: 0.65rem;
+        }
+
+        .date-inputs {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .section-body {
+            padding: var(--spacing-lg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- MODE INFO CARD -->
+    <div class="mode-info-card">
+        <div class="mode-info-header">
+            <div class="mode-info-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="mode-info-content">
+                <h6>Mode Jam Kerja Aktif</h6>
+                <p>
+                    {% if mode_info and mode_info.nama_mode %}
+                        <strong>{{ mode_info.nama_mode }}</strong> ({{ mode_info.kode_mode }})
+                        {% if mode_info.nama_periode %}
+                            <span class="mode-badge">Periode: {{ mode_info.nama_periode }}</span>
+                        {% endif %}
+                        {% if mode_info.is_libur %}
+                            <span class="badge bg-danger ms-2">LIBUR</span>
+                        {% endif %}
+                    {% else %}
+                        <em style="opacity: 0.8;">Mode Jam Kerja belum diatur</em>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER SECTION -->
+    <div class="filter-section">
+        <div class="filter-header">
+            <h5 class="filter-title">
+                <i class="fas fa-filter"></i>
+                Filter Data Absensi
+            </h5>
+            <button type="button" class="btn-sync" data-bs-toggle="modal" data-bs-target="#syncModal">
+                <i class="fas fa-sync-alt"></i>
+                Sync Data
+            </button>
+        </div>
+
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="{{ form.search_employee.id_for_label }}" class="form-label">
+                    Cari Pegawai
+                </label>
+                {{ form.search_employee }}
+            </div>
+
+            <div class="col-md-3">
+                <label for="{{ form.tanggal_mulai.id_for_label }}" class="form-label">
+                    Tanggal Mulai
+                </label>
+                {{ form.tanggal_mulai }}
+            </div>
+
+            <div class="col-md-3">
+                <label for="{{ form.tanggal_akhir.id_for_label }}" class="form-label">
+                    Tanggal Akhir
+                </label>
+                {{ form.tanggal_akhir }}
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter"></i>
+                    Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- TABLE SECTION -->
+    <div class="table-section">
+        <div class="section-header">
+            <h5 class="section-title">
+                <i class="fas fa-table"></i>
+                Data Riwayat Absensi
+            </h5>
+            
+            <div class="view-controls">
+                <label>Tampilkan:</label>
+                <select class="entries-select" id="entriesSelect">
+                    <option value="10">10 Data</option>
+                    <option value="25">25 Data</option>
+                    <option value="50">50 Data</option>
+                    <option value="100">100 Data</option>
+                    <option value="-1" selected>Semua Data</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section-body">
+            <div class="table-wrapper">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="absensiTable">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 50px;">No</th>
+                                <th class="text-center" style="width: 100px;">User ID</th>
+                                <th>Nama Pegawai</th>
+                                <th class="text-center">Departemen</th>
+                                <th class="text-center">Tanggal</th>
+                                <th class="text-center">Masuk</th>
+                                <th class="text-center">Ist. Keluar</th>
+                                <th class="text-center">Ist. Masuk</th>
+                                <th class="text-center">Pulang</th>
+                                <th class="text-center">Total Jam</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Keterangan</th>
+                                <th class="text-center" style="width: 120px;">Aksi</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for absensi in absensi_list %}
+                            <tr>
+                                <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
+
+                                <td class="text-center">
+                                    <span class="badge-userid">{{ absensi.pegawai.userid }}</span>
+                                </td>
+
+                                <td>
+                                    <a href="{% url 'riwayat_per_Pegawai' absensi.pegawai.id %}" class="user-name">
+                                        {{ absensi.pegawai.nama_lengkap }}
+                                    </a>
+                                </td>
+
+                                <td class="text-center">
+                                    {% if absensi.pegawai.departemen %}
+                                        <span class="badge bg-light text-dark">{{ absensi.pegawai.departemen.nama }}</span>
+                                    {% else %}
+                                        <span style="color: #9ca3af;">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center">
+                                    <small>{{ absensi.tanggal|date:"d M Y" }}</small>
+                                </td>
+
+                                <td class="text-center">
+                                    {% if absensi.tap_masuk %}
+                                        <span class="jam-text{% if absensi.is_late %} violation{% endif %}">
+                                            {{ absensi.tap_masuk|date:"H:i" }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center">
+                                    {% if absensi.tap_istirahat_keluar %}
+                                        <span class="jam-text">{{ absensi.tap_istirahat_keluar|date:"H:i" }}</span>
+                                    {% elif absensi.tap_masuk and absensi.tap_pulang %}
+                                        <span class="jam-text violation">12:00</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center">
+                                    {% if absensi.tap_istirahat_masuk %}
+                                        <span class="jam-text">{{ absensi.tap_istirahat_masuk|date:"H:i" }}</span>
+                                    {% elif absensi.tap_masuk and absensi.tap_pulang %}
+                                        <span class="jam-text violation">14:00</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center">
+                                    {% if absensi.tap_pulang %}
+                                        <span class="jam-text{% if absensi.is_early_departure %} violation{% endif %}">
+                                            {{ absensi.tap_pulang|date:"H:i" }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center">
+                                    {% if absensi.total_jam_kerja %}
+                                        <span class="total-jam-card{% if absensi.has_violation %} violation{% endif %}">
+                                            {{ absensi.total_jam_kerja }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center">
+                                    {% if absensi.status == 'Hadir' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle"></i> Hadir
+                                        </span>
+                                    {% elif absensi.status == 'Sakit' %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-thermometer-half"></i> Sakit
+                                        </span>
+                                    {% elif absensi.status == 'Izin' %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-file-signature"></i> Izin
+                                        </span>
+                                    {% elif absensi.status == 'Absen' %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times-circle"></i> Absen
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ absensi.status }}</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center">
+                                    <small style="color: var(--gray-600);">
+                                        {{ absensi.keterangan|default:"-" }}
+                                    </small>
+                                </td>
+
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <a href="{% url 'absensi_edit' absensi.pk %}" class="btn-action btn-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'absensi_hapus' absensi.pk %}" class="btn-action btn-danger"
+                                           onclick="return confirm('Yakin ingin menghapus?')" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="13">
+                                    <div class="empty-state" style="text-align: center; padding: 48px 20px;">
+                                        <i class="fas fa-inbox" style="font-size: 3rem; color: var(--gray-300); margin-bottom: 16px;"></i>
+                                        <h6 style="font-size: var(--font-base); color: var(--gray-700); margin-bottom: 8px; font-weight: 600;">Tidak Ada Data</h6>
+                                        <p style="font-size: var(--font-sm); color: var(--gray-600); margin: 0;">Belum ada riwayat absensi</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="custom-pagination" id="customPagination"></div>
+        </div>
+
+        <div class="section-footer">
+            <div>
+                Total: <strong id="totalAbsensi">{{ absensi_list|length }}</strong> Data
+                {% if cabang_aktif %}
+                <span style="margin-left: var(--spacing-lg);">| Cabang: <strong>{{ cabang_aktif.nama }}</strong></span>
+                {% endif %}
+            </div>
+            <div>
+                <span id="showingInfo" style="color: var(--gray-600); font-size: var(--font-sm);">Menampilkan semua data</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SYNC MODAL ==================== -->
+<div class="modal fade" id="syncModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-sync-alt"></i>
+                    Sync Data Absensi
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="sync-info-header">
+                    <h6><i class="fas fa-server"></i> Sinkronisasi Otomatis</h6>
+                    <p>Data akan diambil dari semua mesin yang terdaftar di sistem</p>
+                    <div class="sync-machine-count">
+                        <i class="fas fa-layer-group"></i>
+                        <span>{{ mesin_list.count|default:"0" }} Mesin Aktif</span>
+                    </div>
+                </div>
+
+                <div class="date-filter-card">
+                    <h6>
+                        <i class="fas fa-calendar-alt"></i>
+                        Filter Periode
+                    </h6>
+
+                    <div class="date-inputs">
+                        <div class="date-input-group">
+                            <label>Tanggal Mulai</label>
+                            <input type="date" class="form-control" id="syncTanggalMulai">
+                        </div>
+                        <div class="date-input-group">
+                            <label>Tanggal Akhir</label>
+                            <input type="date" class="form-control" id="syncTanggalAkhir">
+                        </div>
+                    </div>
+
+                    <div class="date-hint">
+                        <small>
+                            <i class="fas fa-info-circle"></i>
+                            Kosongkan untuk sync semua data yang tersedia
+                        </small>
+                    </div>
+                </div>
+
+                <button class="btn-sync-start" onclick="syncSekarang()" id="btnSync">
+                    <i class="fas fa-sync-alt"></i>
+                    <span id="btnText">Mulai Sinkronisasi</span>
+                </button>
+
+                <div id="syncProgress" class="sync-progress-container" style="display:none;">
+                    <div class="sync-spinner"></div>
+                    <p class="sync-progress-text">Sedang memproses data dari semua mesin...</p>
+                </div>
+
+                <div id="syncResult" class="sync-result-container" style="display:none;">
+                    <div class="result-alert" id="syncAlert">
+                        <div class="result-header">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="syncAlertTitle">Sinkronisasi Berhasil!</span>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-number success" id="statCreated">0</div>
+                                <div class="stat-label">Data Baru</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number info" id="statUpdated">0</div>
+                                <div class="stat-label">Diupdate</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number warning" id="statSkipped">0</div>
+                                <div class="stat-label">Dilewati</div>
+                            </div>
+                        </div>
+
+                        <div class="result-info">
+                            <div class="result-info-item">
+                                <i class="fas fa-calendar-check text-primary"></i>
+                                <span id="syncPeriodInfo">Periode: -</span>
+                            </div>
+                            <div class="result-info-item">
+                                <i class="fas fa-server text-success"></i>
+                                <span id="syncMachineInfo">Mesin: -</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <a class="detail-toggle" data-bs-toggle="collapse" href="#syncDetailMsg">
+                                <i class="fas fa-chevron-down"></i>
+                                <span>Lihat Detail Lengkap</span>
+                            </a>
+                            <div class="collapse" id="syncDetailMsg">
+                                <div class="detail-content" id="syncMsg"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-refresh" onclick="location.reload()">
+                        <i class="fas fa-redo"></i>
+                        <span>Refresh Halaman</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    let table;
+
+    function updateShowingInfo() {
+        const info = table.page.info();
+        const showingInfo = $('#showingInfo');
+        
+        if (info.recordsDisplay === info.recordsTotal && info.length === -1) {
+            showingInfo.text('Menampilkan semua data');
+        } else if (info.length === -1) {
+            showingInfo.text('Menampilkan semua data');
+        } else {
+            showingInfo.text('Menampilkan ' + (info.start + 1) + '-' + info.end + ' dari ' + info.recordsDisplay + ' data');
+        }
+    }
+
+    function renderCustomPagination() {
+        const info = table.page.info();
+        const current = info.page;
+        const total = info.pages;
+        const pagination = $('#customPagination');
+
+        if (total <= 1) {
+            pagination.hide();
+            updateShowingInfo();
+            return;
+        }
+
+        pagination.show();
+        let html = '';
+
+        html += current === 0 ?
+            '<button class="page-btn disabled" disabled>Prev</button>' :
+            '<button class="page-btn" onclick="changePage(' + (current - 1) + ')">Prev</button>';
+
+        let start = Math.max(0, current - 2);
+        let end = Math.min(total - 1, current + 2);
+
+        if (current <= 2) {
+            end = Math.min(4, total - 1);
+        }
+        if (current >= total - 3) {
+            start = Math.max(0, total - 5);
+        }
+
+        for (let i = start; i <= end; i++) {
+            html += i === current ?
+                '<button class="page-btn active">' + (i + 1) + '</button>' :
+                '<button class="page-btn" onclick="changePage(' + i + ')">' + (i + 1) + '</button>';
+        }
+
+        html += current === total - 1 ?
+            '<button class="page-btn disabled" disabled>Next</button>' :
+            '<button class="page-btn" onclick="changePage(' + (current + 1) + ')">Next</button>';
+
+        pagination.html(html);
+        updateShowingInfo();
+    }
+
+    function changePage(page) {
+        table.page(page).draw('page');
+    }
+
+    function getCookie(name) {
+        let value = null;
+        if (document.cookie) {
+            document.cookie.split(';').forEach(cookie => {
+                const c = cookie.trim();
+                if (c.startsWith(name + '=')) {
+                    value = decodeURIComponent(c.substring(name.length + 1));
+                }
+            });
+        }
+        return value;
+    }
+
+    async function syncSekarang() {
+        const btnSync = $('#btnSync');
+        const btnText = $('#btnText');
+        const syncProgress = $('#syncProgress');
+        const syncResult = $('#syncResult');
+        const syncAlert = $('#syncAlert');
+
+        const tanggalMulai = $('#syncTanggalMulai').val();
+        const tanggalAkhir = $('#syncTanggalAkhir').val();
+
+        if (tanggalMulai && tanggalAkhir && tanggalMulai > tanggalAkhir) {
+            alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir!');
+            return;
+        }
+
+        let url = '{% url "sync_absensi" %}';
+        const params = new URLSearchParams();
+        if (tanggalMulai) params.append('tanggal_mulai', tanggalMulai);
+        if (tanggalAkhir) params.append('tanggal_akhir', tanggalAkhir);
+        if (params.toString()) url += '?' + params.toString();
+
+        btnSync.prop('disabled', true);
+        btnText.html('Memproses...');
+        syncProgress.show();
+        syncResult.hide();
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+            syncProgress.hide();
+
+            if (data.status === 'success' || data.status === 'info') {
+                syncAlert.removeClass('error').addClass(data.status === 'info' ? 'warning' : 'success');
+                $('#syncAlertTitle').html(data.status === 'info' ? 'Informasi' : 'Sinkronisasi Berhasil!');
+
+                const stats = data.stats || { created: 0, updated: 0, skipped: 0 };
+                $('#statCreated').text(stats.created || 0);
+                $('#statUpdated').text(stats.updated || 0);
+                $('#statSkipped').text(stats.skipped || 0);
+
+                let period = 'Semua data';
+                if (stats.filter && (stats.filter.tanggal_mulai || stats.filter.tanggal_akhir)) {
+                    period = (stats.filter.tanggal_mulai || '-') + ' s/d ' + (stats.filter.tanggal_akhir || '-');
+                }
+                $('#syncPeriodInfo').text('Periode: ' + period);
+
+                const machineInfo = (stats.total_machines || 0) + ' mesin (' + (stats.online_machines || 0) + ' online)';
+                $('#syncMachineInfo').text('Mesin: ' + machineInfo);
+
+                $('#syncMsg').html((data.msg || 'Selesai').replace(/\n/g, '<br>'));
+                syncResult.show();
+
+                if ((stats.created || 0) + (stats.updated || 0) > 0) {
+                    setTimeout(function() { location.reload(); }, 3000);
+                }
+            } else {
+                throw new Error(data.msg || 'Error tidak diketahui');
+            }
+        } catch (error) {
+            syncProgress.hide();
+            syncAlert.removeClass('success warning').addClass('error');
+            $('#syncAlertTitle').html('Gagal!');
+            $('#syncMsg').html(error.message);
+            syncResult.show();
+        } finally {
+            btnSync.prop('disabled', false);
+            btnText.html('Mulai Sinkronisasi');
+        }
+    }
+
+    $('#syncModal').on('shown.bs.modal', function() {
+        const today = new Date().toISOString().split('T')[0];
+        if (!$('#syncTanggalMulai').val()) {
+            $('#syncTanggalMulai').val(today);
+            $('#syncTanggalAkhir').val(today);
+        }
+    });
+
+    $(document).ready(function() {
+        table = $('#absensiTable').DataTable({
+            paging: true,
+            pageLength: -1,
+            lengthChange: false,
+            ordering: true,
+            searching: false,
+            info: false,
+            scrollX: true,
+            scrollCollapse: false,
+            autoWidth: false,
+            dom: 'rt',
+            language: {
+                emptyTable: 'Tidak ada data'
+            },
+            columnDefs: [
+                { width: "50px", targets: 0 },
+                { width: "100px", targets: 1 },
+                { width: "200px", targets: 2 },
+                { width: "150px", targets: 3 },
+                { width: "120px", targets: 4 },
+                { width: "80px", targets: 5 },
+                { width: "80px", targets: 6 },
+                { width: "80px", targets: 7 },
+                { width: "80px", targets: 8 },
+                { width: "100px", targets: 9 },
+                { width: "100px", targets: 10 },
+                { width: "150px", targets: 11 },
+                { width: "120px", targets: 12 }
+            ],
+            drawCallback: function() {
+                renderCustomPagination();
+            }
+        });
+
+        $('#entriesSelect').on('change', function() {
+            const value = parseInt($(this).val());
+            table.page.len(value).draw();
+        });
+
+        renderCustomPagination();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistem Absensi</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --radius-sm: 0.3rem;
+            --radius-md: 0.4rem;
+            --radius-lg: 0.6rem;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 3px 10px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 20px rgba(0,0,0,0.12);
+            --font-xs: 0.55rem;
+            --font-sm: 0.65rem;
+            --font-base: 0.7rem;
+            --font-lg: 0.8rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .login-container {
+            max-width: 360px;
+            width: 100%;
+        }
+        
+        .login-card {
+            border: none;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            background: white;
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .login-header i {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            opacity: 0.95;
+        }
+        
+        .login-header h3 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.3px;
+        }
+        
+        .login-header p {
+            margin: 4px 0 0 0;
+            opacity: 0.9;
+            font-size: var(--font-sm);
+        }
+        
+        .login-body {
+            padding: 20px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 4px;
+            font-size: var(--font-sm);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .form-label i {
+            font-size: var(--font-xs);
+        }
+        
+        .input-group {
+            margin-bottom: 12px;
+        }
+        
+        .input-group-text {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            border: none;
+            color: white;
+            padding: 7px 10px;
+            font-size: var(--font-sm);
+            border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+        }
+
+        .input-group-text i {
+            font-size: 0.7rem;
+        }
+        
+        .form-control {
+            border: 1px solid var(--gray-200);
+            border-left: none;
+            padding: 7px 10px;
+            transition: all 0.2s;
+            font-size: var(--font-sm);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            border: none;
+            padding: 8px;
+            font-size: var(--font-sm);
+            font-weight: 700;
+            border-radius: var(--radius-sm);
+            color: white;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            color: white;
+        }
+        
+        .alert {
+            border-radius: var(--radius-sm);
+            border: none;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+            font-size: var(--font-xs);
+        }
+        
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-left: 3px solid #ef4444;
+        }
+        
+        .login-footer {
+            text-align: center;
+            padding: 10px;
+            background-color: var(--gray-50);
+            color: var(--gray-600);
+            font-size: var(--font-xs);
+        }
+
+        @media (max-width: 576px) {
+            .login-container {
+                max-width: 100%;
+            }
+
+            .login-header i {
+                font-size: 1.75rem;
+            }
+
+            .login-header h3 {
+                font-size: var(--font-lg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            
+            <div class="login-header">
+                <i class="fas fa-fingerprint"></i>
+                <h3>SISTEM ABSENSI</h3>
+                <p>Silakan login untuk melanjutkan</p>
+            </div>
+
+            <div class="login-body">
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size: 0.6rem; padding: 6px;"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">
+                            <i class="fas fa-user"></i>
+                            Username
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <input type="text" 
+                                class="form-control" 
+                                id="id_username" 
+                                name="username" 
+                                placeholder="Masukkan username"
+                                required
+                                autofocus>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">
+                            <i class="fas fa-lock"></i>
+                            Password
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" 
+                                class="form-control" 
+                                id="id_password" 
+                                name="password" 
+                                placeholder="Masukkan password"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-login">
+                            <i class="fas fa-sign-in-alt me-1" style="font-size: 0.65rem;"></i>
+                            MASUK
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="login-footer">
+                <i class="fas fa-shield-alt me-1"></i>
+                © 2025 Sistem Absensi Pegawai
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

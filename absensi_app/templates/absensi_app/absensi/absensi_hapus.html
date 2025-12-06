@@ -1,0 +1,247 @@
+{% extends 'absensi_app/base.html' %}
+
+{% block title %}Hapus Absensi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-container { 
+        max-width: 600px; 
+        margin: 0 auto; 
+    }
+    
+    .delete-card { 
+        background: white; 
+        border-radius: var(--radius-lg); 
+        box-shadow: var(--shadow-sm); 
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+    }
+    
+    .delete-header { 
+        background: linear-gradient(135deg, var(--danger-dark) 0%, var(--danger) 100%); 
+        color: white; 
+        padding: var(--spacing-xl); 
+    }
+    
+    .delete-header h4 { 
+        font-size: var(--font-lg); 
+        font-weight: 600; 
+        margin: 0; 
+        display: flex; 
+        align-items: center; 
+        gap: var(--spacing-sm); 
+    }
+    
+    .delete-body { 
+        padding: var(--spacing-2xl); 
+    }
+    
+    .alert-danger {
+        background: var(--danger-light);
+        border: 1px solid var(--danger);
+        color: #991b1b;
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--spacing-xl);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        font-size: var(--font-sm);
+    }
+
+    .alert-danger i {
+        font-size: var(--font-lg);
+    }
+    
+    .info-table { 
+        width: 100%;
+        margin: var(--spacing-xl) 0;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+    }
+
+    .info-table tr {
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .info-table tr:last-child {
+        border-bottom: none;
+    }
+    
+    .info-table th { 
+        background: var(--gray-50);
+        font-weight: 600; 
+        font-size: var(--font-sm); 
+        color: var(--gray-700); 
+        padding: var(--spacing-md) var(--spacing-lg);
+        width: 150px;
+        text-align: left;
+    }
+    
+    .info-table td { 
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: var(--font-sm);
+        color: var(--gray-900);
+    }
+
+    .badge {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: var(--font-xs);
+        display: inline-block;
+    }
+
+    .bg-hadir { background: var(--success-light); color: #065f46; }
+    .bg-sakit { background: var(--warning-light); color: #92400e; }
+    .bg-izin { background: var(--info-light); color: #1e40af; }
+    .bg-absen { background: var(--danger-light); color: #991b1b; }
+    
+    .btn-group { 
+        display: flex; 
+        gap: var(--spacing-md); 
+        justify-content: flex-end;
+        margin-top: var(--spacing-xl);
+    }
+    
+    .btn { 
+        padding: var(--spacing-sm) var(--spacing-xl); 
+        font-size: var(--font-sm); 
+        font-weight: 600; 
+        border-radius: var(--radius-sm); 
+        border: none; 
+        cursor: pointer; 
+        display: inline-flex; 
+        align-items: center; 
+        gap: var(--spacing-sm); 
+        transition: all var(--transition-base); 
+        text-decoration: none; 
+    }
+    
+    .btn:hover { 
+        transform: translateY(-1px); 
+        box-shadow: var(--shadow-md); 
+    }
+    
+    .btn-danger { 
+        background: var(--danger-dark); 
+        color: white; 
+    }
+    
+    .btn-danger:hover { 
+        background: #b91c1c; 
+        color: white; 
+    }
+    
+    .btn-secondary { 
+        background: var(--gray-600); 
+        color: white; 
+    }
+    
+    .btn-secondary:hover { 
+        background: var(--gray-700); 
+        color: white; 
+    }
+    
+    @media (max-width: 768px) {
+        .delete-body { 
+            padding: var(--spacing-xl); 
+        }
+
+        .info-table th {
+            width: 120px;
+            padding: var(--spacing-sm) var(--spacing-md);
+        }
+
+        .info-table td {
+            padding: var(--spacing-sm) var(--spacing-md);
+        }
+        
+        .btn-group { 
+            flex-direction: column; 
+        }
+        
+        .btn { 
+            width: 100%; 
+            justify-content: center; 
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="delete-card">
+        <div class="delete-header">
+            <h4><i class="fas fa-trash-alt"></i> Hapus Absensi</h4>
+        </div>
+
+        <div class="delete-body">
+            <div class="alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>PERINGATAN!</strong> Data absensi akan dihapus permanen dan tidak dapat dikembalikan.
+                </div>
+            </div>
+
+            <p style="font-size: var(--font-sm); color: var(--gray-700); margin-bottom: var(--spacing-lg);">
+                Anda yakin ingin menghapus data absensi berikut?
+            </p>
+
+            <table class="info-table">
+                <tr>
+                    <th>Pegawai</th>
+                    <td><strong>{{ absensi.pegawai.nama_lengkap }}</strong></td>
+                </tr>
+                <tr>
+                    <th>User ID</th>
+                    <td>{{ absensi.pegawai.userid }}</td>
+                </tr>
+                <tr>
+                    <th>Tanggal</th>
+                    <td>{{ absensi.tanggal|date:"d F Y" }}</td>
+                </tr>
+                <tr>
+                    <th>Jam Masuk</th>
+                    <td>{{ absensi.tap_masuk|time:"H:i"|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <th>Jam Keluar</th>
+                    <td>{{ absensi.tap_pulang|time:"H:i"|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>
+                        <span class="badge bg-{{ absensi.status|lower }}">{{ absensi.status }}</span>
+                    </td>
+                </tr>
+            </table>
+
+            <form method="POST" id="deleteForm">
+                {% csrf_token %}
+                <div class="btn-group">
+                    <a href="{% url 'riwayat_absensi' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Batal
+                    </a>
+                    <button type="submit" class="btn btn-danger" id="deleteBtn">
+                        <i class="fas fa-trash"></i> Ya, Hapus
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$('#deleteForm').submit(function(e) {
+    e.preventDefault();
+    if (confirm('Yakin hapus absensi {{ absensi.pegawai.nama_lengkap }} tanggal {{ absensi.tanggal|date:"d/m/Y" }}?\n\nData tidak dapat dikembalikan!')) {
+        $('#deleteBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Menghapus...');
+        this.submit();
+    }
+});
+</script>
+{% endblock %}

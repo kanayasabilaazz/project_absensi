@@ -1,0 +1,450 @@
+{% extends "absensi_app/base.html" %}
+{% load static %}
+
+{% block title %}Edit Data Pegawai{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    /* ==================== FORM CARD ==================== */
+    .form-card {
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+    }
+
+    .form-card-header h5 {
+        margin: 0;
+        font-size: var(--font-lg);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .form-card-body {
+        padding: var(--spacing-xl);
+    }
+
+    /* ==================== FORM SECTIONS ==================== */
+    .form-section {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 2px solid var(--gray-100);
+        font-size: var(--font-base);
+        font-weight: 600;
+        color: var(--gray-900);
+    }
+
+    .section-title i {
+        color: var(--primary);
+    }
+
+    /* ==================== FORM CONTROLS ==================== */
+    .form-label {
+        font-weight: 600;
+        font-size: var(--font-sm);
+        margin-bottom: var(--spacing-sm);
+        color: var(--gray-700);
+        display: block;
+    }
+
+    .form-label .text-danger {
+        color: var(--danger);
+        margin-left: var(--spacing-xs);
+    }
+
+    .form-control,
+    .form-select {
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: 0.5rem var(--spacing-lg);
+        font-size: var(--font-sm);
+        transition: all var(--transition-base);
+        font-family: 'Inter', system-ui, sans-serif;
+        width: 100%;
+        background: white;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-light);
+        outline: none;
+    }
+
+    .form-control[readonly] {
+        background: var(--gray-50);
+        cursor: not-allowed;
+        border-color: var(--gray-200);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 60px;
+    }
+
+    small.text-muted {
+        display: block;
+        margin-top: var(--spacing-xs);
+        font-size: var(--font-xs);
+        color: var(--gray-500);
+    }
+
+    /* ==================== SELECT2 STYLING ==================== */
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding-top: 3px;
+        transition: all var(--transition-base);
+    }
+
+    .select2-container--default .select2-selection--single:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-light);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: var(--gray-900);
+        line-height: 32px;
+        font-size: var(--font-sm);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: var(--gray-500);
+    }
+
+    .select2-dropdown {
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-md);
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--primary);
+    }
+
+    /* ==================== FORM SWITCHES ==================== */
+    .form-check {
+        padding-left: 0;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .form-check-input {
+        width: 2.5rem;
+        height: 1.25rem;
+        margin-right: var(--spacing-sm);
+        cursor: pointer;
+        border: 2px solid var(--gray-300);
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 2px var(--primary-light);
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        font-size: var(--font-sm);
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .btn-group-actions {
+        display: flex;
+        gap: var(--spacing-md);
+        padding-top: var(--spacing-lg);
+        border-top: 2px solid var(--gray-100);
+        margin-top: var(--spacing-xl);
+    }
+
+    .btn-secondary {
+        background: var(--gray-500);
+        color: white;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background: var(--gray-600);
+        transform: translateY(-1px);
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+        .form-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .btn-group-actions {
+            flex-direction: column;
+        }
+
+        .btn-group-actions .btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .form-card-header {
+            padding: var(--spacing-md) var(--spacing-lg);
+        }
+
+        .form-card-body {
+            padding: var(--spacing-md);
+        }
+
+        .form-card-header h5 {
+            font-size: var(--font-base);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h5>
+                        <i class="fas fa-user-edit"></i>
+                        Edit Data Pegawai: {{ pegawai.nama_lengkap }}
+                    </h5>
+                </div>
+
+                <div class="form-card-body">
+                    <form method="post" id="formEdit">
+                        {% csrf_token %}
+
+                        <!-- DATA PRIBADI & KONTAK -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="fas fa-user"></i>
+                                <span>Data Pribadi & Kontak</span>
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">User ID</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        value="{{ pegawai.userid }}" 
+                                        readonly
+                                    >
+                                    <small class="text-muted">
+                                        <i class="fas fa-lock"></i> User ID tidak dapat diubah
+                                    </small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_nama_lengkap" class="form-label">
+                                        Nama Lengkap <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="id_nama_lengkap" name="nama_lengkap"
+                                        value="{{ pegawai.nama_lengkap }}" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="id_email" name="email"
+                                        value="{{ pegawai.email|default:'' }}" placeholder="contoh@email.com">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_tanggal_lahir" class="form-label">Tanggal Lahir</label>
+                                    <input type="date" class="form-control" id="id_tanggal_lahir" name="tanggal_lahir"
+                                        value="{% if pegawai.tanggal_lahir %}{{ pegawai.tanggal_lahir|date:'Y-m-d' }}{% endif %}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_nomor_hp" class="form-label">Nomor HP</label>
+                                    <input type="text" class="form-control" id="id_nomor_hp" name="nomor_hp"
+                                        value="{{ pegawai.nomor_hp|default:'' }}" placeholder="081234567890">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_alamat" class="form-label">Alamat</label>
+                                    <textarea class="form-control" id="id_alamat" name="alamat" rows="2"
+                                        placeholder="Masukkan alamat lengkap">{{ pegawai.alamat|default:'' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ORGANISASI & JADWAL KERJA -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="fas fa-briefcase"></i>
+                                <span>Organisasi & Jadwal Kerja</span>
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_departemen" class="form-label">
+                                        Departemen <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select select2-init" id="id_departemen" name="departemen" required>
+                                        <option value="">-- Pilih Departemen --</option>
+                                        {% for dept in departemen_list %}
+                                            <option value="{{ dept.id }}" 
+                                                {% if pegawai.departemen.id == dept.id %}selected{% endif %}>
+                                                {{ dept.nama }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_jabatan" class="form-label">
+                                        Jabatan <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select select2-init" id="id_jabatan" name="jabatan" required>
+                                        <option value="">-- Pilih Jabatan --</option>
+                                        {% for jab in jabatan_list %}
+                                            <option value="{{ jab.id }}" 
+                                                {% if pegawai.jabatan.id == jab.id %}selected{% endif %}>
+                                                {{ jab.nama }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_cabang" class="form-label">Cabang</label>
+                                    <select class="form-select select2-init" id="id_cabang" name="cabang">
+                                        <option value="">-- Pilih Cabang --</option>
+                                        {% for cab in cabang_list %}
+                                            <option value="{{ cab.id }}" 
+                                                {% if pegawai.cabang.id == cab.id %}selected{% endif %}>
+                                                {{ cab.nama }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_jam_kerja" class="form-label">Jam Kerja</label>
+                                    <select class="form-select select2-init" id="id_jam_kerja" name="jam_kerja">
+                                        <option value="">-- Pilih Jam Kerja --</option>
+                                        {% for jk in jam_kerja_list %}
+                                            <option value="{{ jk.id }}" {% if pegawai.jam_kerja.id == jk.id %}selected{% endif %}>
+                                                {{ jk.nama }} ({{ jk.jam_masuk|time:"H:i" }} - {{ jk.jam_keluar|time:"H:i" }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_mesin" class="form-label">Mesin Fingerprint Utama</label>
+                                    <select class="form-select select2-init" id="id_mesin" name="mesin">
+                                        <option value="">-- Pilih Mesin --</option>
+                                        {% for mesin in mesin_list %}
+                                            <option value="{{ mesin.id }}" 
+                                                {% if pegawai.mesin.id == mesin.id %}selected{% endif %}>
+                                                {{ mesin.nama }} ({{ mesin.cabang.nama }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_tanggal_bergabung" class="form-label">Tanggal Bergabung</label>
+                                    <input type="date" class="form-control" id="id_tanggal_bergabung" name="tanggal_bergabung"
+                                        value="{% if pegawai.tanggal_bergabung %}{{ pegawai.tanggal_bergabung|date:'Y-m-d' }}{% endif %}">
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_tanggal_nonaktif" class="form-label">Tanggal Non-Aktif</label>
+                                    <input type="date" class="form-control" id="id_tanggal_nonaktif" name="tanggal_nonaktif"
+                                        value="{% if pegawai.tanggal_nonaktif %}{{ pegawai.tanggal_nonaktif|date:'Y-m-d' }}{% endif %}">
+                                    <small class="text-muted">Diisi jika status Nonaktif</small>
+                                </div>
+
+                        <!-- BUTTONS -->
+                        <div class="btn-group-actions">
+                            <button type="submit" class="btn btn-primary" id="btnSubmit">
+                                <i class="fas fa-save"></i> Simpan Perubahan
+                            </button>
+                            <a href="{% url 'Pegawai_detail' pegawai.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Batal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inisialisasi Select2
+        $('.select2-init').select2({
+            width: '100%',
+            placeholder: function() {
+                return $(this).data('placeholder') || '-- Pilih --';
+            },
+            allowClear: true
+        });
+        
+        const formEdit = document.getElementById('formEdit');
+        const btnSubmit = document.getElementById('btnSubmit');
+
+        formEdit.addEventListener('submit', function(e) {
+            const namaLengkap = document.getElementById('id_nama_lengkap').value.trim();
+            const departemen = document.getElementById('id_departemen').value.trim();
+            const jabatan = document.getElementById('id_jabatan').value.trim();
+            
+            if (!namaLengkap || !departemen || !jabatan) {
+                e.preventDefault();
+                alert('❌ Nama Lengkap, Departemen, dan Jabatan harus diisi!');
+                return false;
+            }
+
+            const confirmed = confirm('Yakin menyimpan perubahan data pegawai ini?');
+            if (!confirmed) {
+                e.preventDefault();
+                return false;
+            }
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,617 @@
+{% extends 'absensi_app/base.html' %}
+{% load static %}
+
+{% block title %}Kelola Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== KONSISTEN DENGAN BASE & DASHBOARD ==================== */
+    :root {
+        --card-radius: var(--radius-md);
+        --card-shadow: var(--shadow-sm);
+        --card-shadow-hover: var(--shadow-md);
+    }
+
+    /* ==================== SECTION CARD ==================== */
+    .section-card {
+        background: white;
+        border-radius: var(--card-radius);
+        box-shadow: var(--card-shadow);
+        margin-bottom: var(--spacing-xl);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+        transition: var(--transition-base);
+    }
+
+    .section-card:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border-bottom: 1px solid var(--gray-200);
+        flex-wrap: wrap;
+        gap: var(--spacing-lg);
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        color: white;
+    }
+
+    .section-title {
+        font-size: var(--font-lg);
+        font-weight: 700;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin: 0;
+    }
+
+    .section-title i {
+        font-size: var(--font-lg);
+    }
+
+    .section-body {
+        padding: var(--spacing-xl);
+    }
+
+    .section-footer {
+        padding: var(--spacing-md) var(--spacing-xl);
+        background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+        font-size: var(--font-sm);
+        color: var(--gray-600);
+    }
+
+    .section-footer strong {
+        color: var(--gray-900);
+    }
+
+    /* ==================== STATS CARDS ==================== */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: var(--card-radius);
+        padding: var(--spacing-lg);
+        box-shadow: var(--card-shadow);
+        transition: var(--transition-base);
+        border: 1px solid var(--gray-200);
+        text-align: center;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary);
+        line-height: 1;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .stat-label {
+        font-size: var(--font-sm);
+        color: var(--gray-600);
+        font-weight: 600;
+    }
+
+    /* ==================== BUTTONS (KONSISTEN) ==================== */
+    .btn {
+        padding: var(--spacing-md) var(--spacing-xl);
+        font-size: var(--font-sm);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        border: none;
+        transition: var(--transition-base);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        cursor: pointer;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-light {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-light:hover {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+    }
+
+    .btn-outline-light {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-outline-light:hover {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+    }
+
+    .btn-action {
+        padding: 0.5rem 0.875rem;
+        font-size: var(--font-xs);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(14, 165, 233, 0.3);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    }
+
+    /* ==================== TABLE (SAMA PERSIS DASHBOARD) ==================== */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        margin-bottom: 0;
+        font-size: var(--font-sm);
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table thead th {
+        background: var(--gray-800);
+        color: white;
+        font-weight: 600;
+        padding: var(--spacing-md);
+        font-size: var(--font-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        border: none;
+        white-space: nowrap;
+        text-align: left;
+    }
+
+    .table thead th:first-child {
+        border-top-left-radius: var(--radius-md);
+    }
+
+    .table thead th:last-child {
+        border-top-right-radius: var(--radius-md);
+    }
+
+    .table tbody td {
+        padding: var(--spacing-md);
+        vertical-align: middle;
+        border-bottom: 1px solid var(--gray-200);
+        color: var(--gray-700);
+    }
+
+    .table tbody tr {
+        transition: var(--transition-fast);
+    }
+
+    .table tbody tr:hover {
+        background: var(--gray-50);
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* ==================== BADGES ==================== */
+    .badge {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: var(--font-xs);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        white-space: nowrap;
+    }
+
+    .badge-superadmin {
+        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    }
+
+    .badge-admin {
+        background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-active {
+        background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-inactive {
+        background: #e5e7eb;
+        color: #6b7280;
+    }
+
+    .badge.bg-info {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        color: white;
+        font-size: var(--font-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    /* ==================== USER NAME ==================== */
+    .user-name {
+        font-weight: 600;
+        color: var(--gray-900);
+    }
+
+    /* ==================== MODAL ==================== */
+    .modal-content {
+        border: none;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+        background: var(--gray-800);
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border: none;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        font-size: var(--font-base);
+    }
+
+    .modal-body {
+        padding: var(--spacing-xl);
+    }
+
+    .modal-footer {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    /* ==================== FORM ==================== */
+    .form-label {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+        font-weight: 600;
+        color: var(--gray-700);
+        font-size: var(--font-sm);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.5rem var(--spacing-lg);
+        font-size: var(--font-sm);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        transition: var(--transition-base);
+        background: white;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-light);
+    }
+
+    .form-text {
+        font-size: var(--font-xs);
+        color: var(--gray-600);
+        margin-top: var(--spacing-xs);
+    }
+
+    /* ==================== EMPTY STATE ==================== */
+    .empty-state {
+        text-align: center;
+        padding: 48px var(--spacing-xl);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--gray-300);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .empty-state h6 {
+        font-size: var(--font-base);
+        color: var(--gray-700);
+        margin-bottom: var(--spacing-sm);
+        font-weight: 600;
+    }
+
+    .empty-state p {
+        font-size: var(--font-sm);
+        color: var(--gray-600);
+        margin: 0;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-action {
+            padding: var(--spacing-sm);
+            font-size: 0.65rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_admin }}</div>
+            <div class="stat-label">Total Admin</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_superuser }}</div>
+            <div class="stat-label">Super Admin</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_staff }}</div>
+            <div class="stat-label">Admin/HR</div>
+        </div>
+    </div>
+
+    <!-- Main Section -->
+    <div class="section-card">
+        <div class="section-header">
+            <h5 class="section-title">
+                <i class="fas fa-user-shield"></i>
+                Kelola Admin
+            </h5>
+            <div class="d-flex gap-2">
+                <a href="{% url 'tambah_admin' %}" class="btn btn-light">
+                    <i class="fas fa-plus"></i> Tambah Admin
+                </a>
+                <a href="{% url 'menu_pengaturan' %}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+            </div>
+        </div>
+
+        <div class="section-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 50px;">No</th>
+                                <th>Username</th>
+                                <th>Nama Lengkap</th>
+                                <th>Email</th>
+                                <th class="text-center">Role</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center" style="width: 200px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for admin in admin_list %}
+                            <tr>
+                                <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
+                                <td>
+                                    <span class="user-name">{{ admin.username }}</span>
+                                    {% if admin.pk == request.user.pk %}
+                                    <span class="badge bg-info">Anda</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ admin.get_full_name|default:"-" }}</td>
+                                <td>{{ admin.email|default:"-" }}</td>
+                                <td class="text-center">
+                                    {% if admin.is_superuser %}
+                                    <span class="badge badge-superadmin">
+                                        <i class="fas fa-crown"></i> Super Admin
+                                    </span>
+                                    {% else %}
+                                    <span class="badge badge-admin">
+                                        <i class="fas fa-user-tie"></i> Admin/HR
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if admin.is_active %}
+                                    <span class="badge badge-active">
+                                        <i class="fas fa-check-circle"></i> Aktif
+                                    </span>
+                                    {% else %}
+                                    <span class="badge badge-inactive">
+                                        <i class="fas fa-times-circle"></i> Nonaktif
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                        <a href="{% url 'edit_admin' admin.pk %}" 
+                                            class="btn btn-warning btn-action"
+                                            title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button 
+                                            class="btn btn-info btn-action"
+                                            data-admin-id="{{ admin.pk }}"
+                                            data-username="{{ admin.username }}"
+                                            title="Reset Password">
+                                            <i class="fas fa-key"></i>
+                                        </button>
+                                        {% if admin.pk != request.user.pk %}
+                                        <a href="{% url 'hapus_admin' admin.pk %}" 
+                                            class="btn btn-danger btn-action"
+                                            onclick="return confirm('Yakin hapus admin {{ admin.username }}?')"
+                                            title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        <i class="fas fa-inbox"></i>
+                                        <h6>Tidak Ada Data Admin</h6>
+                                        <p>Belum ada data admin terdaftar</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        <div class="section-footer">
+            Total: <strong>{{ total_admin }}</strong> Admin
+        </div>
+    </div>
+</div>
+
+<!-- Modal Reset Password -->
+<div class="modal fade" id="modalResetPassword" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reset Password Admin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Reset password untuk: <strong id="adminUsername"></strong></p>
+                <div class="mb-3">
+                    <label class="form-label">Password Baru <span class="text-danger">*</span></label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        id="newPassword" 
+                        placeholder="Minimal 8 karakter"
+                    >
+                    <small class="form-text text-muted">
+                        Salin password ini dan berikan ke admin yang bersangkutan
+                    </small>
+                </div>
+                <button class="btn btn-sm btn-secondary" id="btnGenerate">
+                    <i class="fas fa-magic"></i> Generate Password
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmReset">
+                    <i class="fas fa-save"></i> Reset Password
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentAdminId = null;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+    
+    document.querySelectorAll('[data-admin-id]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            currentAdminId = this.getAttribute('data-admin-id');
+            const username = this.getAttribute('data-username');
+            
+            document.getElementById('adminUsername').textContent = username;
+            document.getElementById('newPassword').value = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalResetPassword'));
+            modal.show();
+        });
+    });
+    
+    document.getElementById('btnGenerate').addEventListener('click', function() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+        let password = '';
+        for (let i = 0; i < 12; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('newPassword').value = password;
+    });
+    
+    document.getElementById('btnConfirmReset').addEventListener('click', function() {
+        const newPassword = document.getElementById('newPassword').value.trim();
+        
+        if (!newPassword) {
+            alert('Password baru harus diisi!');
+            return;
+        }
+        
+        if (newPassword.length < 8) {
+            alert('Password minimal 8 karakter!');
+            return;
+        }
+        
+        fetch('/pengaturan/admin/' + currentAdminId + '/reset-password/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: 'new_password=' + encodeURIComponent(newPassword)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.msg + '\n\nPassword baru: ' + data.new_password);
+                bootstrap.Modal.getInstance(document.getElementById('modalResetPassword')).hide();
+                location.reload();
+            } else {
+                alert('Error: ' + data.msg);
+            }
+        })
+        .catch(error => {
+            alert('Gagal reset password: ' + error);
+        });
+    });
+});
+</script>
+{% endblock %}

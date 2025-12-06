@@ -1,0 +1,793 @@
+{% extends 'absensi_app/base.html' %}
+{% load static %}
+
+{% block title %}{% if mode %}Edit{% else %}Tambah{% endif %} Mode Jam Kerja{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== FORM WIZARD ==================== */
+    .form-wizard {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .wizard-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        color: white;
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .wizard-header h3 {
+        margin: 0 0 var(--spacing-sm) 0;
+        font-size: var(--font-xl);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .wizard-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: var(--font-sm);
+    }
+    
+    .wizard-body {
+        background: white;
+        padding: var(--spacing-xl);
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        border-top: none;
+    }
+    
+    /* ==================== STEP INDICATOR ==================== */
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-2xl);
+        padding: 0 var(--spacing-xl);
+    }
+    
+    .step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+        padding-bottom: var(--spacing-xl);
+    }
+    
+    .step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 1.25rem;
+        left: 60%;
+        width: 80%;
+        height: 2px;
+        background: var(--gray-200);
+        transition: background var(--transition-base);
+    }
+    
+    .step.active .step-number {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
+    }
+    
+    .step.completed .step-number {
+        background: var(--success);
+        color: white;
+    }
+    
+    .step.completed:not(:last-child)::after {
+        background: var(--success);
+    }
+    
+    .step-number {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background: var(--gray-200);
+        color: var(--gray-600);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: var(--font-base);
+        margin-bottom: var(--spacing-sm);
+        position: relative;
+        z-index: 1;
+        transition: all var(--transition-base);
+    }
+    
+    .step-label {
+        font-size: var(--font-sm);
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+    
+    .step.active .step-label {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .step.completed .step-label {
+        color: var(--success);
+    }
+    
+    /* ==================== SECTION CARDS ==================== */
+    .section-card {
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+        border: 1px solid var(--gray-200);
+    }
+
+    .section-card h5 {
+        margin: 0 0 var(--spacing-md) 0;
+        font-size: var(--font-lg);
+        font-weight: 600;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .section-card p.text-muted {
+        font-size: var(--font-sm);
+        margin-bottom: var(--spacing-lg);
+        color: var(--gray-600);
+    }
+    
+    /* ==================== GROUP ITEMS ==================== */
+    .group-item {
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-md);
+        transition: all var(--transition-base);
+    }
+    
+    .group-item:hover {
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        transform: translateY(-1px);
+    }
+    
+    .group-item .group-name {
+        font-size: var(--font-base);
+        font-weight: 600;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+    
+    /* ==================== GROUP SCHEDULE ==================== */
+    .group-schedule {
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .group-schedule-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        color: white;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--spacing-lg);
+        font-weight: 600;
+        font-size: var(--font-base);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+    
+    .day-row {
+        background: var(--gray-50);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .day-row .day-label {
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-sm);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-size: var(--font-sm);
+    }
+    
+    .time-input-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    .time-input-row label {
+        font-size: var(--font-xs);
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: var(--spacing-xs);
+        display: block;
+    }
+
+    /* ==================== EMPTY STATE ==================== */
+    .empty-state {
+        text-align: center;
+        padding: var(--spacing-2xl);
+        color: var(--gray-500);
+    }
+    
+    .empty-state i {
+        font-size: var(--font-3xl);
+        margin-bottom: var(--spacing-lg);
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-size: var(--font-sm);
+        font-weight: 500;
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .btn-add-group {
+        width: 100%;
+        border: 2px dashed var(--primary);
+        background: transparent;
+        color: var(--primary);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: var(--font-sm);
+        transition: all var(--transition-base);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-sm);
+    }
+    
+    .btn-add-group:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .btn-group-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+        padding-top: var(--spacing-lg);
+        border-top: 2px solid var(--gray-100);
+        margin-top: var(--spacing-xl);
+    }
+
+    .btn-secondary {
+        background: var(--gray-500);
+        color: white;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background: var(--gray-600);
+        transform: translateY(-1px);
+    }
+
+    /* ==================== FORM CONTROLS ==================== */
+    .form-control-color {
+        height: 2.5rem;
+        width: 100%;
+        border: 1px solid var(--gray-300);
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+        .wizard-header {
+            padding: var(--spacing-lg);
+        }
+
+        .wizard-body {
+            padding: var(--spacing-lg);
+        }
+
+        .step-indicator {
+            padding: 0;
+        }
+
+        .step-number {
+            width: 2rem;
+            height: 2rem;
+            font-size: var(--font-sm);
+        }
+
+        .step-label {
+            font-size: var(--font-xs);
+        }
+
+        .section-card {
+            padding: var(--spacing-lg);
+        }
+
+        .time-input-row {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-group-actions {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .wizard-header h3 {
+            font-size: var(--font-lg);
+        }
+
+        .wizard-header p {
+            font-size: var(--font-xs);
+        }
+
+        .step:not(:last-child)::after {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="form-wizard">
+        <div class="wizard-header">
+            <h3>
+                <i class="fas fa-clock"></i>
+                {% if mode %}Edit Mode: {{ mode.nama }}{% else %}Buat Mode Jam Kerja Baru{% endif %}
+            </h3>
+            <p>
+                Atur grup jam kerja yang independen dari departemen
+            </p>
+        </div>
+
+        <div class="wizard-body">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Info Dasar</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Buat Grup</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Jadwal Grup</div>
+                </div>
+            </div>
+
+            <form method="POST" id="modeForm">
+                {% csrf_token %}
+                <input type="hidden" name="schedules_json" id="schedules_json">
+
+                <!-- STEP 1: BASIC INFO -->
+                <div class="step-content" data-step="1">
+                    <div class="section-card">
+                        <h5>
+                            <i class="fas fa-info-circle"></i> 
+                            Informasi Mode
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Nama Mode <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="nama" 
+                                    value="{% if mode %}{{ mode.nama }}{% endif %}"
+                                    placeholder="Contoh: Mode Normal" required>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Kode Mode <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="kode" 
+                                    value="{% if mode %}{{ mode.kode }}{% endif %}"
+                                    placeholder="NORMAL" required 
+                                    style="text-transform: uppercase;">
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Warna</label>
+                                <input type="color" class="form-control form-control-color" 
+                                    name="warna" id="colorInput"
+                                    value="{% if mode %}{{ mode.warna }}{% else %}#3B82F6{% endif %}">
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Priority</label>
+                                <select class="form-select" name="priority">
+                                    {% for value, label in priority_choices %}
+                                    <option value="{{ value }}" 
+                                        {% if mode and mode.priority == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary btn-next">
+                            Lanjut <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: CREATE GROUPS -->
+                <div class="step-content" data-step="2" style="display: none;">
+                    <div class="section-card">
+                        <h5>
+                            <i class="fas fa-layer-group"></i> 
+                            Buat Grup Jam Kerja
+                        </h5>
+                        <p class="text-muted small">
+                            <i class="fas fa-info-circle"></i> 
+                            Buat grup-grup jam kerja yang akan tersedia di mode ini.<br>
+                            <strong>Contoh:</strong> Shift Pagi, Shift Siang, Shift Office, dll.
+                        </p>
+                        
+                        <div id="groupsContainer">
+                            <div class="empty-state">
+                                <i class="fas fa-layer-group"></i>
+                                <p>Belum ada grup jam kerja</p>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="btn btn-add-group mt-3" id="btnAddGroup">
+                            <i class="fas fa-plus"></i> 
+                            <span>Tambah Grup Baru</span>
+                        </button>
+                    </div>
+
+                    <div class="btn-group-actions">
+                        <button type="button" class="btn btn-secondary btn-prev">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </button>
+                        <button type="button" class="btn btn-primary btn-next">
+                            Lanjut <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: SCHEDULE PER GROUP -->
+                <div class="step-content" data-step="3" style="display: none;">
+                    <div class="section-card">
+                        <h5>
+                            <i class="fas fa-calendar-alt"></i> 
+                            Jadwal Per Grup
+                        </h5>
+                        <p class="text-muted small">
+                            <i class="fas fa-info-circle"></i> 
+                            Atur jadwal untuk setiap grup di 7 hari. Kosongkan jika hari libur.
+                        </p>
+
+                        <div id="scheduleContainer">
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-times"></i>
+                                <p>Loading jadwal...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btn-group-actions">
+                        <button type="button" class="btn btn-secondary btn-prev">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </button>
+                        <button type="submit" class="btn btn-success" id="btnSubmit">
+                            <i class="fas fa-save"></i> Simpan Mode
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("🚀 Form Mode Jam Kerja - EDIT/CREATE MODE");
+    
+    let currentStep = 1;
+    const hariNames = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+    
+    // ✅ STORE GROUPS
+    let groups = [];
+    
+    // ✅ CRITICAL: Load existing data from backend
+    let scheduleRaw = '{{ schedules_json|default:""|escapejs }}';
+    console.log("📦 Raw schedules_json length:", scheduleRaw.length);
+    
+    if (scheduleRaw !== '' && scheduleRaw !== '{}') {
+        try {
+            const existingData = JSON.parse(scheduleRaw);
+            console.log("✅ Parsed existing data:", existingData);
+            
+            // ✅ Convert to groups array
+            Object.keys(existingData).forEach(groupId => {
+                const groupData = existingData[groupId];
+                groups.push({
+                    id: groupId,
+                    name: groupData.name || `Group ${groupId}`,
+                    days: groupData.days || {}
+                });
+            });
+            
+            console.log(`✅ Loaded ${groups.length} existing groups:`, groups);
+        } catch (e) {
+            console.error("❌ Failed to parse existing data:", e);
+        }
+    } else {
+        console.log("ℹ️ No existing data - creating new mode");
+    }
+    
+    showStep(1);
+    
+    // ==================== NAVIGATION ====================
+    function showStep(stepNumber) {
+        console.log(`📍 Showing step ${stepNumber}`);
+        
+        document.querySelectorAll(".step-content").forEach(el => el.style.display = "none");
+        const page = document.querySelector(`.step-content[data-step="${stepNumber}"]`);
+        if (page) page.style.display = "block";
+
+        document.querySelectorAll(".step").forEach((step, idx) => {
+            const num = idx + 1;
+            step.classList.remove("active", "completed");
+            if (num < stepNumber) step.classList.add("completed");
+            if (num === stepNumber) step.classList.add("active");
+        });
+
+        currentStep = stepNumber;
+        
+        // Trigger actions
+        if (stepNumber === 2) {
+            renderGroups();
+        }
+        if (stepNumber === 3) {
+            generateSchedules();
+        }
+    }
+
+    document.querySelectorAll(".btn-next").forEach(btn => {
+        btn.addEventListener("click", function () {
+            if (validateCurrentStep()) {
+                showStep(currentStep + 1);
+            }
+        });
+    });
+
+    document.querySelectorAll(".btn-prev").forEach(btn => {
+        btn.addEventListener("click", function () {
+            if (currentStep > 1) showStep(currentStep - 1);
+        });
+    });
+
+    // ==================== VALIDATION ====================
+    function validateCurrentStep() {
+        if (currentStep === 1) {
+            const nama = document.querySelector('input[name="nama"]').value.trim();
+            const kode = document.querySelector('input[name="kode"]').value.trim();
+            if (!nama || !kode) {
+                alert("❌ Nama dan Kode wajib diisi!");
+                return false;
+            }
+            return true;
+        }
+
+        if (currentStep === 2) {
+            if (groups.length === 0) {
+                alert("❌ Minimal buat 1 grup jam kerja!");
+                return false;
+            }
+            return true;
+        }
+
+        return true;
+    }
+
+    // ==================== ADD/DELETE GROUPS ====================
+    document.getElementById('btnAddGroup').addEventListener('click', function() {
+        const groupName = prompt('Nama Grup Jam Kerja:\n\n(Contoh: Shift Pagi, Shift Siang)');
+        
+        if (groupName && groupName.trim()) {
+            groups.push({
+                id: Date.now().toString(),
+                name: groupName.trim(),
+                days: {}
+            });
+            
+            console.log(`➕ Group added: ${groupName}`);
+            renderGroups();
+        }
+    });
+
+    function renderGroups() {
+        const container = document.getElementById('groupsContainer');
+        
+        if (groups.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-layer-group"></i>
+                    <p>Belum ada grup jam kerja</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = groups.map((group, index) => `
+            <div class="group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="group-name">
+                        <i class="fas fa-briefcase"></i> ${group.name}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger" 
+                        onclick="deleteGroup(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        console.log(`✅ Rendered ${groups.length} groups`);
+    }
+
+    window.deleteGroup = function(index) {
+        if (confirm(`Hapus grup "${groups[index].name}"?`)) {
+            groups.splice(index, 1);
+            renderGroups();
+            console.log(`🗑️ Group deleted, remaining: ${groups.length}`);
+        }
+    };
+
+    // ==================== GENERATE SCHEDULES ====================
+    function generateSchedules() {
+        const container = document.getElementById('scheduleContainer');
+        
+        if (groups.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Tidak ada grup. Kembali ke Step 2.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = groups.map(group => {
+            return `
+            <div class="group-schedule">
+                <div class="group-schedule-header">
+                    <i class="fas fa-briefcase"></i> 
+                    <span>${group.name}</span>
+                </div>
+                
+                ${hariNames.map((hari, hariIdx) => {
+                    // ✅ CRITICAL: Get existing data for this day
+                    const dayData = group.days && group.days[hariIdx] && group.days[hariIdx][0] 
+                        ? group.days[hariIdx][0] 
+                        : {};
+                    
+                    return `
+                    <div class="day-row">
+                        <span class="day-label">
+                            <i class="fas fa-calendar-day"></i> ${hari}
+                        </span>
+                        
+                        <div class="time-input-row">
+                            <div>
+                                <label>Jam Masuk</label>
+                                <input type="time" class="form-control" 
+                                    data-group="${group.id}" 
+                                    data-day="${hariIdx}" 
+                                    data-field="masuk"
+                                    value="${dayData.masuk || ''}">
+                            </div>
+                            <div>
+                                <label>Jam Keluar</label>
+                                <input type="time" class="form-control" 
+                                    data-group="${group.id}" 
+                                    data-day="${hariIdx}" 
+                                    data-field="keluar"
+                                    value="${dayData.keluar || ''}">
+                            </div>
+                            <div>
+                                <label>Istirahat Keluar</label>
+                                <input type="time" class="form-control" 
+                                    data-group="${group.id}" 
+                                    data-day="${hariIdx}" 
+                                    data-field="break_out"
+                                    value="${dayData.break_out || ''}">
+                            </div>
+                            <div>
+                                <label>Istirahat Masuk</label>
+                                <input type="time" class="form-control" 
+                                    data-group="${group.id}" 
+                                    data-day="${hariIdx}" 
+                                    data-field="break_in"
+                                    value="${dayData.break_in || ''}">
+                            </div>
+                        </div>
+                    </div>
+                `}).join('')}
+            </div>
+        `}).join('');
+        
+        console.log("✅ Schedules generated with existing data");
+    }
+
+    // ==================== FORM SUBMIT ====================
+    document.getElementById("modeForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        
+        console.log("🔄 Form submitting...");
+        
+        let result = {};
+        let totalSchedules = 0;
+        
+        // Collect data from all inputs
+        document.querySelectorAll('input[data-group]').forEach(input => {
+            const groupId = input.dataset.group;
+            const day = input.dataset.day;
+            const field = input.dataset.field;
+            const value = input.value;
+            
+            if (!result[groupId]) {
+                const group = groups.find(g => g.id === groupId);
+                result[groupId] = {
+                    name: group ? group.name : 'Unknown',
+                    days: {}
+                };
+            }
+            
+            if (!result[groupId].days[day]) {
+                result[groupId].days[day] = [{}];
+            }
+            
+            result[groupId].days[day][0][field] = value;
+            
+            // Count complete schedules
+            if (field === 'keluar' && value && result[groupId].days[day][0].masuk) {
+                totalSchedules++;
+            }
+        });
+        
+        const jsonValue = JSON.stringify(result);
+        document.getElementById("schedules_json").value = jsonValue;
+        
+        console.log("💾 Total complete schedules:", totalSchedules);
+        console.log("💾 JSON length:", jsonValue.length);
+        
+        if (totalSchedules === 0) {
+            alert("❌ Belum ada jadwal lengkap! Isi minimal jam masuk dan keluar untuk satu hari.");
+            return false;
+        }
+        
+        // Show loading state
+        const btnSubmit = document.getElementById('btnSubmit');
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+        
+        console.log("✅ Submitting form...");
+        this.submit();
+    });
+    
+    console.log("✅ Script initialized successfully");
+});
+</script>
+{% endblock %}

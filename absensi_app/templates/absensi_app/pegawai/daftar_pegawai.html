@@ -1,0 +1,1800 @@
+{% extends 'absensi_app/base.html' %}
+{% load static %}
+
+{% block title %}Daftar Pegawai{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<style>
+    :root {
+        --primary: #3b82f6;
+        --primary-dark: #2563eb;
+        --primary-light: #dbeafe;
+        --success: #10b981;
+        --success-dark: #059669;
+        --warning: #f59e0b;
+        --warning-dark: #d97706;
+        --danger: #ef4444;
+        --danger-dark: #dc2626;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        --radius-sm: 0.375rem;
+        --radius-md: 0.5rem;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --spacing-xs: 0.25rem;
+        --spacing-sm: 0.5rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+        --spacing-2xl: 3rem;
+        --font-size-xs: 0.75rem;
+        --font-size-sm: 0.875rem;
+        --font-size-base: 1rem;
+        --font-size-lg: 1.125rem;
+    }
+
+    /* STATS GRID */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: var(--radius-md);
+        padding: var(--spacing-xl);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        text-decoration: none !important;
+        color: white !important;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+        min-height: 140px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-card.active {
+        border: 2px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .stat-card.active::after {
+        content: '✓';
+        position: absolute;
+        top: var(--spacing-lg);
+        right: var(--spacing-lg);
+        font-size: 1.75rem;
+        font-weight: bold;
+        background: rgba(255, 255, 255, 0.25);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .stat-card-icon {
+        font-size: 2.5rem;
+        opacity: 0.15;
+        position: absolute;
+        right: var(--spacing-lg);
+        top: var(--spacing-lg);
+    }
+
+    .stat-card-label {
+        font-size: var(--font-size-xs);
+        margin-bottom: var(--spacing-sm);
+        font-weight: 600;
+        text-transform: uppercase;
+        opacity: 0.9;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-card-number {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .stat-card.bg-success {
+        background: linear-gradient(135deg, var(--success-dark) 0%, var(--success) 100%);
+    }
+
+    .stat-card.bg-warning {
+        background: linear-gradient(135deg, var(--warning-dark) 0%, var(--warning) 100%);
+    }
+
+    .stat-card.bg-secondary {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    }
+
+    .stat-card.bg-secondary .stat-card-label,
+    .stat-card.bg-secondary .stat-card-number {
+        color: white !important;
+        opacity: 1 !important;
+    }
+
+    /* FILTER SECTION */
+    .filter-section {
+        background: white;
+        border-radius: var(--radius-md);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: var(--spacing-xl);
+        border: 1px solid var(--gray-200);
+    }
+
+    .filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 2px solid var(--gray-100);
+    }
+
+    .filter-title {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin: 0;
+    }
+
+    .filter-title i {
+        color: var(--primary);
+    }
+
+    /* COMPACT FILTERS */
+    .compact-filters {
+        display: grid;
+        grid-template-columns: 1fr 1fr 2fr auto auto;
+        gap: var(--spacing-md);
+        align-items: end;
+        margin-bottom: 0;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .filter-label {
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        color: var(--gray-700);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        margin-bottom: 2px;
+    }
+
+    .filter-label i {
+        color: var(--primary);
+    }
+
+    .filter-select,
+    .form-control-compact {
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: 0.5rem 0.75rem;
+        font-size: var(--font-size-sm);
+        transition: all 0.2s;
+        background: white;
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--gray-700);
+        height: 40px;
+        font-family: 'Inter', system-ui, sans-serif;
+        width: 100%;
+    }
+
+    .filter-select:focus,
+    .form-control-compact:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .btn-filter-action {
+        height: 40px;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: var(--font-size-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-xs);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        padding: 0.5rem 1rem;
+    }
+
+    .btn-filter-action.btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-filter-action.btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, #1d4ed8 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-filter-action.btn-secondary {
+        background: white;
+        color: var(--gray-700);
+        border: 2px solid var(--gray-300);
+    }
+
+    .btn-filter-action.btn-secondary:hover {
+        background: var(--gray-50);
+        border-color: var(--gray-400);
+        transform: translateY(-2px);
+    }
+
+    .btn-filter-action.btn-secondary.active {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border-color: var(--primary-dark);
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    }
+
+    /* BULK ACTIONS */
+    .bulk-actions-bar {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #fbbf24;
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg) var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .bulk-actions-bar.show {
+        display: flex;
+    }
+
+    .bulk-info {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        color: #92400e;
+    }
+
+    .bulk-count {
+        background: white;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: var(--font-size-lg);
+        color: var(--warning-dark);
+    }
+
+    .bulk-actions {
+        display: flex;
+        gap: var(--spacing-md);
+        flex-wrap: wrap;
+    }
+
+    .btn-bulk {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        color: white;
+    }
+
+    .btn-bulk-jam-kerja {
+        background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-bulk-jam-kerja:hover {
+        background: linear-gradient(135deg, var(--warning-dark) 0%, #b45309 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-bulk-activate {
+        background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-bulk-activate:hover {
+        background: linear-gradient(135deg, var(--success-dark) 0%, #047857 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-bulk-deactivate {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+    }
+
+    .btn-bulk-deactivate:hover {
+        background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-bulk-delete {
+        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-bulk-delete:hover {
+        background: linear-gradient(135deg, var(--danger-dark) 0%, #991b1b 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* SYNC BUTTON SECTION */
+    .sync-button-section {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #fbbf24;
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg) var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .sync-button-section h6 {
+        font-size: var(--font-size-base);
+        font-weight: 700;
+        color: #92400e;
+        margin: 0 0 var(--spacing-md) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .btn-sync-fingerprint {
+        background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+        color: white;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        border-radius: var(--radius-sm);
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-sync-fingerprint:hover {
+        background: linear-gradient(135deg, var(--warning-dark) 0%, #b45309 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .sync-hint {
+        margin-top: var(--spacing-md);
+        font-size: var(--font-size-xs);
+        color: #92400e;
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        line-height: 1.5;
+    }
+
+    /* TABLE SECTION */
+    .table-section {
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        font-size: var(--font-size-sm);
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--gray-100);
+        white-space: nowrap;
+    }
+
+    .table th {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        font-weight: 600;
+        color: white;
+        text-align: left;
+        font-size: var(--font-size-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background: var(--gray-50);
+    }
+
+    .table tbody tr.selected {
+        background: linear-gradient(to right, #dbeafe 0%, #bfdbfe 100%) !important;
+        border-left: 4px solid var(--primary);
+    }
+
+    /* CHECKBOX */
+    .checkbox-cell {
+        width: 50px;
+        text-align: center;
+        padding: 0.75rem var(--spacing-sm) !important;
+    }
+
+    input[type="checkbox"].custom-checkbox {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--gray-300);
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+        display: none;
+    }
+
+    body.selection-mode input[type="checkbox"].custom-checkbox {
+        display: inline-block;
+    }
+
+    input[type="checkbox"].custom-checkbox:hover {
+        border-color: var(--primary);
+        transform: scale(1.05);
+    }
+
+    input[type="checkbox"].custom-checkbox:checked {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-color: var(--primary-dark);
+    }
+
+    input[type="checkbox"].custom-checkbox:checked::after {
+        content: '✓';
+        position: absolute;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* BADGES */
+    .badge-userid {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: var(--font-size-sm);
+        display: inline-block;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        letter-spacing: 0.5px;
+    }
+
+    .badge {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: var(--font-size-xs);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        white-space: nowrap;
+    }
+
+    .badge.bg-light {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        color: var(--gray-800);
+    }
+
+    /* BUTTONS */
+    .btn-action {
+        padding: 0.5rem 0.875rem;
+        font-size: var(--font-size-xs);
+        border-radius: var(--radius-sm);
+        white-space: nowrap;
+        box-shadow: var(--shadow-sm);
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-action.btn-info {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    }
+
+    .btn-action.btn-info:hover {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    }
+
+    .btn-action.btn-warning {
+        background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+    }
+
+    .btn-action.btn-warning:hover {
+        background: linear-gradient(135deg, var(--warning-dark) 0%, #b45309 100%);
+    }
+
+    .btn-action.btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+
+    .btn-action.btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, #1d4ed8 100%);
+    }
+
+    /* TOGGLE STATUS BUTTON */
+    .btn-toggle-status {
+        padding: 0.5rem 0.875rem;
+        font-size: var(--font-size-xs);
+        border-radius: var(--radius-sm);
+        white-space: nowrap;
+        box-shadow: var(--shadow-sm);
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        color: white;
+    }
+
+    .btn-toggle-status:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-toggle-status.btn-success-toggle {
+        background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-toggle-status.btn-success-toggle:hover {
+        background: linear-gradient(135deg, var(--success-dark) 0%, #047857 100%);
+    }
+
+    .btn-toggle-status.btn-danger-toggle {
+        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-toggle-status.btn-danger-toggle:hover {
+        background: linear-gradient(135deg, var(--danger-dark) 0%, #991b1b 100%);
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+        text-align: center;
+        padding: var(--spacing-2xl);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--gray-300);
+        margin-bottom: var(--spacing-lg);
+        display: block;
+    }
+
+    .empty-state h6 {
+        font-size: var(--font-size-base);
+        color: var(--gray-500);
+        margin-bottom: var(--spacing-sm);
+        font-weight: 600;
+    }
+
+    .empty-state p {
+        color: var(--gray-400);
+        font-size: var(--font-size-sm);
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    /* ========================================
+       MODAL MODE ASSIGNMENT STYLES
+    ======================================== */
+    .mode-accordion-item {
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    .mode-accordion-item.selected {
+        border-color: var(--primary);
+        background: rgba(59, 130, 246, 0.02);
+    }
+
+    .mode-accordion-header {
+        padding: var(--spacing-lg);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--gray-50);
+        transition: all 0.2s;
+    }
+
+    .mode-accordion-header:hover {
+        background: var(--gray-100);
+    }
+
+    .mode-accordion-item.selected .mode-accordion-header {
+        background: rgba(59, 130, 246, 0.05);
+    }
+
+    .mode-accordion-left {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        flex: 1;
+    }
+
+    .mode-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .mode-info h6 {
+        margin: 0 0 4px 0;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .mode-info small {
+        color: var(--gray-600);
+    }
+
+    .mode-status-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .mode-status-badge.pending {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+    }
+
+    .mode-status-badge.completed {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .mode-chevron {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--gray-200);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+    .mode-accordion-item.active .mode-chevron {
+        transform: rotate(180deg);
+        background: var(--primary);
+        color: white;
+    }
+
+    .mode-accordion-body {
+        display: none;
+        padding: var(--spacing-xl);
+        border-top: 2px solid var(--gray-100);
+    }
+
+    .mode-accordion-item.active .mode-accordion-body {
+        display: block;
+    }
+
+    /* GROUP SELECTION GRID */
+    .group-selection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    .group-option-card {
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-lg);
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    .group-option-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .group-option-card.selected {
+        border-color: var(--primary);
+        background: rgba(59, 130, 246, 0.05);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .group-option-card.selected::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), #60a5fa);
+    }
+
+    .group-check-box {
+        width: 24px;
+        height: 24px;
+        border: 2px solid var(--gray-300);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        float: right;
+    }
+
+    .group-option-card.selected .group-check-box {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .group-option-card.selected .group-check-box i {
+        display: block;
+    }
+
+    .group-check-box i {
+        display: none;
+        font-size: 0.75rem;
+    }
+
+    .group-name-text {
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: var(--spacing-sm);
+        padding-right: 30px;
+    }
+
+    .group-time-display {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        color: var(--gray-900);
+        background: var(--gray-50);
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .group-option-card.selected .group-time-display {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--primary);
+    }
+
+    .group-meta-info {
+        display: flex;
+        gap: var(--spacing-sm);
+        flex-wrap: wrap;
+    }
+
+    .group-meta-tag {
+        font-size: 0.75rem;
+        color: var(--gray-600);
+        background: var(--gray-100);
+        padding: 4px 8px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1200px) {
+        .compact-filters {
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+        }
+        
+        .filter-group:nth-child(3) {
+            grid-column: 1 / -1;
+        }
+        
+        .filter-group:nth-child(4),
+        .filter-group:nth-child(5) {
+            grid-column: span 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+.stats-grid {
+grid-template-columns: 1fr;
+}
+    .compact-filters {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-group {
+        grid-column: span 1 !important;
+    }
+
+    .bulk-actions-bar {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .bulk-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .btn-bulk {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .table {
+        min-width: 1000px;
+    }
+
+    .filter-section {
+        padding: var(--spacing-lg);
+    }
+
+    .group-selection-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .filter-section {
+        padding: var(--spacing-md);
+    }
+
+    .table-section {
+        border-radius: var(--radius-sm);
+    }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="stats-grid">
+        <a href="?status_filter=active" class="stat-card bg-success {% if status_filter == 'active' %}active{% endif %}">
+            <i class="fas fa-user-check stat-card-icon"></i>
+            <div>
+                <div class="stat-card-label"><i class="fas fa-check-circle"></i> Pegawai Aktif</div>
+                <div class="stat-card-number">{{ total_active }}</div>
+            </div>
+        </a>
+    <a href="?status_filter=pending" class="stat-card bg-warning {% if status_filter == 'pending' %}active{% endif %}">
+        <i class="fas fa-clock stat-card-icon"></i>
+        <div>
+            <div class="stat-card-label"><i class="fas fa-hourglass-half"></i> Menunggu Registrasi</div>
+            <div class="stat-card-number">{{ total_pending }}</div>
+        </div>
+    </a>
+
+    <a href="?status_filter=inactive" class="stat-card bg-secondary {% if status_filter == 'inactive' %}active{% endif %}">
+        <i class="fas fa-user-lock stat-card-icon"></i>
+        <div>
+            <div class="stat-card-label"><i class="fas fa-ban"></i> Pegawai Nonaktif</div>
+            <div class="stat-card-number">{{ total_inactive }}</div>
+        </div>
+    </a>
+</div>
+
+<div class="filter-section">
+    <div class="filter-header">
+        <h5 class="filter-title"><i class="fas fa-filter"></i> Filter & Pencarian Pegawai</h5>
+    </div>
+
+    <form method="get" id="searchForm">
+        <input type="hidden" name="status_filter" value="{{ status_filter }}" id="statusFilterInput">
+        
+        <div class="compact-filters">
+            <div class="filter-group">
+                <label class="filter-label"><i class="fas fa-building"></i> Departemen</label>
+                <select class="filter-select" name="departemen" id="filterDepartemen">
+                    <option value="">Semua Departemen</option>
+                    {% for dept in departemen_list %}
+                    <option value="{{ dept.nama }}" {% if request.GET.departemen == dept.nama %}selected{% endif %}>{{ dept.nama }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label"><i class="fas fa-briefcase"></i> Jabatan</label>
+                <select class="filter-select" name="jabatan" id="filterJabatan">
+                    <option value="">Semua Jabatan</option>
+                    {% for jab in jabatan_list %}
+                    <option value="{{ jab.nama }}" {% if request.GET.jabatan == jab.nama %}selected{% endif %}>{{ jab.nama }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label"><i class="fas fa-search"></i> Pencarian</label>
+                <input type="text" name="search_query" class="form-control-compact" 
+                       placeholder="Cari User ID, Nama, Jabatan, atau Departemen..."
+                       value="{{ request.GET.search_query }}" id="searchInput">
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label" style="opacity: 0;">Cari</label>
+                <button type="submit" class="btn-filter-action btn-primary">
+                    <i class="fas fa-search"></i> Cari
+                </button>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label" style="opacity: 0;">Pilih</label>
+                <button type="button" class="btn-filter-action btn-secondary" id="btnToggleSelection">
+                    <i class="fas fa-check-square"></i> Pilih
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="bulk-actions-bar" id="bulkActionsBar">
+    <div class="bulk-info">
+        <i class="fas fa-check-square"></i>
+        <div>
+            <strong>Dipilih:</strong>
+            <span class="bulk-count" id="selectedCount">0</span>
+            <span>pegawai</span>
+        </div>
+    </div>
+    <div class="bulk-actions">
+        {% if status_filter == 'active' %}
+            <button type="button" class="btn-bulk btn-bulk-deactivate" id="btnBulkDeactivate">
+                <i class="fas fa-ban"></i> Non-aktifkan
+            </button>
+        {% elif status_filter == 'inactive' %}
+            <button type="button" class="btn-bulk btn-bulk-activate" id="btnBulkActivate">
+                <i class="fas fa-check-circle"></i> Aktifkan
+            </button>
+        {% endif %}
+        <button type="button" class="btn-bulk btn-bulk-jam-kerja" id="btnBulkAssignMode" data-bs-toggle="modal" data-bs-target="#modalBulkAssignMode">
+            <i class="fas fa-clock"></i> Assign Mode
+        </button>
+        <button type="button" class="btn-bulk btn-bulk-delete" id="btnBulkDelete">
+            <i class="fas fa-trash"></i> Hapus Permanen
+        </button>
+    </div>
+</div>
+
+{% if status_filter == 'pending' and total_pending > 0 %}
+<div class="sync-button-section">
+    <h6><i class="fas fa-fingerprint"></i> Sinkronisasi Fingerprint</h6>
+    <button type="button" class="btn-sync-fingerprint" id="btnSyncFingerprint">
+        <i class="fas fa-sync"></i> Cek & Sync Semua Fingerprint dari Mesin
+    </button>
+    <div class="sync-hint">
+        <i class="fas fa-info-circle"></i>
+        <span>Klik tombol ini setelah pegawai selesai scan sidik jari di mesin fingerprint. 
+        Sistem akan otomatis mengambil data fingerprint dan mengaktifkan pegawai.</span>
+    </div>
+</div>
+{% endif %}
+
+<div class="table-section">
+    <div class="table-wrapper">
+        <table class="table table-hover" id="pegawaiTable">
+            <thead>
+                <tr>
+                    <th class="checkbox-cell">
+                        <input type="checkbox" class="custom-checkbox" id="selectAll" title="Pilih Semua">
+                    </th>
+                    <th style="width: 5%;" class="text-center">No</th>
+                    <th style="width: 12%;" class="text-center">User ID</th>
+                    <th style="width: 25%;">Nama Lengkap</th>
+                    <th style="width: 15%;" class="text-center">Departemen</th>
+                    <th style="width: 15%;" class="text-center">Jabatan</th>
+                    <th style="width: 13%;" class="text-center">Status</th>
+                    <th style="width: 15%;" class="text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if pegawai_list %}
+                    {% for pegawai in pegawai_list %}
+                    <tr data-pegawai-id="{{ pegawai.id }}" 
+                        data-departemen="{{ pegawai.departemen.nama|default:'' }}"
+                        data-jabatan="{{ pegawai.jabatan.nama|default:'' }}">
+                        
+                        <!-- ✅ Kolom 1: Checkbox -->
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="custom-checkbox row-checkbox" value="{{ pegawai.id }}">
+                        </td>
+                        
+                        <!-- ✅ Kolom 2: No -->
+                        <td class="text-center">
+                            <strong class="text-muted">{{ forloop.counter }}</strong>
+                        </td>
+                        
+                        <!-- ✅ Kolom 3: User ID -->
+                        <td class="text-center">
+                            <span class="badge-userid">{{ pegawai.userid }}</span>
+                        </td>
+                        
+                        <!-- ✅ Kolom 4: Nama -->
+                        <td>
+                            <strong>{{ pegawai.nama_lengkap }}</strong>
+                        </td>
+                        
+                        <!-- ✅ Kolom 5: Departemen -->
+                        <td class="text-center">
+                            {% if pegawai.departemen %}
+                                <span class="badge bg-light">{{ pegawai.departemen.nama }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- ✅ Kolom 6: Jabatan -->
+                        <td class="text-center">
+                            {% if pegawai.jabatan %}
+                                <span class="badge bg-light">{{ pegawai.jabatan.nama }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- ✅ Kolom 7: Status -->
+                        <td class="text-center">
+                            {% if pegawai.is_active %}
+                                <form method="post" action="{% url 'toggle_pegawai_status' pegawai.pk %}" 
+                                      style="display:inline;" 
+                                      onsubmit="return confirm('Yakin ingin menonaktifkan pegawai ini?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-toggle-status btn-success-toggle">
+                                        <i class="fas fa-check-circle"></i> AKTIF
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form method="post" action="{% url 'toggle_pegawai_status' pegawai.pk %}" 
+                                      style="display:inline;" 
+                                      onsubmit="return confirm('Yakin ingin mengaktifkan kembali pegawai ini?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-toggle-status btn-danger-toggle">
+                                        <i class="fas fa-times-circle"></i> NONAKTIF
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- ✅ Kolom 8: Aksi -->
+                        <td class="text-center">
+                            <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                <a href="{% url 'Pegawai_detail' pk=pegawai.pk %}" class="btn-action btn-info">
+                                    <i class="fas fa-eye"></i> Detail
+                                </a>
+                                
+                                {% if not pegawai.uid_mesin or pegawai.uid_mesin == 0 %}
+                                    <a href="{% url 'sinkron_ke_mesin' %}" class="btn-action btn-warning">
+                                        <i class="fas fa-upload"></i> Sync ke Mesin
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'Pegawai_edit' pk=pegawai.pk %}" class="btn-action btn-primary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <!-- ✅ Empty State: HARUS COLSPAN 8! -->
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <h6>Tidak Ada Data Pegawai</h6>
+                                <p>
+                                    {% if status_filter == 'pending' %}
+                                        Tidak ada pegawai yang menunggu registrasi fingerprint.
+                                    {% elif status_filter == 'inactive' %}
+                                        Tidak ada pegawai nonaktif.
+                                    {% else %}
+                                        Tidak ada pegawai aktif yang terdaftar.
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Bulk Assign Mode Jam Kerja -->
+<div class="modal fade" id="modalBulkAssignMode" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-clock"></i> Assign Mode Jam Kerja - Multiple Pegawai
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+            <!-- SELECTED PEGAWAI COUNT -->
+            <div class="alert alert-success mb-4">
+                <strong>📋 Pegawai Terpilih:</strong> 
+                <span id="selectedCountModalMode" class="badge bg-success fs-6">0</span>
+            </div>
+
+            <!-- LOADING STATE -->
+            <div id="modeLoadingState" class="text-center py-5" style="display: none;">
+                <i class="fas fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+                <p class="text-muted">Memuat mode jam kerja...</p>
+            </div>
+
+            <!-- MODE ACCORDION CONTAINER -->
+            <div id="modeAccordionContainer"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <i class="fas fa-times"></i> Batal
+            </button>
+            <button type="button" class="btn btn-primary btn-lg" id="btnConfirmAssignMode">
+                <i class="fas fa-check"></i> Assign Semua Mode
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script>
+$(document).ready(function() {
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    const table = $('#pegawaiTable').DataTable({
+    language: {
+        "oPaginate": {
+            "sFirst": "Pertama",
+            "sPrevious": "Sebelumnya",
+            "sNext": "Selanjutnya",
+            "sLast": "Terakhir"
+        },
+        "sEmptyTable": "Tidak ada data",
+        "sZeroRecords": "Tidak ada data yang cocok"
+    },
+    pageLength: 25,
+    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
+    order: [[2, 'asc']], // ✅ Sort by User ID (kolom ke-3, index 2)
+    responsive: true,
+    searching: false,
+    lengthChange: false,
+    info: false,
+    columnDefs: [
+        { orderable: false, targets: [0, 6, 7] }, // ✅ Checkbox, Status, Aksi tidak sortable
+        { className: "text-center", targets: [0, 1, 2, 4, 5, 6, 7] },
+        { className: "text-left", targets: [3] }
+    ]
+});
+    let selectedIds = [];
+    let selectionMode = false;
+    let allModesData = [];
+    let modeAssignments = {}; // {mode_id: {group_id: X, group_nama: Y}}
+    
+    // ========================================
+    // SELECTION MODE
+    // ========================================
+    $('#btnToggleSelection').on('click', function() {
+        selectionMode = !selectionMode;
+        
+        if (selectionMode) {
+            $('body').addClass('selection-mode');
+            $(this).addClass('active');
+            $(this).html('<i class="fas fa-times"></i> Batal');
+        } else {
+            $('body').removeClass('selection-mode');
+            $(this).removeClass('active');
+            $(this).html('<i class="fas fa-check-square"></i> Pilih');
+            
+            $('.row-checkbox').prop('checked', false);
+            $('#selectAll').prop('checked', false);
+            $('tr.selected').removeClass('selected');
+            selectedIds = [];
+            updateBulkBar();
+        }
+    });
+
+    // Select All
+    $('#selectAll').on('change', function() {
+        if (!selectionMode) {
+            $(this).prop('checked', false);
+            return;
+        }
+        
+        const isChecked = $(this).prop('checked');
+        table.rows({ page: 'current', search: 'applied' }).nodes().to$().find('.row-checkbox').prop('checked', isChecked);
+        
+        selectedIds = [];
+        if (isChecked) {
+             table.rows({ page: 'current', search: 'applied' }).nodes().to$().find('.row-checkbox:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+             $('tr').has('.row-checkbox:checked').addClass('selected');
+        } else {
+             $('tr').removeClass('selected');
+        }
+        
+        updateBulkBar();
+    });
+
+    // Individual Checkbox
+    $(document).on('change', '.row-checkbox', function() {
+        if (!selectionMode) {
+            $(this).prop('checked', false);
+            return;
+        }
+        
+        const id = $(this).val();
+        const row = $(this).closest('tr');
+        
+        if ($(this).prop('checked')) {
+            if (!selectedIds.includes(id)) selectedIds.push(id);
+            row.addClass('selected');
+        } else {
+            selectedIds = selectedIds.filter(item => item !== id);
+            row.removeClass('selected');
+            $('#selectAll').prop('checked', false);
+        }
+        
+        updateBulkBar();
+    });
+
+    function updateBulkBar() {
+        selectedIds = [...new Set(selectedIds)];
+        
+        $('#selectedCount').text(selectedIds.length);
+        $('#selectedCountModalMode').text(selectedIds.length);
+        
+        if (selectedIds.length > 0) {
+            $('#bulkActionsBar').addClass('show');
+        } else {
+            $('#bulkActionsBar').removeClass('show');
+            $('#selectAll').prop('checked', false);
+        }
+    }
+
+    // ========================================
+    // BULK ACTIONS
+    // ========================================
+    $('#btnBulkActivate, #btnBulkDeactivate, #btnBulkDelete').on('click', function() {
+        if (!selectedIds.length) {
+            Swal.fire('Perhatian!', 'Pilih minimal 1 pegawai untuk aksi massal.', 'warning');
+            return;
+        }
+
+        const actionType = $(this).attr('id');
+        let url, title, text, icon, confirmText, confirmColor;
+
+        if (actionType === 'btnBulkActivate') {
+            url = "{% url 'bulk_activate_pegawai' %}";
+            title = 'Aktifkan Pegawai?';
+            text = `${selectedIds.length} pegawai akan diaktifkan kembali.`;
+            icon = 'question';
+            confirmText = 'Ya, Aktifkan';
+            confirmColor = '#10b981';
+        } else if (actionType === 'btnBulkDeactivate') {
+            url = "{% url 'bulk_deactivate_pegawai' %}";
+            title = 'Non-aktifkan Pegawai?';
+            text = `${selectedIds.length} pegawai akan di-non-aktifkan.`;
+            icon = 'warning';
+            confirmText = 'Ya, Non-aktifkan';
+            confirmColor = '#6b7280';
+        } else if (actionType === 'btnBulkDelete') {
+            url = "{% url 'bulk_delete_pegawai' %}";
+            title = 'Hapus Permanen?';
+            text = `${selectedIds.length} pegawai akan dihapus PERMANEN, termasuk semua data absensi terkait! Data tidak bisa dikembalikan!`;
+            icon = 'error';
+            confirmText = 'Ya, Hapus Permanen';
+            confirmColor = '#ef4444';
+        }
+
+        Swal.fire({
+            title: title,
+            html: text,
+            icon: icon,
+            showCancelButton: true,
+            confirmButtonText: confirmText,
+            cancelButtonText: 'Batal',
+            confirmButtonColor: confirmColor,
+            reverseButtons: true
+        }).then(result => {
+            if (result.isConfirmed) {
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({ pegawai_ids: selectedIds.join(',') })
+                }).then(r => r.json()).then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire('Berhasil!', data.msg, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Gagal!', data.msg, 'error');
+                    }
+                }).catch(() => Swal.fire('Error!', 'Terjadi kesalahan pada server', 'error'));
+            }
+        });
+    });
+
+    // ========================================
+    // BULK ASSIGN MODE - MODAL TRIGGER
+    // ========================================
+    $('#btnBulkAssignMode').on('click', function() {
+        if (!selectedIds.length) {
+            Swal.fire('Perhatian!', 'Pilih minimal 1 pegawai untuk assign mode!', 'warning');
+            return;
+        }
+
+        // Reset state
+        modeAssignments = {};
+        allModesData = [];
+        
+        // Load modes
+        loadModesForBulkAssign();
+    });
+
+    // ========================================
+    // LOAD MODES FOR BULK ASSIGN
+    // ========================================
+    function loadModesForBulkAssign() {
+        $('#modeLoadingState').show();
+        $('#modeAccordionContainer').html('');
+
+        fetch('/api/pegawai/get-modes/')
+            .then(response => response.json())
+            .then(data => {
+                $('#modeLoadingState').hide();
+                
+                if (data.status === 'success' && data.modes.length > 0) {
+                    allModesData = data.modes;
+                    renderModeAccordion(data.modes);
+                } else {
+                    $('#modeAccordionContainer').html(`
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Tidak ada mode tersedia
+                        </div>
+                    `);
+                }
+            })
+            .catch(error => {
+                $('#modeLoadingState').hide();
+                console.error('Error:', error);
+                $('#modeAccordionContainer').html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Gagal memuat mode
+                    </div>
+                `);
+            });
+    }
+
+    // ========================================
+    // RENDER MODE ACCORDION
+    // ========================================
+    function renderModeAccordion(modes) {
+        let html = '';
+
+        modes.forEach(mode => {
+            const isCompleted = modeAssignments[mode.id] !== undefined;
+            const badgeHtml = isCompleted 
+                ? '<span class="mode-status-badge completed"><i class="fas fa-check-circle"></i> Selesai</span>'
+                : '<span class="mode-status-badge pending"><i class="fas fa-clock"></i> Belum Diisi</span>';
+
+            html += `
+                <div class="mode-accordion-item ${isCompleted ? 'selected' : ''}" data-mode-id="${mode.id}">
+                    <div class="mode-accordion-header" onclick="toggleModeAccordion(${mode.id})">
+                        <div class="mode-accordion-left">
+                            <div class="mode-icon-box" style="background: ${mode.warna}20; color: ${mode.warna}">
+                                <i class="${mode.icon}"></i>
+                            </div>
+                            <div class="mode-info">
+                                <h6>
+                                    ${mode.nama}
+                                    ${mode.is_default ? '<span class="badge bg-warning text-dark ms-2">Default</span>' : ''}
+                                </h6>
+                                <small>Kode: ${mode.kode} | Prioritas: ${mode.priority}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            ${badgeHtml}
+                            <div class="mode-chevron">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mode-accordion-body">
+                        <div class="text-center py-4">
+                            <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                            <p class="text-muted mt-2">Memuat grup jam kerja...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        $('#modeAccordionContainer').html(html);
+    }
+
+    // ========================================
+    // TOGGLE MODE ACCORDION
+    // ========================================
+    window.toggleModeAccordion = function(modeId) {
+        const modeItem = $(`.mode-accordion-item[data-mode-id="${modeId}"]`);
+        const modeBody = modeItem.find('.mode-accordion-body');
+        const wasActive = modeItem.hasClass('active');
+
+        // Close all
+        $('.mode-accordion-item').removeClass('active');
+
+        // Open clicked if wasn't active
+        if (!wasActive) {
+            modeItem.addClass('active');
+            
+            // Load groups if not loaded
+            if (modeBody.find('.fa-spinner').length) {
+                loadJamKerjaGroupsForMode(modeId, modeBody);
+            }
+        }
+    };
+
+    // ========================================
+    // LOAD JAM KERJA GROUPS FOR MODE
+    // ========================================
+    function loadJamKerjaGroupsForMode(modeId, container) {
+        fetch(`/api/mode/${modeId}/get-jam-kerja-groups/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success' && data.groups.length > 0) {
+                    renderGroupSelectionGrid(data.groups, modeId, container);
+                } else {
+                    container.html(`
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Belum ada grup jam kerja untuk mode ini
+                        </div>
+                    `);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                container.html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Gagal memuat grup jam kerja
+                    </div>
+                `);
+            });
+    }
+
+    // ========================================
+    // RENDER GROUP SELECTION GRID
+    // ========================================
+    function renderGroupSelectionGrid(groups, modeId, container) {
+        let html = `
+            <div class="mb-3">
+                <h6 class="mb-2">
+                    <i class="fas fa-clock text-primary me-2"></i>
+                    Pilih Grup Jam Kerja
+                </h6>
+                <p class="text-muted small mb-3">Klik salah satu grup di bawah ini</p>
+            </div>
+            <div class="group-selection-grid">
+        `;
+
+        groups.forEach(group => {
+            const isSelected = modeAssignments[modeId]?.group_id === group.id;
+            
+            html += `
+                <div class="group-option-card ${isSelected ? 'selected' : ''}" 
+                     onclick="selectGroupForMode(${modeId}, ${group.id}, '${group.nama}')">
+                    <div class="group-check-box">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h6 class="group-name-text">${group.nama}</h6>
+                    <div class="group-time-display">
+                        <i class="fas fa-clock"></i>
+                        <span>${group.jam_masuk} - ${group.jam_keluar}</span>
+                    </div>
+                    <div class="group-meta-info">
+            `;
+            
+            if (group.jam_istirahat) {
+                html += `
+                    <span class="group-meta-tag">
+                        <i class="fas fa-coffee"></i>
+                        ${group.jam_istirahat}
+                    </span>
+                `;
+            }
+            
+            html += `
+                        <span class="group-meta-tag">
+<i class="fas fa-calendar-check"></i>
+${group.hari_kerja} hari
+</span>
+</div>
+</div>
+`;
+});
+    html += '</div>';
+    container.html(html);
+}
+
+// ========================================
+// SELECT GROUP FOR MODE
+// ========================================
+window.selectGroupForMode = function(modeId, groupId, groupNama) {
+    // Save assignment
+    modeAssignments[modeId] = {
+        group_id: groupId,
+        group_nama: groupNama
+    };
+    
+    // Update UI
+    updateModeAccordionStatus(modeId);
+    
+    // Update group cards
+    const modeItem = $(`.mode-accordion-item[data-mode-id="${modeId}"]`);
+    const cards = modeItem.find('.group-option-card');
+    
+    cards.removeClass('selected');
+    
+    const selectedCard = cards.filter(function() {
+        return $(this).attr('onclick').includes(`${groupId},`);
+    });
+    
+    selectedCard.addClass('selected');
+};
+
+// ========================================
+// UPDATE MODE ACCORDION STATUS
+// ========================================
+function updateModeAccordionStatus(modeId) {
+    const modeItem = $(`.mode-accordion-item[data-mode-id="${modeId}"]`);
+    
+    if (modeAssignments[modeId]) {
+        modeItem.addClass('selected');
+        
+        const badge = modeItem.find('.mode-status-badge');
+        badge.removeClass('pending').addClass('completed');
+        badge.html('<i class="fas fa-check-circle"></i> Selesai');
+    }
+}
+
+// ========================================
+// CONFIRM ASSIGN MODE
+// ========================================
+$('#btnConfirmAssignMode').on('click', function() {
+    const completedModes = Object.keys(modeAssignments).length;
+    
+    if (completedModes === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Perhatian!',
+            text: 'Minimal pilih 1 grup jam kerja untuk salah satu mode!',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    const modeList = allModesData
+        .filter(m => modeAssignments[m.id])
+        .map(m => `${m.nama} → ${modeAssignments[m.id].group_nama}`)
+        .join('<br>');
+
+    Swal.fire({
+        title: 'Konfirmasi Assign Mode?',
+        html: `
+            <strong>${selectedIds.length} pegawai</strong> akan di-assign ke:<br><br>
+            ${modeList}
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Assign',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#3b82f6',
+        reverseButtons: true
+    }).then(result => {
+        if (result.isConfirmed) {
+            // Build request data
+            const assignments = selectedIds.map(pegawaiId => ({
+                pegawai_id: pegawaiId,
+                modes: modeAssignments
+            }));
+            
+            // Send request
+            fetch('/api/save-mode-assignment-bulk/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    assignments: JSON.stringify(assignments)
+                })
+            }).then(r => r.json()).then(data => {
+                if (data.status === 'success' || data.status === 'warning') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        html: data.msg,
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('modalBulkAssignMode'));
+                        modal.hide();
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        html: data.msg,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Terjadi kesalahan pada server',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
+    });
+});
+
+// ========================================
+// SYNC FINGERPRINT
+// ========================================
+$('#btnSyncFingerprint').on('click', function() {
+    const btn = $(this);
+    const originalHtml = btn.html();
+    
+    btn.prop('disabled', true);
+    btn.html('<i class="fas fa-spinner fa-spin"></i> Syncing...');
+    
+    $.ajax({
+        url: "{% url 'sync_fingerprint_from_machine' %}",
+        method: 'POST',
+        data: { 
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            mesin_id: '1'
+        },
+        success: function(response) {
+            btn.prop('disabled', false);
+            btn.html(originalHtml);
+            
+            if (response.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sync Berhasil!',
+                    html: response.msg.replace(/\n/g, '<br>'),
+                    confirmButtonText: 'OK'
+                }).then(() => location.reload());
+            } else {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Informasi',
+                    text: response.msg,
+                    confirmButtonText: 'OK'
+                });
+            }
+        },
+        error: function(xhr) {
+            btn.prop('disabled', false);
+            btn.html(originalHtml);
+            const response = xhr.responseJSON || {};
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Sync',
+                text: response.msg || 'Terjadi kesalahan saat sync fingerprint',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+});
+});
+</script>
+{% endblock %}

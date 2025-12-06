@@ -1,0 +1,686 @@
+{% extends 'absensi_app/base.html' %}
+{% load static %}
+
+{% block title %}Hapus Riwayat Sesi Absensi{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== CONFIRMATION CARD ==================== */
+    .confirmation-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 200px);
+        padding: var(--spacing-xl) 0;
+    }
+
+    .confirmation-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        max-width: 600px;
+        width: 100%;
+        border: 1px solid var(--gray-200);
+    }
+
+    .confirmation-header {
+        background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        color: white;
+        padding: var(--spacing-xl);
+        text-align: center;
+    }
+
+    .confirmation-header i {
+        font-size: 3rem;
+        margin-bottom: var(--spacing-md);
+        display: block;
+        animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+
+    .confirmation-header h4 {
+        margin: 0 0 var(--spacing-sm) 0;
+        font-size: var(--font-lg);
+        font-weight: 700;
+    }
+
+    .confirmation-header p {
+        margin: 0;
+        font-size: var(--font-sm);
+        opacity: 0.95;
+    }
+
+    .confirmation-body {
+        padding: var(--spacing-xl);
+    }
+
+    /* ==================== INFO SECTION ==================== */
+    .sesi-info-card {
+        background: var(--gray-50);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .sesi-info-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .sesi-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: var(--font-lg);
+        flex-shrink: 0;
+    }
+
+    .sesi-title {
+        flex: 1;
+    }
+
+    .sesi-title h5 {
+        margin: 0 0 4px 0;
+        font-size: var(--font-base);
+        font-weight: 700;
+        color: var(--gray-900);
+    }
+
+    .sesi-title small {
+        color: var(--gray-600);
+        font-size: var(--font-xs);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .info-label {
+        font-size: var(--font-xs);
+        font-weight: 600;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .info-value {
+        font-size: var(--font-sm);
+        font-weight: 600;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .info-value i {
+        color: var(--primary);
+        font-size: 0.7rem;
+    }
+
+    .info-value.full-width {
+        grid-column: 1 / -1;
+    }
+
+    /* ==================== WARNING BOX ==================== */
+    .warning-box {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid var(--warning);
+        border-left: 4px solid var(--warning);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .warning-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .warning-header i {
+        color: #d97706;
+        font-size: var(--font-base);
+    }
+
+    .warning-header strong {
+        color: #92400e;
+        font-size: var(--font-sm);
+        font-weight: 700;
+    }
+
+    .warning-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .warning-list li {
+        padding: var(--spacing-xs) 0;
+        color: #92400e;
+        font-size: var(--font-xs);
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        line-height: 1.5;
+    }
+
+    .warning-list li i {
+        margin-top: 2px;
+        font-size: 0.6rem;
+        flex-shrink: 0;
+    }
+
+    /* ==================== DANGER BOX ==================== */
+    .danger-box {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border: 2px solid var(--danger);
+        border-left: 4px solid var(--danger);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .danger-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .danger-header i {
+        color: #dc2626;
+        font-size: var(--font-base);
+    }
+
+    .danger-header strong {
+        color: #991b1b;
+        font-size: var(--font-sm);
+        font-weight: 700;
+    }
+
+    .danger-text {
+        color: #991b1b;
+        font-size: var(--font-xs);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* ==================== CONFIRMATION INPUT ==================== */
+    .confirmation-input-section {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .confirmation-input-label {
+        font-size: var(--font-sm);
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-sm);
+        display: block;
+    }
+
+    .confirmation-input-hint {
+        font-size: var(--font-xs);
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-md);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .confirmation-input-hint i {
+        color: var(--primary);
+        font-size: 0.7rem;
+    }
+
+    .confirmation-code-display {
+        background: var(--gray-100);
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-md);
+        font-family: 'Consolas', monospace;
+        font-size: var(--font-base);
+        font-weight: 700;
+        color: var(--gray-900);
+        text-align: center;
+        margin-bottom: var(--spacing-md);
+        letter-spacing: 2px;
+    }
+
+    .confirmation-input {
+        width: 100%;
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-md);
+        font-size: var(--font-sm);
+        font-weight: 600;
+        transition: all var(--transition-base);
+        font-family: 'Consolas', monospace;
+        text-align: center;
+        letter-spacing: 2px;
+    }
+
+    .confirmation-input:focus {
+        outline: none;
+        border-color: var(--danger);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .confirmation-input.error {
+        border-color: var(--danger);
+        background: #fee2e2;
+    }
+
+    .error-message {
+        color: var(--danger);
+        font-size: var(--font-xs);
+        margin-top: var(--spacing-sm);
+        display: none;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .error-message.show {
+        display: flex;
+    }
+
+    .error-message i {
+        font-size: 0.7rem;
+    }
+
+    /* ==================== ACTIONS ==================== */
+    .confirmation-actions {
+        display: flex;
+        gap: var(--spacing-md);
+        justify-content: space-between;
+    }
+
+    .btn-confirm {
+        flex: 1;
+        padding: var(--spacing-md) var(--spacing-xl);
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: var(--font-sm);
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--transition-base);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-sm);
+        text-decoration: none;
+    }
+
+    .btn-confirm i {
+        font-size: var(--font-sm);
+    }
+
+    .btn-cancel {
+        background: white;
+        color: var(--gray-700);
+        border: 2px solid var(--gray-300);
+    }
+
+    .btn-cancel:hover {
+        background: var(--gray-50);
+        border-color: var(--gray-400);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+        text-decoration: none;
+        color: var(--gray-700);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        color: white;
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-delete.enabled {
+        opacity: 1;
+        cursor: pointer;
+    }
+
+    .btn-delete.enabled:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-delete:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+        .confirmation-container {
+            padding: var(--spacing-md);
+        }
+
+        .confirmation-card {
+            max-width: 100%;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .confirmation-actions {
+            flex-direction: column-reverse;
+        }
+
+        .btn-confirm {
+            width: 100%;
+        }
+
+        .confirmation-header i {
+            font-size: 2.5rem;
+        }
+
+        .sesi-icon {
+            width: 40px;
+            height: 40px;
+            font-size: var(--font-base);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .confirmation-header {
+            padding: var(--spacing-lg);
+        }
+
+        .confirmation-body {
+            padding: var(--spacing-lg);
+        }
+
+        .confirmation-header h4 {
+            font-size: var(--font-base);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="confirmation-container">
+        <div class="confirmation-card">
+            <!-- Header -->
+            <div class="confirmation-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h4>Konfirmasi Penghapusan Sesi Absensi</h4>
+                <p>Tindakan ini tidak dapat dibatalkan!</p>
+            </div>
+
+            <!-- Body -->
+            <div class="confirmation-body">
+                <!-- Sesi Info Card -->
+                <div class="sesi-info-card">
+                    <div class="sesi-info-header">
+                        <div class="sesi-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="sesi-title">
+                            <h5>{{ sesi.nama_sesi }}</h5>
+                            <small>ID Sesi: {{ sesi.id }}</small>
+                        </div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Tanggal Mulai</span>
+                            <span class="info-value">
+                                <i class="fas fa-calendar"></i>
+                                {{ sesi.tanggal_mulai|date:"d M Y" }}
+                            </span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Tanggal Selesai</span>
+                            <span class="info-value">
+                                <i class="fas fa-calendar"></i>
+                                {{ sesi.tanggal_selesai|date:"d M Y" }}
+                            </span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Jam Mulai</span>
+                            <span class="info-value">
+                                <i class="fas fa-clock"></i>
+                                {{ sesi.jam_mulai }}
+                            </span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Jam Selesai</span>
+                            <span class="info-value">
+                                <i class="fas fa-clock"></i>
+                                {{ sesi.jam_selesai }}
+                            </span>
+                        </div>
+
+                        {% if sesi.pegawai %}
+                        <div class="info-item info-value full-width">
+                            <span class="info-label">Pegawai</span>
+                            <span class="info-value">
+                                <i class="fas fa-user"></i>
+                                {{ sesi.pegawai.nama_lengkap }} ({{ sesi.pegawai.userid }})
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        {% if sesi.keterangan %}
+                        <div class="info-item info-value full-width">
+                            <span class="info-label">Keterangan</span>
+                            <span class="info-value">
+                                <i class="fas fa-info-circle"></i>
+                                {{ sesi.keterangan }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Warning Box -->
+                <div class="warning-box">
+                    <div class="warning-header">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Perhatian!</strong>
+                    </div>
+                    <ul class="warning-list">
+                        <li>
+                            <i class="fas fa-circle"></i>
+                            <span>Semua data absensi yang terkait dengan sesi ini akan ikut terhapus</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-circle"></i>
+                            <span>Riwayat tap masuk, tap pulang, dan tap istirahat akan hilang permanen</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-circle"></i>
+                            <span>Laporan dan statistik yang menggunakan data sesi ini akan terpengaruh</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-circle"></i>
+                            <span>Data yang sudah dihapus tidak dapat dikembalikan</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Danger Box -->
+                <div class="danger-box">
+                    <div class="danger-header">
+                        <i class="fas fa-skull-crossbones"></i>
+                        <strong>PERINGATAN KERAS!</strong>
+                    </div>
+                    <p class="danger-text">
+                        Penghapusan sesi absensi adalah tindakan PERMANEN dan TIDAK DAPAT DIBATALKAN. 
+                        Pastikan Anda benar-benar yakin sebelum melanjutkan. Semua data terkait akan 
+                        hilang selamanya dari sistem.
+                    </p>
+                </div>
+
+                <!-- Confirmation Input -->
+                <div class="confirmation-input-section">
+                    <label class="confirmation-input-label">
+                        Konfirmasi Penghapusan
+                    </label>
+                    <p class="confirmation-input-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Ketik kode berikut untuk mengaktifkan tombol hapus:
+                    </p>
+                    <div class="confirmation-code-display">HAPUS-SESI</div>
+                    <input 
+                        type="text" 
+                        class="confirmation-input" 
+                        id="confirmationInput" 
+                        placeholder="Ketik: HAPUS-SESI"
+                        autocomplete="off"
+                    >
+                    <div class="error-message" id="errorMessage">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Kode konfirmasi tidak sesuai!</span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <div class="confirmation-actions">
+                        <a href="{% url 'riwayat_sesi_absensi' %}" class="btn-confirm btn-cancel">
+                            <i class="fas fa-arrow-left"></i>
+                            Batal
+                        </a>
+                        <button type="submit" class="btn-confirm btn-delete" id="btnDelete" disabled>
+                            <i class="fas fa-trash-alt"></i>
+                            Hapus Permanen
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    const confirmationInput = $('#confirmationInput');
+    const btnDelete = $('#btnDelete');
+    const errorMessage = $('#errorMessage');
+    const deleteForm = $('#deleteForm');
+    const correctCode = 'HAPUS-SESI';
+
+    // Check confirmation input
+    confirmationInput.on('input', function() {
+        const value = $(this).val().trim().toUpperCase();
+        
+        if (value === correctCode) {
+            $(this).removeClass('error');
+            errorMessage.removeClass('show');
+            btnDelete.removeClass('btn-delete').addClass('btn-delete enabled').prop('disabled', false);
+        } else {
+            $(this).addClass('error');
+            if (value.length > 0) {
+                errorMessage.addClass('show');
+            } else {
+                errorMessage.removeClass('show');
+            }
+            btnDelete.removeClass('enabled').prop('disabled', true);
+        }
+    });
+
+    // Form submit confirmation
+    deleteForm.on('submit', function(e) {
+        e.preventDefault();
+        
+        const value = confirmationInput.val().trim().toUpperCase();
+        
+        if (value !== correctCode) {
+            confirmationInput.addClass('error');
+            errorMessage.addClass('show');
+            return false;
+        }
+
+        // Show final confirmation
+        Swal.fire({
+            title: 'Konfirmasi Terakhir',
+            html: `
+                <div style="text-align: left; padding: 20px;">
+                    <p style="font-size: 14px; margin-bottom: 16px; color: #374151;">
+                        <strong>Anda akan menghapus:</strong>
+                    </p>
+                    <div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 12px; border-radius: 4px; margin-bottom: 16px;">
+                        <p style="margin: 0; font-weight: 600; color: #991b1b; font-size: 13px;">
+                            Sesi: <strong>{{ sesi.nama_sesi }}</strong>
+                        </p>
+                        <p style="margin: 4px 0 0 0; font-size: 12px; color: #991b1b;">
+                            Periode: {{ sesi.tanggal_mulai|date:"d M Y" }} - {{ sesi.tanggal_selesai|date:"d M Y" }}
+                        </p>
+                    </div>
+                    <p style="font-size: 13px; color: #991b1b; margin: 0; font-weight: 600;">
+                        ⚠️ Data tidak dapat dikembalikan setelah dihapus!
+                    </p>
+                </div>
+            `,
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-trash"></i> Ya, Hapus Permanen',
+            cancelButtonText: '<i class="fas fa-times"></i> Batal',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'btn-confirm btn-delete enabled',
+                cancelButton: 'btn-confirm btn-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading
+                Swal.fire({
+                    title: 'Menghapus...',
+                    html: 'Sedang menghapus sesi absensi...',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Submit form
+                deleteForm.off('submit').submit();
+            }
+        });
+    });
+
+    // Auto focus on confirmation input
+    confirmationInput.focus();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,308 @@
+{% extends 'absensi_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ judul }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        color: white;
+        padding: var(--spacing-lg) var(--spacing-xl);
+    }
+
+    .form-card-header h5 {
+        margin: 0;
+        font-size: var(--font-lg);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .form-card-body {
+        padding: var(--spacing-xl);
+    }
+
+    .form-section {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    #ipPreview .badge {
+        font-size: var(--font-xs);
+        padding: 0.3rem 0.6rem;
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    #ipPreview .badge.bg-success {
+        background: var(--success-light);
+        color: #065f46;
+    }
+
+    #ipPreview .badge.bg-danger {
+        background: var(--danger-light);
+        color: #991b1b;
+    }
+
+    .btn-group-actions {
+        display: flex;
+        gap: var(--spacing-md);
+        padding-top: var(--spacing-lg);
+        border-top: 2px solid var(--gray-100);
+        margin-top: var(--spacing-xl);
+    }
+
+    .btn-secondary {
+        background: var(--gray-500);
+        color: white;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background: var(--gray-600);
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 768px) {
+        .form-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .btn-group-actions {
+            flex-direction: column;
+        }
+
+        .btn-group-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h5>
+                        <i class="fas fa-building"></i>
+                        {{ judul }}
+                    </h5>
+                </div>
+
+                <div class="form-card-body">
+                    <form method="post" id="formCabang">
+                        {% csrf_token %}
+
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <strong>Petunjuk:</strong> Isi data cabang dengan lengkap. IP Mesin Fingerprint bisa lebih dari satu (pisahkan dengan koma).
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="{{ form.nama.id_for_label }}" class="form-label">
+                                        Nama Cabang <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.nama }}
+                                    {% if form.nama.errors %}
+                                        <div class="text-danger small mt-1">{{ form.nama.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted d-block mt-1">
+                                        Nama lengkap cabang (Contoh: Kantor Pusat Jakarta, Cabang Surabaya)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.kode.id_for_label }}" class="form-label">
+                                        Kode Cabang <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.kode }}
+                                    {% if form.kode.errors %}
+                                        <div class="text-danger small mt-1">{{ form.kode.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted d-block mt-1">
+                                        Kode unik untuk identifikasi (Contoh: JKT-01, SBY-01)
+                                    </small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.port_mesin.id_for_label }}" class="form-label">
+                                        Port Mesin <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.port_mesin }}
+                                    {% if form.port_mesin.errors %}
+                                        <div class="text-danger small mt-1">{{ form.port_mesin.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted d-block mt-1">
+                                        Port default: 4370 (untuk ZKTeco)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="{{ form.alamat.id_for_label }}" class="form-label">
+                                        Alamat Lengkap <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.alamat }}
+                                    {% if form.alamat.errors %}
+                                        <div class="text-danger small mt-1">{{ form.alamat.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted d-block mt-1">
+                                        Alamat lengkap cabang
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="{{ form.ip_mesin_fingerprint.id_for_label }}" class="form-label">
+                                        IP Mesin Fingerprint
+                                    </label>
+                                    {{ form.ip_mesin_fingerprint }}
+                                    {% if form.ip_mesin_fingerprint.errors %}
+                                        <div class="text-danger small mt-1">{{ form.ip_mesin_fingerprint.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="fas fa-lightbulb text-warning"></i>
+                                        IP Address mesin fingerprint. Jika lebih dari satu, pisahkan dengan koma.
+                                        Contoh: <code>192.168.1.100, 192.168.1.101</code>
+                                    </small>
+                                    <div id="ipPreview" class="mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        {{ form.is_active }}
+                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                            <strong>Status Aktif</strong>
+                                        </label>
+                                    </div>
+                                    {% if form.is_active.errors %}
+                                        <div class="text-danger small mt-1">{{ form.is_active.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted d-block mt-1">
+                                        Nonaktifkan jika cabang sedang tidak beroperasi
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="btn-group-actions">
+                            <button type="submit" class="btn btn-primary" id="btnSubmit">
+                                <i class="fas fa-save"></i> Simpan Cabang
+                            </button>
+                            <a href="{% url 'daftar_cabang' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Batal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formCabang = document.getElementById('formCabang');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const kodeInput = document.querySelector('[name="kode"]');
+    const ipInput = document.querySelector('[name="ip_mesin_fingerprint"]');
+    const ipPreview = document.getElementById('ipPreview');
+
+    if (kodeInput) {
+        kodeInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+    }
+
+    function updateIpPreview() {
+        ipPreview.innerHTML = '';
+        if (ipInput && ipInput.value.trim()) {
+            const ips = ipInput.value.split(',').map(ip => ip.trim()).filter(ip => ip);
+            if (ips.length > 0) {
+                let html = '<strong class="small">IP Mesin yang akan disimpan:</strong><br>';
+                const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+                ips.forEach((ip) => {
+                    const isValid = ipPattern.test(ip);
+                    const badgeClass = isValid ? 'bg-success' : 'bg-danger';
+                    const icon = isValid ? 'fa-check' : 'fa-times';
+                    html += `<span class="badge ${badgeClass}">
+                        <i class="fas ${icon}"></i> ${ip}
+                    </span>`;
+                });
+                ipPreview.innerHTML = html;
+            }
+        }
+    }
+    
+    if (ipInput) {
+        ipInput.addEventListener('input', updateIpPreview);
+        updateIpPreview();
+    }
+
+    formCabang.addEventListener('submit', function(e) {
+        const kode = document.querySelector('[name="kode"]').value.trim();
+        const nama = document.querySelector('[name="nama"]').value.trim();
+        const alamat = document.querySelector('[name="alamat"]').value.trim();
+
+        if (!kode || !nama || !alamat) {
+            e.preventDefault();
+            alert('Kode, Nama, dan Alamat Cabang harus diisi!');
+            return false;
+        }
+
+        if (kode.length < 2) {
+            e.preventDefault();
+            alert('Kode Cabang minimal 2 karakter!');
+            return false;
+        }
+        
+        if (confirm('Yakin ingin menyimpan data cabang ini?')) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+        } else {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}
