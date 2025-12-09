@@ -850,6 +850,7 @@
                         </thead>
 
                         <tbody>
+                     <tbody>
                             {% for absensi in absensi_list %}
                             <tr data-status="{{ absensi.status }}">
                                 <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
@@ -860,11 +861,9 @@
 
                                 <td class="text-center">
                                     {% if absensi.tap_masuk %}
-                                        {% with tap_masuk=absensi.get_tap_masuk_display %}
-                                            <span class="jam-text {% if tap_masuk.is_late %}violation{% endif %}">
-                                                {{ absensi.tap_masuk|date:"H:i" }}
-                                            </span>
-                                        {% endwith %}
+                                        <span class="jam-text{% if absensi.is_late %} violation{% endif %}">
+                                            {{ absensi.tap_masuk|date:"H:i" }}
+                                        </span>
                                     {% else %}
                                         <span class="badge bg-secondary">-</span>
                                     {% endif %}
@@ -874,7 +873,7 @@
                                     {% if absensi.tap_istirahat_keluar %}
                                         <span class="jam-text">{{ absensi.tap_istirahat_keluar|date:"H:i" }}</span>
                                     {% elif absensi.tap_masuk and absensi.tap_pulang %}
-                                        <span class="jam-text violation">12:00</span>
+                                        <span class="jam-text violation" title="Tidak tap istirahat">12:00 <i class="fas fa-exclamation-circle" style="font-size: 0.65rem;"></i></span>
                                     {% else %}
                                         <span class="badge bg-secondary">-</span>
                                     {% endif %}
@@ -884,7 +883,7 @@
                                     {% if absensi.tap_istirahat_masuk %}
                                         <span class="jam-text">{{ absensi.tap_istirahat_masuk|date:"H:i" }}</span>
                                     {% elif absensi.tap_masuk and absensi.tap_pulang %}
-                                        <span class="jam-text violation">14:00</span>
+                                        <span class="jam-text violation" title="Tidak tap istirahat">14:00 <i class="fas fa-exclamation-circle" style="font-size: 0.65rem;"></i></span>
                                     {% else %}
                                         <span class="badge bg-secondary">-</span>
                                     {% endif %}
@@ -892,22 +891,22 @@
 
                                 <td class="text-center">
                                     {% if absensi.tap_pulang %}
-                                        {% with tap_pulang=absensi.get_tap_pulang_display %}
-                                            <span class="jam-text {% if tap_pulang.is_early %}violation{% endif %}">
-                                                {{ absensi.tap_pulang|date:"H:i" }}
-                                            </span>
-                                        {% endwith %}
+                                        <span class="jam-text{% if absensi.is_early_departure %} violation{% endif %}">
+                                            {{ absensi.tap_pulang|date:"H:i" }}
+                                        </span>
                                     {% else %}
                                         <span class="badge bg-secondary">-</span>
                                     {% endif %}
                                 </td>
 
                                 <td class="text-center">
-                                    {% with jam_kerja=absensi.get_total_jam_kerja_display %}
-                                        <span class="total-jam-card {% if jam_kerja.has_violation %}violation{% endif %}">
-                                            {{ jam_kerja.value }}
+                                    {% if absensi.total_jam_kerja and absensi.total_jam_kerja != '-' %}
+                                        <span class="total-jam-card{% if absensi.has_violation %} violation{% endif %}">
+                                            {{ absensi.total_jam_kerja }}
                                         </span>
-                                    {% endwith %}
+                                    {% else %}
+                                        <span class="badge bg-secondary">-</span>
+                                    {% endif %}
                                 </td>
 
                                 <td class="text-center">
@@ -963,6 +962,7 @@
                                 </td>
                             </tr>
                             {% endfor %}
+                        </tbody>
                         </tbody>
                     </table>
                 </div>

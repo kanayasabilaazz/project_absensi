@@ -48,7 +48,6 @@
         padding: var(--spacing-xl);
     }
 
-    /* Header Actions */
     .header-actions {
         display: flex;
         gap: var(--spacing-xs);
@@ -87,7 +86,6 @@
         color: white;
     }
 
-    /* Stats Cards */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -105,9 +103,15 @@
         transition: all var(--transition-base);
     }
 
-    .stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
+    .stat-card.clickable-card {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .stat-card.clickable-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary);
     }
 
     .stat-value {
@@ -128,7 +132,6 @@
         gap: var(--spacing-xs);
     }
 
-    /* Alert Boxes */
     .alert {
         border-radius: var(--radius-md);
         padding: var(--spacing-lg);
@@ -164,7 +167,6 @@
         gap: var(--spacing-xs);
     }
 
-    /* Section Headers */
     .section-header {
         font-size: var(--font-base);
         font-weight: 700;
@@ -175,7 +177,6 @@
         gap: var(--spacing-sm);
     }
 
-    /* Group Section */
     .group-section {
         background: white;
         border-radius: var(--radius-lg);
@@ -213,7 +214,6 @@
         font-weight: 600;
     }
 
-    /* Schedule Table */
     .schedule-table {
         overflow-x: auto;
     }
@@ -252,7 +252,6 @@
         border-bottom: none;
     }
 
-    /* Time Badges */
     .time-badge {
         display: inline-block;
         padding: 4px var(--spacing-sm);
@@ -285,7 +284,6 @@
         gap: 4px;
     }
 
-    /* Buttons */
     .btn {
         padding: var(--spacing-sm) var(--spacing-lg);
         border-radius: var(--radius-sm);
@@ -363,7 +361,6 @@
         color: white;
     }
 
-    /* Action Bar */
     .action-bar {
         display: flex;
         gap: var(--spacing-xs);
@@ -371,7 +368,15 @@
         margin-top: var(--spacing-xl);
     }
 
-    /* Responsive */
+    .modal-header {
+        border-bottom: 2px solid rgba(0,0,0,0.1);
+    }
+
+    .modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
     @media (max-width: 768px) {
         .dashboard-card-header,
         .dashboard-card-body {
@@ -416,7 +421,6 @@
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Header -->
     <div class="dashboard-card">
         <div class="dashboard-card-header" id="modeHeaderCard">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
@@ -439,23 +443,15 @@
         </div>
 
         <div class="dashboard-card-body">
-            <!-- Stats -->
             <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">{{ pegawai_count }}</div>
-                    <div class="stat-label">
-                        <i class="fas fa-users"></i> 
-                        <span>Total Pegawai</span>
-                    </div>
-                </div>
-                <div class="stat-card">
+                <div class="stat-card clickable-card" data-bs-toggle="modal" data-bs-target="#modalJadwal" title="Klik untuk lihat detail jadwal">
                     <div class="stat-value">{{ mode.jadwal_list.count }}</div>
                     <div class="stat-label">
                         <i class="fas fa-calendar"></i> 
                         <span>Total Jadwal</span>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card clickable-card" data-bs-toggle="modal" data-bs-target="#modalPeriode" title="Klik untuk lihat detail periode">
                     <div class="stat-value">{{ mode.periode_list.count }}</div>
                     <div class="stat-label">
                         <i class="fas fa-hourglass-start"></i> 
@@ -464,7 +460,6 @@
                 </div>
             </div>
 
-            <!-- Periode Aktif -->
             {% if periode_aktif %}
             <div class="alert alert-success">
                 <h5 class="alert-heading">
@@ -482,147 +477,119 @@
                         <a href="{% url 'edit_periode_mode' periode_aktif.id %}" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <a href="{% url 'hapus_periode_mode' periode_aktif.id %}" class="btn btn-sm btn-outline-danger"
-                           onclick="return confirm('Hapus periode ini?')">
+                        <button type="button" class="btn btn-sm btn-outline-danger btn-hapus-periode" data-periode-id="{{ periode_aktif.id }}" data-periode-name="{{ periode_aktif.nama }}">
                             <i class="fas fa-trash"></i> Hapus
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
             {% endif %}
 
-            <!-- Jadwal Per Grup -->
             <h4 class="section-header">
                 <i class="fas fa-layer-group"></i> Jadwal Per Grup Jam Kerja
             </h4>
             
             {% if jadwal_by_dept %}
                 {% for group_name, group_data in jadwal_by_dept.items %}
-                    {% with total_jadwal=0 %}
-                        {% for hari_idx, day_data in group_data.days.items %}
-                            {% if day_data.jadwal_list %}
-                                {% with total_jadwal=total_jadwal|add:day_data.jadwal_list|length %}
-                                {% endwith %}
-                            {% endif %}
-                        {% endfor %}
-                        
-                        {% if group_data.days %}
-                            {% with has_schedule=False %}
-                                {% for hari_idx, day_data in group_data.days.items %}
-                                    {% if day_data.jadwal_list %}
-                                        {% with has_schedule=True %}{% endwith %}
-                                    {% endif %}
-                                {% endfor %}
-                                
-                                {% if has_schedule or group_data.days.0.jadwal_list or group_data.days.1.jadwal_list or group_data.days.2.jadwal_list or group_data.days.3.jadwal_list or group_data.days.4.jadwal_list or group_data.days.5.jadwal_list or group_data.days.6.jadwal_list %}
-                                <div class="group-section">
-                                    <div class="group-header">
-                                        <h5>
-                                            <i class="fas fa-briefcase"></i> {{ group_name|title }}
-                                        </h5>
-                                        <span class="badge">
-                                            {% with filled_days=0 %}
-                                                {% for hari_idx, day_data in group_data.days.items %}
-                                                    {% if day_data.jadwal_list %}
-                                                        {% with filled_days=filled_days|add:1 %}{% endwith %}
-                                                    {% endif %}
-                                                {% endfor %}
-                                                {{ group_data.days|length }} hari kerja
-                                            {% endwith %}
-                                        </span>
-                                    </div>
+                    {% if group_data.days %}
+                        <div class="group-section">
+                            <div class="group-header">
+                                <h5>
+                                    <i class="fas fa-briefcase"></i> {{ group_name|title }}
+                                </h5>
+                                <span class="badge">
+                                    {{ group_data.days|length }} hari kerja
+                                </span>
+                            </div>
 
-                                    <div class="schedule-table">
-                                        <table class="table table-hover mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th style="width: 10%;">HARI</th>
-                                                    <th style="width: 15%;">JAM MASUK</th>
-                                                    <th style="width: 20%;">ISTIRAHAT</th>
-                                                    <th style="width: 15%;">JAM KELUAR</th>
-                                                    <th style="width: 15%;">DURASI</th>
-                                                    <th style="width: 15%;">TOLERANSI</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for hari_idx in "0123456" %}
-                                                    {% with hari_int=hari_idx|add:0 %}
-                                                    {% with day_info=group_data.days|dict_lookup:hari_int %}
-                                                        {% if day_info.jadwal_list %}
-                                                            {% for jadwal in day_info.jadwal_list %}
-                                                            <tr>
-                                                                {% if forloop.first %}
-                                                                <td rowspan="{{ day_info.jadwal_list|length }}" style="font-weight: 700; color: #374151;">
-                                                                    {% if hari_int == 0 %}Senin
-                                                                    {% elif hari_int == 1 %}Selasa
-                                                                    {% elif hari_int == 2 %}Rabu
-                                                                    {% elif hari_int == 3 %}Kamis
-                                                                    {% elif hari_int == 4 %}Jumat
-                                                                    {% elif hari_int == 5 %}Sabtu
-                                                                    {% elif hari_int == 6 %}Minggu
-                                                                    {% endif %}
-                                                                </td>
-                                                                {% endif %}
-                                                                
-                                                                <td>
-                                                                    {% if jadwal.jam_masuk %}
-                                                                        <span class="time-badge time-in">{{ jadwal.jam_masuk|time:"H:i" }}</span>
-                                                                    {% else %}
-                                                                        <span style="color: #9ca3af;">-</span>
-                                                                    {% endif %}
-                                                                </td>
-                                                                
-                                                                <td>
-                                                                    {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
-                                                                        <small style="color: #6b7280;">
-                                                                            {{ jadwal.jam_istirahat_keluar|time:"H:i" }} - 
-                                                                            {{ jadwal.jam_istirahat_masuk|time:"H:i" }}
-                                                                        </small>
-                                                                    {% else %}
-                                                                        <span style="color: #9ca3af; font-style: italic;">Tidak ada</span>
-                                                                    {% endif %}
-                                                                </td>
-                                                                
-                                                                <td>
-                                                                    {% if jadwal.jam_keluar %}
-                                                                        <span class="time-badge time-out">{{ jadwal.jam_keluar|time:"H:i" }}</span>
-                                                                    {% else %}
-                                                                        <span style="color: #9ca3af;">-</span>
-                                                                    {% endif %}
-                                                                </td>
-                                                                
-                                                                <td>
-                                                                    {% with duration_formatted=jadwal.get_duration_formatted %}
-                                                                        {% if duration_formatted %}
-                                                                            <span class="duration-badge">
-                                                                                <i class="fas fa-business-time"></i> {{ duration_formatted }}
-                                                                            </span>
-                                                                        {% else %}
-                                                                            <span style="color: #9ca3af;">-</span>
-                                                                        {% endif %}
-                                                                    {% endwith %}
-                                                                </td>
-                                                                
-                                                                <td>
-                                                                    <small style="color: #6b7280;">
-                                                                        <i class="fas fa-clock"></i> 
-                                                                        {{ jadwal.toleransi_terlambat }} menit
-                                                                    </small>
-                                                                </td>
-                                                            </tr>
-                                                            {% endfor %}
+                            <div class="schedule-table">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%;">HARI</th>
+                                            <th style="width: 15%;">JAM MASUK</th>
+                                            <th style="width: 20%;">ISTIRAHAT</th>
+                                            <th style="width: 15%;">JAM KELUAR</th>
+                                            <th style="width: 15%;">DURASI</th>
+                                            <th style="width: 15%;">TOLERANSI</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for hari_idx in "0123456" %}
+                                            {% with hari_int=hari_idx|add:0 %}
+                                            {% with day_info=group_data.days|dict_lookup:hari_int %}
+                                                {% if day_info.jadwal_list %}
+                                                    {% for jadwal in day_info.jadwal_list %}
+                                                    <tr>
+                                                        {% if forloop.first %}
+                                                        <td rowspan="{{ day_info.jadwal_list|length }}" style="font-weight: 700; color: #374151;">
+                                                            {% if hari_int == 0 %}Senin
+                                                            {% elif hari_int == 1 %}Selasa
+                                                            {% elif hari_int == 2 %}Rabu
+                                                            {% elif hari_int == 3 %}Kamis
+                                                            {% elif hari_int == 4 %}Jumat
+                                                            {% elif hari_int == 5 %}Sabtu
+                                                            {% elif hari_int == 6 %}Minggu
+                                                            {% endif %}
+                                                        </td>
                                                         {% endif %}
-                                                    {% endwith %}
-                                                    {% endwith %}
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                {% endif %}
-                            {% endwith %}
-                        {% endif %}
-                    {% endwith %}
+                                                        
+                                                        <td>
+                                                            {% if jadwal.jam_masuk %}
+                                                                <span class="time-badge time-in">{{ jadwal.jam_masuk|time:"H:i" }}</span>
+                                                            {% else %}
+                                                                <span style="color: #9ca3af;">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        
+                                                        <td>
+                                                            {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
+                                                                <small style="color: #6b7280;">
+                                                                    {{ jadwal.jam_istirahat_keluar|time:"H:i" }} - 
+                                                                    {{ jadwal.jam_istirahat_masuk|time:"H:i" }}
+                                                                </small>
+                                                            {% else %}
+                                                                <span style="color: #9ca3af; font-style: italic;">Tidak ada</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        
+                                                        <td>
+                                                            {% if jadwal.jam_keluar %}
+                                                                <span class="time-badge time-out">{{ jadwal.jam_keluar|time:"H:i" }}</span>
+                                                            {% else %}
+                                                                <span style="color: #9ca3af;">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        
+                                                        <td>
+                                                            {% with duration_formatted=jadwal.get_duration_formatted %}
+                                                                {% if duration_formatted %}
+                                                                    <span class="duration-badge">
+                                                                        <i class="fas fa-business-time"></i> {{ duration_formatted }}
+                                                                    </span>
+                                                                {% else %}
+                                                                    <span style="color: #9ca3af;">-</span>
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        </td>
+                                                        
+                                                        <td>
+                                                            <small style="color: #6b7280;">
+                                                                <i class="fas fa-clock"></i> 
+                                                                {{ jadwal.toleransi_terlambat }} menit
+                                                            </small>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endwith %}
+                                            {% endwith %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endif %}
                 {% endfor %}
             {% else %}
                 <div class="alert alert-warning">
@@ -631,7 +598,6 @@
                 </div>
             {% endif %}
 
-            <!-- Periode Mendatang -->
             {% if periode_mendatang %}
             <div class="row mb-4">
                 <div class="col-12">
@@ -655,10 +621,9 @@
                                 <a href="{% url 'edit_periode_mode' periode.id %}" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="{% url 'hapus_periode_mode' periode.id %}" class="btn btn-sm btn-outline-danger"
-                                   onclick="return confirm('Hapus periode {{ periode.nama }}?')">
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-hapus-periode" data-periode-id="{{ periode.id }}" data-periode-name="{{ periode.nama }}">
                                     <i class="fas fa-trash"></i>
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -667,7 +632,6 @@
             </div>
             {% endif %}
 
-            <!-- Action Buttons -->
             <div class="action-bar">
                 <a href="{% url 'daftar_mode_jam_kerja' %}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Kembali
@@ -676,8 +640,7 @@
                     <i class="fas fa-copy"></i> Duplikasi Mode
                 </a>
                 {% if not mode.is_default %}
-                <a href="{% url 'hapus_mode_jam_kerja' mode.id %}" class="btn btn-danger"
-                   onclick="return confirm('Yakin hapus mode {{ mode.nama }}? Data terkait akan terhapus.')">
+                <a href="{% url 'hapus_mode_jam_kerja' mode.id %}" class="btn btn-danger" onclick="return confirm('Yakin hapus mode {{ mode.nama }}? Data terkait akan terhapus.')">
                     <i class="fas fa-trash"></i> Hapus Mode
                 </a>
                 {% endif %}
@@ -686,6 +649,180 @@
     </div>
 </div>
 
+<!-- Modal Total Jadwal -->
+<div class="modal fade" id="modalJadwal" tabindex="-1" aria-labelledby="modalJadwalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <h5 class="modal-title" id="modalJadwalLabel">
+                    <i class="fas fa-calendar"></i> Daftar Jadwal - {{ mode.nama }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% if jadwal_by_dept %}
+                    {% for group_name, group_data in jadwal_by_dept.items %}
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark mb-3" style="border-left: 4px solid #667eea; padding-left: 12px;">
+                                <i class="fas fa-briefcase"></i> {{ group_name|title }}
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 15%;">Hari</th>
+                                            <th style="width: 15%;">Jam Masuk</th>
+                                            <th style="width: 25%;">Istirahat</th>
+                                            <th style="width: 15%;">Jam Keluar</th>
+                                            <th style="width: 15%;">Durasi</th>
+                                            <th style="width: 15%;">Toleransi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for hari_idx in "0123456" %}
+                                            {% with hari_int=hari_idx|add:0 %}
+                                            {% with day_info=group_data.days|dict_lookup:hari_int %}
+                                                {% if day_info.jadwal_list %}
+                                                    {% for jadwal in day_info.jadwal_list %}
+                                                    <tr>
+                                                        <td class="fw-bold">
+                                                            {% if hari_int == 0 %}Senin
+                                                            {% elif hari_int == 1 %}Selasa
+                                                            {% elif hari_int == 2 %}Rabu
+                                                            {% elif hari_int == 3 %}Kamis
+                                                            {% elif hari_int == 4 %}Jumat
+                                                            {% elif hari_int == 5 %}Sabtu
+                                                            {% elif hari_int == 6 %}Minggu
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {% if jadwal.jam_masuk %}
+                                                                <span class="badge bg-success">{{ jadwal.jam_masuk|time:"H:i" }}</span>
+                                                            {% else %}
+                                                                <span class="text-muted">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
+                                                                <small>{{ jadwal.jam_istirahat_keluar|time:"H:i" }} - {{ jadwal.jam_istirahat_masuk|time:"H:i" }}</small>
+                                                            {% else %}
+                                                                <span class="text-muted fst-italic">Tidak ada</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {% if jadwal.jam_keluar %}
+                                                                <span class="badge bg-danger">{{ jadwal.jam_keluar|time:"H:i" }}</span>
+                                                            {% else %}
+                                                                <span class="text-muted">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {% with duration_formatted=jadwal.get_duration_formatted %}
+                                                                {% if duration_formatted %}
+                                                                    <span class="badge bg-primary">{{ duration_formatted }}</span>
+                                                                {% else %}
+                                                                    <span class="text-muted">-</span>
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        </td>
+                                                        <td>
+                                                            <small><i class="fas fa-clock"></i> {{ jadwal.toleransi_terlambat }} menit</small>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endwith %}
+                                            {% endwith %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Belum ada jadwal untuk mode ini.
+                    </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Total Periode -->
+<div class="modal fade" id="modalPeriode" tabindex="-1" aria-labelledby="modalPeriodeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                <h5 class="modal-title" id="modalPeriodeLabel">
+                    <i class="fas fa-hourglass-start"></i> Daftar Periode - {{ mode.nama }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% if mode.periode_list.all %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 5%;">No</th>
+                                <th style="width: 30%;">Nama Periode</th>
+                                <th style="width: 20%;">Tanggal Mulai</th>
+                                <th style="width: 20%;">Tanggal Selesai</th>
+                                <th style="width: 15%;">Status</th>
+                                <th style="width: 10%;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for periode in mode.periode_list.all %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <strong>{{ periode.nama }}</strong>
+                                    {% if periode.catatan %}
+                                    <br><small class="text-muted">{{ periode.catatan|truncatewords:10 }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>{{ periode.tanggal_mulai|date:"d M Y" }}</td>
+                                <td>{{ periode.tanggal_selesai|date:"d M Y" }}</td>
+                                <td>
+                                    {% if periode.tanggal_mulai <= today and today <= periode.tanggal_selesai %}
+                                        <span class="badge bg-success">✅ Aktif</span>
+                                    {% elif periode.tanggal_mulai > today %}
+                                        <span class="badge bg-info">📅 Mendatang</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">⏹️ Selesai</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-danger btn-hapus-periode" data-periode-id="{{ periode.id }}" data-periode-name="{{ periode.nama }}" title="Hapus periode ini">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Belum ada periode untuk mode ini.
+                </div>
+            {% endif %}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <a href="{% url 'tambah_periode_mode' mode.id %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Tambah Periode
+            </a>
+        </div>
+    </div>
+</div>
+</div>
+{% csrf_token %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const modeColor = '{{ mode.warna|default:"#667eea" }}';
@@ -693,6 +830,117 @@ document.addEventListener('DOMContentLoaded', function() {
     if (headerCard && modeColor) {
         headerCard.style.background = `linear-gradient(135deg, ${modeColor} 0%, ${modeColor}dd 100%)`;
     }
+    
+    document.body.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-hapus-periode');
+        if (btn) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const periodeId = btn.getAttribute('data-periode-id');
+            const periodeName = btn.getAttribute('data-periode-name');
+            
+            if (periodeId && periodeName) {
+                hapusPeriode(periodeId, periodeName, btn);
+            } else {
+                console.error('Data periode tidak lengkap:', {periodeId, periodeName});
+                alert('Data periode tidak lengkap!');
+            }
+        }
+    });
 });
+
+function hapusPeriode(periodeId, periodeName, buttonElement) {
+    if (!confirm(`Yakin ingin menghapus periode "${periodeName}"?\n\nData periode akan dihapus permanen dan tidak dapat dikembalikan!`)) {
+        return;
+    }
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    
+    if (!csrfToken) {
+        alert('CSRF token tidak ditemukan! Silakan refresh halaman.');
+        console.error('CSRF token not found');
+        return;
+    }
+    
+    const originalHTML = buttonElement.innerHTML;
+    buttonElement.disabled = true;
+    buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    console.log('Mengirim request hapus periode:', periodeId);
+    
+    fetch(`/pengaturan/periode/${periodeId}/hapus/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new TypeError('Response bukan JSON! Server mungkin redirect atau error.');
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        
+        if (data.status === 'success') {
+            alert(data.msg || 'Periode berhasil dihapus!');
+            
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(modal => {
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            });
+            
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 300);
+        } else {
+            alert('Error: ' + (data.msg || 'Gagal menghapus periode'));
+            buttonElement.disabled = false;
+            buttonElement.innerHTML = originalHTML;
+        }
+    })
+    .catch(error => {
+        console.error('Error detail:', error);
+        
+        let errorMsg = 'Terjadi kesalahan saat menghapus periode:\n\n';
+        
+        if (error instanceof TypeError && error.message.includes('JSON')) {
+            errorMsg += 'Server tidak mengembalikan data JSON yang valid.\n';
+            errorMsg += 'Kemungkinan:\n';
+            errorMsg += '- URL endpoint salah\n';
+            errorMsg += '- Session login expired\n';
+            errorMsg += '- Server error (500)\n\n';
+            errorMsg += 'Silakan:\n';
+            errorMsg += '1. Cek console browser (F12) untuk detail\n';
+            errorMsg += '2. Refresh halaman dan login ulang\n';
+            errorMsg += '3. Hubungi administrator jika masalah berlanjut';
+        } else {
+            errorMsg += error.message;
+        }
+        
+        alert(errorMsg);
+        
+        buttonElement.disabled = false;
+        buttonElement.innerHTML = originalHTML;
+    });
+}
 </script>
 {% endblock %}

@@ -555,25 +555,6 @@
                             </div>
                         </div>
 
-                        <!-- INFO STATUS SAAT INI -->
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <div>
-                                <strong>Status Saat Ini</strong>
-                                <p>
-                                    {% if absensi.is_late %}
-                                        <span class="badge bg-danger">Terlambat</span>
-                                    {% endif %}
-                                    {% if absensi.is_early_departure %}
-                                        <span class="badge bg-warning">Pulang Cepat</span>
-                                    {% endif %}
-                                    {% if not absensi.is_late and not absensi.is_early_departure %}
-                                        <span class="badge bg-success">Normal</span>
-                                    {% endif %}
-                                </p>
-                            </div>
-                        </div>
-
                         <!-- BUTTONS -->
                         <div class="btn-group-actions">
                             <a href="{% url 'riwayat_absensi' %}" class="btn btn-secondary">

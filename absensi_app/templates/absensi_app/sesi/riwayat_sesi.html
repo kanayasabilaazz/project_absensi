@@ -157,6 +157,25 @@
         box-shadow: var(--shadow-sm);
     }
 
+    /* ✅ TOMBOL HAPUS */
+    .btn-delete {
+        padding: 0.2rem 0.5rem;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 0.65rem;
+        transition: all var(--transition-base);
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+    }
+
     /* ==================== FORM CONTROLS ==================== */
     .form-label {
         font-weight: 600;
@@ -475,7 +494,7 @@
             grid-template-columns: 1fr;
         }
 
-        .btn-action {
+        .btn-action, .btn-delete {
             padding: 0.15rem 0.4rem;
             font-size: 0.6rem;
         }
@@ -529,7 +548,7 @@
         </div>
 
         <form method="get" class="row g-3 align-items-end">
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <label class="form-label">
                     <i class="fas fa-user"></i>
                     Cari Pegawai
@@ -540,7 +559,7 @@
                        placeholder="Nama atau User ID..." 
                        value="{{ search_employee }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-5">
                 <label class="form-label">
                     <i class="fas fa-calendar"></i>
                     Range Tanggal
@@ -580,15 +599,15 @@
                     <tr>
                         <th class="text-center" style="width: 5%;">No</th>
                         <th class="text-center" style="width: 10%;">User ID</th>
-                        <th style="width: 20%;">Nama</th>
-                        <th class="text-center" style="width: 12%;">Departemen</th>
-                        <th class="text-center" style="width: 13%;">Tanggal</th>
-                        <th class="text-center" style="width: 10%;">Sesi</th>
-                        <th class="text-center" style="width: 8%;">Tap Masuk</th>
-                        <th class="text-center" style="width: 8%;">Tap Pulang</th>
+                        <th style="width: 18%;">Nama</th>
+                        <th class="text-center" style="width: 10%;">Departemen</th>
+                        <th class="text-center" style="width: 12%;">Tanggal</th>
+                        <th class="text-center" style="width: 8%;">Sesi</th>
+                        <th class="text-center" style="width: 7%;">Tap Masuk</th>
+                        <th class="text-center" style="width: 7%;">Tap Pulang</th>
                         <th class="text-center" style="width: 8%;">Durasi</th>
-                        <th class="text-center" style="width: 8%;">Status</th>
-                        <th class="text-center" style="width: 6%;">Aksi</th>
+                        <th class="text-center" style="width: 7%;">Status</th>
+                        <th class="text-center" style="width: 8%;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -656,9 +675,19 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                <button class="btn-action" onclick="showDetail('{{ sesi.id }}')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                                <div style="display: flex; gap: 4px; justify-content: center;">
+                                    <button class="btn-action" onclick="showDetail('{{ sesi.id }}')" title="Lihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-delete" 
+                                            data-sesi-id="{{ sesi.id }}" 
+                                            data-pegawai-nama="{{ sesi.pegawai.nama_lengkap|escapejs }}" 
+                                            data-tanggal="{{ sesi.tanggal_mulai|date:'d M Y' }}"
+                                            onclick="hapusSesi(this)" 
+                                            title="Hapus Sesi">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -750,13 +779,24 @@ function getCookie(name) {
     return null;
 }
 
+// ✅ FUNGSI SYNC TAP DENGAN FILTER TANGGAL
 async function syncTap() {
-    // Step 1: Tanya user
     const result = await Swal.fire({
         title: 'Sync Tap dari Mesin?',
         html: `
             <div class="text-start">
-                <p>Proses ini akan mengambil <strong>semua data tap</strong> dari mesin fingerprint.</p>
+                <p>Proses ini akan mengambil <strong>data tap</strong> dari mesin fingerprint.</p>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Filter Tanggal (Opsional):</label>
+                    <div class="d-flex gap-2 align-items-center">
+                        <input type="date" id="sync_tanggal_mulai" class="form-control form-control-sm">
+                        <span>s/d</span>
+                        <input type="date" id="sync_tanggal_akhir" class="form-control form-control-sm">
+                    </div>
+                    <small class="text-muted">Kosongkan untuk sync semua data</small>
+                </div>
+                
                 <div class="alert alert-info mt-3 mb-0" style="font-size: 0.75rem;">
                     <i class="fas fa-info-circle"></i> 
                     Data tap akan disimpan sebagai <strong>TapLog</strong>. 
@@ -769,10 +809,17 @@ async function syncTap() {
         confirmButtonText: '<i class="fas fa-sync-alt me-1"></i>Ya, Sync!',
         cancelButtonText: 'Batal',
         confirmButtonColor: '#3b82f6',
-        cancelButtonColor: '#6b7280'
+        cancelButtonColor: '#6b7280',
+        preConfirm: () => {
+            const tanggalMulai = document.getElementById('sync_tanggal_mulai').value;
+            const tanggalAkhir = document.getElementById('sync_tanggal_akhir').value;
+            return { tanggalMulai, tanggalAkhir };
+        }
     });
 
     if (!result.isConfirmed) return;
+    
+    const { tanggalMulai, tanggalAkhir } = result.value;
 
     // Step 2: Show loading
     Swal.fire({
@@ -786,8 +833,16 @@ async function syncTap() {
     });
 
     try {
-        // Step 3: Call sync API
-        const res = await fetch('{% url "sync_tap_to_log" %}', {
+        // Step 3: Call sync API dengan filter tanggal
+        let url = '{% url "sync_tap_to_log" %}';
+        if (tanggalMulai || tanggalAkhir) {
+            const params = new URLSearchParams();
+            if (tanggalMulai) params.append('tanggal_mulai', tanggalMulai);
+            if (tanggalAkhir) params.append('tanggal_akhir', tanggalAkhir);
+            url += '?' + params.toString();
+        }
+        
+        const res = await fetch(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -830,6 +885,7 @@ async function syncTap() {
         });
     }
 }
+
 async function prosesSesi() {
     const result = await Swal.fire({
         title: 'Proses Tap ke Sesi?',
@@ -882,6 +938,76 @@ async function prosesSesi() {
                 confirmButtonColor: r.status === 'info' ? '#0ea5e9' : '#ef4444',
                 width: '600px'
             });
+        }
+    }
+}
+
+// ✅ FUNGSI HAPUS SESI - PERBAIKAN
+async function hapusSesi(button) {
+    // Ambil data dari data attributes
+    const sesiId = button.getAttribute('data-sesi-id');
+    const pegawaiNama = button.getAttribute('data-pegawai-nama');
+    const tanggal = button.getAttribute('data-tanggal');
+    
+    const result = await Swal.fire({
+        title: '🗑️ Hapus Sesi?',
+        html: `
+            <div class="text-start">
+                <p>Anda akan menghapus sesi absensi:</p>
+                <div class="alert alert-warning mb-3">
+                    <strong>Pegawai:</strong> ${pegawaiNama}<br>
+                    <strong>Tanggal:</strong> ${tanggal}
+                </div>
+                <p class="text-danger mb-0">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Peringatan:</strong> Semua tap logs terkait juga akan terhapus!
+                </p>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-trash me-1"></i>Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        showLoaderOnConfirm: true,
+        preConfirm: async () => {
+            try {
+                const res = await fetch(`/sesi/${sesiId}/hapus/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!res.ok) {
+                    throw new Error('HTTP error! status: ' + res.status);
+                }
+                
+                return await res.json();
+            } catch (error) {
+                Swal.showValidationMessage('Request failed: ' + error.message);
+            }
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    });
+
+    if (result.isConfirmed && result.value) {
+        const r = result.value;
+        
+        await Swal.fire({
+            title: r.status === 'success' ? '✅ Berhasil Dihapus!' : '❌ Gagal Hapus',
+            text: r.message || 'Sesi berhasil dihapus',
+            icon: r.status === 'success' ? 'success' : 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: r.status === 'success' ? '#10b981' : '#ef4444',
+            timer: 2000,
+            timerProgressBar: true
+        });
+
+        if (r.status === 'success') {
+            setTimeout(() => location.reload(), 2000);
         }
     }
 }

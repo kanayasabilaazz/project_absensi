@@ -193,6 +193,42 @@ class LayananModeKerja:
             'is_libur': False,
         }
     
+    # Tambahkan method ini di class LayananModeKerja (di dalam services.py yang sudah ada)
+
+    @classmethod
+    def info_mode_untuk_tanggal(cls, tanggal):
+        """
+        ✅ Ambil informasi mode untuk tanggal tertentu (untuk riwayat absensi)
+        """
+        mode_info = cls.ambil_mode_aktif(tanggal)
+        
+        if not mode_info['mode']:
+            return {
+                'nama_mode': 'Tidak Ada Mode',
+                'kode_mode': 'N/A',
+                'warna_mode': '#999999',
+                'icon_mode': 'fas fa-exclamation-triangle',
+                'nama_periode': None,
+                'is_libur': True,  # ✅ Default untuk mode tidak ada
+                'is_mode_khusus': False
+            }
+        
+        mode = mode_info['mode']
+        periode = mode_info['periode']
+        
+        return {
+            'nama_mode': mode.nama,
+            'kode_mode': mode.kode,
+            'warna_mode': mode.warna,
+            'icon_mode': mode.icon,
+            'nama_periode': periode.nama if periode else None,
+            # ❌ HAPUS BARIS INI:
+            # 'is_libur': mode.is_libur,
+            
+            # ✅ GANTI DENGAN LOGIKA ALTERNATIF:
+            'is_libur': False,  # Atau logika lain sesuai kebutuhan
+            'is_mode_khusus': periode is not None
+        }
     @classmethod
     def bersihkan_cache(cls, tanggal_mulai=None, tanggal_selesai=None):
         """
@@ -252,6 +288,11 @@ class WorkModeService:
     def get_mode_today():
         return LayananModeKerja.info_mode_hari_ini()
     
+    @staticmethod
+    def get_mode_for_date(tanggal):
+        """✅ NEW: Wrapper untuk info_mode_untuk_tanggal"""
+        return LayananModeKerja.info_mode_untuk_tanggal(tanggal)
+        
     @staticmethod
     def get_upcoming_modes(days=30):
         return LayananModeKerja.get_upcoming_modes(days)

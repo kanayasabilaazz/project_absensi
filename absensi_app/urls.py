@@ -151,13 +151,17 @@ urlpatterns = [
     path('api/mode-assignment-form/<int:pegawai_id>/', views.api_get_mode_assignment_form, name='api_get_mode_assignment_form'),
     path('api/save-mode-assignment-bulk/', views.api_save_mode_assignment_bulk, name='api_save_mode_assignment_bulk'),
     path('api/batalkan-pegawai-pending/', views.batalkan_pegawai_pending, name='batalkan_pegawai_pending'),
+    path('api/pegawai/<int:pegawai_id>/mode-assignments/', views.api_get_mode_assignments, name='api_get_mode_assignments'),
     
     # Tap Log & Sesi
     path('api/tap-logs/<int:pegawai_id>/', views.api_get_tap_logs, name='api_get_tap_logs'),
     path('api/sesi/<int:sesi_id>/', views.api_get_sesi_detail, name='api_get_sesi_detail'),
     path('api/sesi/statistics/', views.api_get_sesi_statistics, name='api_get_sesi_statistics'),
-
+        path('api/mode/<int:pk>/pegawai-list/', views.api_get_mode_pegawai_list, name='api_get_mode_pegawai_list'),
+    path('api/mode/<int:pk>/periode-list/', views.api_get_mode_periode_list, name='api_get_mode_periode_list'),
     path('riwayat-sesi/hapus/<int:pk>/', views.hapus_sesi_absensi, name='hapus_sesi_absensi'),
     path('sync-tap-to-log/', views.sync_tap_to_log, name='sync_tap_to_log'),
     path('proses-tap-to-sesi/', views.proses_tap_to_sesi, name='proses_tap_to_sesi'),
+    path('sesi/<int:pk>/hapus/', views.api_hapus_sesi, name='api_hapus_sesi'),
+    path('api/sesi/<int:sesi_id>/', views.api_get_sesi_detail, name='api_get_sesi_detail'),
 ]

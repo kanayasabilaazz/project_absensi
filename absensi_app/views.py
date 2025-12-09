@@ -603,6 +603,7 @@ def statistik_absensi(request):
     })
 
 
+@login_required
 def detail_absensi_by_status(request):
     """Endpoint AJAX: Mengambil detail absensi hari ini berdasarkan status."""
     if not request.user.is_staff:
@@ -635,6 +636,16 @@ def detail_absensi_by_status(request):
         
         pegawai_data = []
         for absensi in absensi_list:
+            # Hitung total jam kerja
+            jam_kerja = absensi.calculate_total_jam_kerja()
+            total_jam_kerja = jam_kerja.get('formatted', '-') if jam_kerja else '-'
+            
+            # Cek violation istirahat
+            has_violation = False
+            if absensi.tap_masuk and absensi.tap_pulang:
+                if not absensi.tap_istirahat_keluar or not absensi.tap_istirahat_masuk:
+                    has_violation = True
+            
             pegawai_data.append({
                 'userid': absensi.pegawai.userid,
                 'nama': absensi.pegawai.nama_lengkap,
@@ -642,10 +653,17 @@ def detail_absensi_by_status(request):
                     if absensi.pegawai.departemen else '-',
                 'jabatan': absensi.pegawai.jabatan.nama
                     if absensi.pegawai.jabatan else '-',
+                'tanggal': absensi.tanggal.strftime('%d %b %Y') if absensi.tanggal else '-',
                 'tap_masuk': absensi.tap_masuk.strftime('%H:%M')
                     if absensi.tap_masuk else '-',
+                'tap_istirahat_keluar': absensi.tap_istirahat_keluar.strftime('%H:%M')
+                    if absensi.tap_istirahat_keluar else '-',
+                'tap_istirahat_masuk': absensi.tap_istirahat_masuk.strftime('%H:%M')
+                    if absensi.tap_istirahat_masuk else '-',
                 'tap_pulang': absensi.tap_pulang.strftime('%H:%M')
                     if absensi.tap_pulang else '-',
+                'total_jam_kerja': total_jam_kerja,
+                'has_violation': has_violation,
                 'keterangan': absensi.keterangan or '-',
                 'is_late': absensi.is_late,
                 'is_early_departure': absensi.is_early_departure
@@ -662,7 +680,7 @@ def detail_absensi_by_status(request):
     except Exception as e:
         return JsonResponse({"status": "error", "msg": str(e)}, status=500)
 
-
+@login_required
 def riwayat_absensi_hari_ini(request):
     """Endpoint AJAX: Mengambil riwayat absensi hari ini (log detail)."""
     if not request.user.is_staff:
@@ -687,6 +705,16 @@ def riwayat_absensi_hari_ini(request):
         
         absensi_data = []
         for absensi in absensi_list:
+            # Hitung total jam kerja
+            jam_kerja = absensi.calculate_total_jam_kerja()
+            total_jam_kerja = jam_kerja.get('formatted', '-') if jam_kerja else '-'
+            
+            # Cek violation istirahat
+            has_violation = False
+            if absensi.tap_masuk and absensi.tap_pulang:
+                if not absensi.tap_istirahat_keluar or not absensi.tap_istirahat_masuk:
+                    has_violation = True
+            
             absensi_data.append({
                 'id': absensi.id,
                 'userid': absensi.pegawai.userid,
@@ -695,10 +723,17 @@ def riwayat_absensi_hari_ini(request):
                     if absensi.pegawai.departemen else '-',
                 'jabatan': absensi.pegawai.jabatan.nama
                     if absensi.pegawai.jabatan else '-',
-                'tap_masuk': absensi.tap_masuk.strftime('%H:%M:%S')
+                'tanggal': absensi.tanggal.strftime('%d %b %Y') if absensi.tanggal else '-',
+                'tap_masuk': absensi.tap_masuk.strftime('%H:%M')
                     if absensi.tap_masuk else '-',
-                'tap_pulang': absensi.tap_pulang.strftime('%H:%M:%S')
+                'tap_istirahat_keluar': absensi.tap_istirahat_keluar.strftime('%H:%M')
+                    if absensi.tap_istirahat_keluar else '-',
+                'tap_istirahat_masuk': absensi.tap_istirahat_masuk.strftime('%H:%M')
+                    if absensi.tap_istirahat_masuk else '-',
+                'tap_pulang': absensi.tap_pulang.strftime('%H:%M')
                     if absensi.tap_pulang else '-',
+                'total_jam_kerja': total_jam_kerja,
+                'has_violation': has_violation,
                 'status': absensi.status,
                 'keterangan': absensi.keterangan or '-',
                 'is_late': absensi.is_late,
@@ -715,8 +750,7 @@ def riwayat_absensi_hari_ini(request):
         })
     except Exception as e:
         return JsonResponse({"status": "error", "msg": str(e)}, status=500)
-
-
+    
 ## FUNGSI MANAJEMEN PEGAWAI (CRUD)
 # Kode ini untuk mengelola data master pegawai, termasuk daftar, detail, edit, dan hapus.
 
@@ -898,55 +932,159 @@ def daftar_Pegawai(request):
 
 @login_required
 def Pegawai_detail(request, pk):
-    """Menampilkan detail lengkap data pegawai dengan info jam kerja aktif."""
+    """
+    Menampilkan detail lengkap data pegawai dengan SEMUA mode jam kerja yang di-assign.
+    
+    ✅ FIX: Langsung query PegawaiModeAssignment untuk dapat jadwal_per_hari
+    """
     if not request.user.is_staff:
         messages.error(request, "Akses ditolak.")
         return redirect('dashboard')
     
     pegawai = get_object_or_404(Pegawai, pk=pk)
-    
     today = date.today()
     
+    # ========================================
+    # 1. Ambil info jam kerja HARI INI (untuk badge aktif)
+    # ========================================
     jam_kerja_info = WorkModeService.get_jam_kerja_for_pegawai(pegawai, today)
     jadwal_hari_ini = jam_kerja_info.get('jadwal')
-    mode_aktif = jam_kerja_info.get('mode')
+    mode_aktif_hari_ini = jam_kerja_info.get('mode')
     periode_aktif = jam_kerja_info.get('periode')
     
-    jadwal_mingguan = {}
+    # ========================================
+    # 2. ✅ AMBIL SEMUA MODE YANG DI-ASSIGN KE PEGAWAI
+    # ========================================
+    from .models import PegawaiModeAssignment, MasterModeJamKerja, ModeJamKerjaJadwal
     
-    if mode_aktif:
-        from .models import PegawaiModeAssignment
-        assignment = PegawaiModeAssignment.objects.filter(
-            pegawai=pegawai,
-            mode=mode_aktif,
-            is_active=True
+    all_assignments = PegawaiModeAssignment.objects.filter(
+        pegawai=pegawai,
+        is_active=True
+    ).select_related('mode').prefetch_related(
+        'mode__jadwal_list',
+        'mode__periode_list'
+    ).order_by('mode__nama')
+    
+    print(f"\n=== DEBUG PEGAWAI DETAIL ===")
+    print(f"Pegawai: {pegawai.nama_lengkap} ({pegawai.userid})")
+    print(f"Total assignments found: {all_assignments.count()}")
+    
+    modes_with_schedule = []
+    
+    for assignment in all_assignments:
+        mode = assignment.mode
+        
+        print(f"\n--- Processing Mode: {mode.nama} ---")
+        print(f"Assignment ID: {assignment.id}")
+        print(f"jadwal_per_hari: {assignment.jadwal_per_hari}")
+        
+        # ✅ Cek apakah ada periode aktif untuk mode ini
+        periode_aktif_mode = mode.periode_list.filter(
+            is_active=True,
+            tanggal_mulai__lte=today,
+            tanggal_selesai__gte=today
         ).first()
         
-        if assignment:
-            for hari in range(7):
-                jadwal_hari = assignment.get_jadwal_hari(hari)
-                jadwal_mingguan[hari] = jadwal_hari
-        else:
-            for hari in range(7):
-                jadwal = mode_aktif.jadwal_list.filter(
-                    hari=hari
-                ).order_by('urutan').first()
+        # ✅ Build jadwal mingguan untuk mode ini DARI assignment.jadwal_per_hari
+        jadwal_mingguan = {}
+        
+        if assignment.jadwal_per_hari:
+            # ✅ Gunakan jadwal yang di-assign ke pegawai
+            for hari_str, jadwal_id in assignment.jadwal_per_hari.items():
+                try:
+                    hari = int(hari_str)
+                    
+                    if jadwal_id:
+                        # ✅ Query jadwal berdasarkan ID
+                        jadwal = ModeJamKerjaJadwal.objects.filter(
+                            id=jadwal_id,
+                            mode=mode
+                        ).first()
+                        
+                        if jadwal:
+                            jadwal_mingguan[hari] = jadwal
+                            print(f"  ✅ Hari {hari}: {jadwal.jam_masuk} - {jadwal.jam_keluar}")
+                        else:
+                            jadwal_mingguan[hari] = None
+                            print(f"  ⚠️ Hari {hari}: Jadwal ID {jadwal_id} NOT FOUND")
+                    else:
+                        jadwal_mingguan[hari] = None
+                        print(f"  ℹ️ Hari {hari}: None (libur)")
                 
-                jadwal_mingguan[hari] = jadwal
+                except (ValueError, TypeError) as e:
+                    print(f"  ❌ ERROR parsing hari {hari_str}: {e}")
+                    jadwal_mingguan[hari] = None
+        
+        # ✅ FALLBACK: Jika jadwal_per_hari kosong/tidak lengkap (untuk backward compatibility)
+        if not jadwal_mingguan or len(jadwal_mingguan) < 7:
+            print("  ⚠️ Fallback: Jadwal tidak lengkap, ambil dari mode default")
+            
+            for hari in range(7):
+                if hari not in jadwal_mingguan:
+                    # Ambil jadwal default dari mode
+                    jadwal = mode.jadwal_list.filter(hari=hari).order_by('urutan').first()
+                    jadwal_mingguan[hari] = jadwal
+                    
+                    if jadwal:
+                        print(f"  ✅ Hari {hari} (fallback): {jadwal.jam_masuk} - {jadwal.jam_keluar}")
+                    else:
+                        print(f"  ℹ️ Hari {hari} (fallback): Libur")
+        
+        # ✅ Cek apakah mode ini adalah yang aktif hari ini
+        is_mode_today = mode_aktif_hari_ini and mode.id == mode_aktif_hari_ini.id
+        
+        modes_with_schedule.append({
+            'mode': mode,
+            'assignment': assignment,
+            'jadwal_mingguan': jadwal_mingguan,
+            'periode_aktif': periode_aktif_mode,
+            'is_mode_today': is_mode_today,
+        })
+        
+        print(f"  ✅ Added to modes_with_schedule (is_mode_today: {is_mode_today})")
+    
+    print(f"\n=== TOTAL modes_with_schedule: {len(modes_with_schedule)} ===\n")
+    
+    # ========================================
+    # 3. Urutkan: Mode aktif hari ini di atas
+    # ========================================
+    modes_with_schedule.sort(key=lambda x: (not x['is_mode_today'], x['mode'].nama))
+    
+    # ========================================
+    # 4. HITUNG STATISTIK ABSENSI BULAN INI
+    # ========================================
+    absensi_bulan_ini = pegawai.absensi.filter(
+        tanggal__month=today.month,
+        tanggal__year=today.year
+    )
+    
+    total_hadir = absensi_bulan_ini.filter(status='Hadir').count()
+    total_terlambat = absensi_bulan_ini.filter(is_late=True).count()
+    total_pulang_cepat = absensi_bulan_ini.filter(is_early_departure=True).count()
+    total_sakit_izin = absensi_bulan_ini.filter(status__in=['Sakit', 'Izin']).count()
     
     context = {
         'pegawai': pegawai,
         'today': today,
         'jadwal_hari_ini': jadwal_hari_ini,
-        'mode_aktif': mode_aktif,
+        'mode_aktif_hari_ini': mode_aktif_hari_ini,
         'periode_aktif': periode_aktif,
-        'jadwal_mingguan': jadwal_mingguan,
+        
+        # ⭐ SEMUA MODE DENGAN JADWAL
+        'modes_with_schedule': modes_with_schedule,
+        'total_mode_assigned': len(modes_with_schedule),
+        
         'hari_names_enum': enumerate(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']),
         'jam_kerja_info': jam_kerja_info,
+        
+        # ✅ STATISTIK ABSENSI
+        'total_hadir': total_hadir,
+        'total_terlambat': total_terlambat,
+        'total_pulang_cepat': total_pulang_cepat,
+        'total_sakit_izin': total_sakit_izin,
     }
     
     return render(request, 'absensi_app/pegawai/pegawai_detail.html', context)
-
 
 @login_required
 def Pegawai_edit(request, pk):
@@ -1317,40 +1455,81 @@ def api_get_mode_jadwal_departemen(request, pk):
     """Redirect ke fungsi ambil grup jam kerja per mode."""
     return api_get_jam_kerja_groups(request, pk)
 
-
 @login_required
 def api_get_jam_kerja_groups(request, pk):
-    """API untuk mengambil grup jam kerja per mode."""
+    """
+    API untuk mengambil grup jam kerja per mode.
+    ✅ FIXED: Semua path RETURN response
+    """
     if not request.user.is_staff:
         return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
     
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
-        mode = get_object_or_404(MasterModeJamKerja, pk=pk)
+        logger.info(f"=== API START: mode_id={pk} ===")
         
-        groups_data = {}
+        # ✅ Query mode dengan select_related
+        mode = MasterModeJamKerja.objects.prefetch_related('jadwal_list').filter(pk=pk).first()
+        
+        # ✅ VALIDASI: Mode exist?
+        if not mode:
+            all_modes = MasterModeJamKerja.objects.all().values('id', 'nama')
+            available_ids = [m['id'] for m in all_modes]
+            logger.error(f"Mode ID {pk} NOT FOUND. Available: {available_ids}")
+            
+            return JsonResponse({
+                "status": "error",
+                "msg": f"Mode ID {pk} tidak ditemukan",
+                "available_modes": list(all_modes)
+            }, status=404)
+        
+        # ✅ Ambil semua jadwal (1 query)
         jadwal_list = mode.jadwal_list.all().order_by('group_name', 'hari')
+        logger.info(f"Mode: {mode.nama}, Total jadwal: {jadwal_list.count()}")
+        
+        # ✅ VALIDASI: Ada jadwal?
+        if not jadwal_list.exists():
+            logger.warning(f"Mode {mode.nama} tidak punya jadwal sama sekali")
+            return JsonResponse({
+                "status": "error",
+                "msg": f"Mode {mode.nama} belum memiliki jadwal jam kerja",
+                "mode": {
+                    "id": mode.id,
+                    "nama": mode.nama,
+                },
+                "groups": [],
+                "total": 0
+            }, status=400)
+        
+        # ✅ Group by group_name
+        from collections import defaultdict
+        groups_dict = defaultdict(list)
         
         for jadwal in jadwal_list:
-            group_name = jadwal.group_name
-            
-            if not group_name:
-                continue
-            
-            if group_name not in groups_data:
-                groups_data[group_name] = {
-                    'jadwal_list': [],
-                    'first_jadwal': None
-                }
-            
-            groups_data[group_name]['jadwal_list'].append(jadwal)
-            
-            if not groups_data[group_name]['first_jadwal']:
-                groups_data[group_name]['first_jadwal'] = jadwal
+            if jadwal.group_name:
+                groups_dict[jadwal.group_name].append(jadwal)
         
+        if not groups_dict:
+            logger.warning(f"Mode {mode.nama} tidak punya group_name yang valid")
+            return JsonResponse({
+                "status": "error",
+                "msg": f"Jadwal mode {mode.nama} tidak memiliki nama grup",
+                "mode": {
+                    "id": mode.id,
+                    "nama": mode.nama,
+                },
+                "groups": [],
+                "total": 0
+            }, status=400)
+        
+        # ✅ Build response groups
         groups = []
-        for group_name, group_info in groups_data.items():
-            jadwals = group_info['jadwal_list']
-            sample = group_info['first_jadwal']
+        hari_names = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu']
+        
+        for group_name, jadwal_items in groups_dict.items():
+            sample = jadwal_items[0]
             
             jam_masuk = sample.jam_masuk.strftime('%H:%M') if sample.jam_masuk else '-'
             jam_keluar = sample.jam_keluar.strftime('%H:%M') if sample.jam_keluar else '-'
@@ -1359,17 +1538,34 @@ def api_get_jam_kerja_groups(request, pk):
             if sample.jam_istirahat_keluar and sample.jam_istirahat_masuk:
                 jam_istirahat = f"{sample.jam_istirahat_keluar.strftime('%H:%M')} - {sample.jam_istirahat_masuk.strftime('%H:%M')}"
             
-            hari_kerja = len([j for j in jadwals if j.hari < 5 and j.jam_masuk and j.jam_keluar])
+            # ✅ Hitung hari kerja & build lists
+            hari_kerja_count = 0
+            hari_kerja_list = []
+            jadwal_per_hari = {}
             
-            groups.append({
+            for jadwal in jadwal_items:
+                if jadwal.jam_masuk and jadwal.jam_keluar and 0 <= jadwal.hari < 7:
+                    hari_kerja_count += 1
+                    hari_kerja_list.append(hari_names[jadwal.hari])
+                    jadwal_per_hari[str(jadwal.hari)] = jadwal.id
+            
+            group_data = {
                 'id': sample.id,
                 'nama': group_name,
                 'jam_masuk': jam_masuk,
                 'jam_keluar': jam_keluar,
                 'jam_istirahat': jam_istirahat,
-                'hari_kerja': hari_kerja
-            })
+                'hari_kerja': hari_kerja_count,
+                'hari_kerja_list': hari_kerja_list,
+                'jadwal_per_hari': jadwal_per_hari
+            }
             
+            groups.append(group_data)
+            logger.info(f"✅ Group: {group_name}, Hari kerja: {hari_kerja_count}")
+        
+        logger.info(f"=== API SUCCESS: {len(groups)} groups found ===")
+        
+        # ✅ RETURN SUCCESS
         return JsonResponse({
             "status": "success",
             "mode": {
@@ -1381,17 +1577,22 @@ def api_get_jam_kerja_groups(request, pk):
         })
     
     except MasterModeJamKerja.DoesNotExist:
+        logger.error(f"Mode ID {pk} tidak ditemukan (DoesNotExist)")
         return JsonResponse({
             "status": "error",
-            "msg": "Mode tidak ditemukan"
+            "msg": f"Mode dengan ID {pk} tidak ditemukan"
         }, status=404)
+    
     except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        logger.error(f"❌ ERROR api_get_jam_kerja_groups:\n{error_detail}")
+        
         return JsonResponse({
             "status": "error",
-            "msg": f"Error: {str(e)}"
+            "msg": f"Terjadi error: {str(e)}"
         }, status=500)
-
-
+            
 @login_required
 def api_get_applicable_modes(request):
     """API untuk mendapatkan semua mode jam kerja yang aktif."""
@@ -2090,27 +2291,38 @@ def batalkan_pegawai_pending(request):
         pegawai_userid = pegawai_obj.userid
         pegawai_dept = pegawai_obj.departemen.nama if pegawai_obj.departemen else '-'
         
-        with transaction.atomic():
-            pegawai_obj.absensi.all().delete()
-            pegawai_obj.fingerprint_templates.all().delete()
-            pegawai_obj.mode_assignments.all().delete()
-            pegawai_obj.excluded_from_modes.all().delete()
+        try:
+            with transaction.atomic():
+                # ✅ Hapus relasi-relasi yang ada
+                pegawai_obj.absensi.all().delete()
+                pegawai_obj.fingerprint_templates.all().delete()
+                pegawai_obj.mode_assignments.all().delete()
+                
+                # ❌ HAPUS BARIS INI (karena relasi tidak ada)
+                # pegawai_obj.excluded_from_modes.all().delete()
+                
+                # Hapus pegawai
+                pegawai_obj.delete()
             
-            pegawai_obj.delete()
+            return JsonResponse({
+                "status": "success",
+                "msg": f"✅ {pegawai_nama} berhasil dihapus PERMANEN!\n\n"
+                       f"Detail:\n"
+                       f"• User ID: {pegawai_userid}\n"
+                       f"• Departemen: {pegawai_dept}\n"
+                       f"• Status: PENDING (belum sync)\n\n"
+                       f"Data telah dihapus dari database dan tidak dapat dikembalikan.",
+                "pegawai_id": pegawai_id,
+                "userid": pegawai_userid,
+                "nama": pegawai_nama
+            })
         
-        return JsonResponse({
-            "status": "success",
-            "msg": f"{pegawai_nama} berhasil dihapus PERMANEN!\n\n"
-                   f"Detail:\n"
-                   f"• User ID: {pegawai_userid}\n"
-                   f"• Departemen: {pegawai_dept}\n"
-                   f"• Status: PENDING (belum sync)\n\n"
-                   f"Data telah dihapus dari database dan tidak dapat dikembalikan.",
-            "pegawai_id": pegawai_id,
-            "userid": pegawai_userid,
-            "nama": pegawai_nama
-        })
-        
+        except Exception as e:
+            return JsonResponse({
+                "status": "error",
+                "msg": f"❌ Error saat menghapus: {str(e)}"
+            }, status=500)
+            
     except Pegawai.DoesNotExist:
         return JsonResponse({
             "status": "error",
@@ -2121,7 +2333,6 @@ def batalkan_pegawai_pending(request):
             "status": "error",
             "msg": f"Error: {str(e)}"
         }, status=500)
-
 
 ## FUNGSI SINKRONISASI ABSENSI
 # Kode ini untuk mengambil data absensi (tap log) dari mesin dan menyimpannya ke database.
@@ -2537,6 +2748,7 @@ def _create_sync_success_message(mesin_list, mesin_results, stats, tgl_mulai, tg
 ## FUNGSI MANAJEMEN ABSENSI
 # Kode ini untuk menampilkan riwayat absensi dan mengelola input absensi manual oleh admin.
 
+
 @login_required
 def riwayat_absensi(request):
     """Menampilkan riwayat absensi dengan filter tanggal dan pencarian."""
@@ -2549,23 +2761,22 @@ def riwayat_absensi(request):
     
     form = LaporanFilterForm(request.GET)
     
-    #  SELECT RELATED DEPARTEMEN & JABATAN
+    # ✅ SELECT RELATED
     absensi_list = Absensi.objects.select_related(
         'pegawai',
-        'pegawai__departemen',  # ← PENTING!
-        'pegawai__jabatan',     # ← PENTING!
+        'pegawai__departemen',
+        'pegawai__jabatan',
         'pegawai__cabang'
     ).all()
     
+    # ✅ FILTER CABANG (OPTIONAL)
     if cabang_aktif:
         absensi_list = absensi_list.filter(pegawai__cabang=cabang_aktif)
     
-    absensi_list = absensi_list.order_by(
-        '-tanggal',
-        '-tap_masuk',
-        'pegawai__userid'
-    )
+    # ✅ SORTING: Data terbaru di atas
+    absensi_list = absensi_list.order_by('-tanggal', '-created_at')
     
+    # ✅ FILTER dari form
     if form.is_valid():
         tgl_mulai = form.cleaned_data.get('tanggal_mulai')
         tgl_akhir = form.cleaned_data.get('tanggal_akhir')
@@ -2587,23 +2798,46 @@ def riwayat_absensi(request):
         mesin_list = mesin_list.filter(cabang=cabang_aktif)
     mesin_list = mesin_list.order_by('nama')
     
+    # ✅ HITUNG TOTAL JAM KERJA + AMBIL INFO MODE PER ABSENSI
+    absensi_with_stats = []
+    
+    for absensi in absensi_list:
+        # Hitung total jam
+        total_jam = absensi.calculate_total_jam_kerja()
+        
+        # ✅ AMBIL MODE YANG AKTIF PADA TANGGAL ABSENSI INI
+        mode_pada_tanggal = WorkModeService.get_mode_for_date(absensi.tanggal)
+        
+        # Cek violation
+        has_violation = False
+        if absensi.tap_masuk and absensi.tap_pulang:
+            if not absensi.tap_istirahat_keluar or not absensi.tap_istirahat_masuk:
+                has_violation = True
+
+        # Tambahkan attribute
+        absensi.total_jam_kerja = total_jam.get('formatted', '-') if total_jam else '-'
+        absensi.has_violation = has_violation
+        
+        # ✅ TAMBAHKAN INFO MODE
+        absensi.mode_warna = mode_pada_tanggal.get('warna_mode', '#6b7280')  # default gray
+        absensi.mode_nama = mode_pada_tanggal.get('nama_mode', 'Normal')
+        absensi.is_mode_khusus = mode_pada_tanggal.get('is_mode_khusus', False)
+        
+        absensi_with_stats.append(absensi)
+
     context = {
-        'absensi_list': absensi_list,
+        'absensi_list': absensi_with_stats,
         'form': form,
         'mesin_list': mesin_list,
         'cabang_aktif': cabang_aktif,
         'mode_info': mode_info,
     }
-    return render(request, 'absensi_app/absensi/riwayat_absensi.html', context)
 
+    return render(request, 'absensi_app/absensi/riwayat_absensi.html', context)
 
 @login_required
 def absensi_admin(request):
-    """
-    Form input absensi manual (izin, sakit, atau kehadiran manual) oleh admin.
-    
-     Filter cabang diterapkan
-    """
+    """Form input absensi manual (izin, sakit, atau kehadiran manual) oleh admin."""
     if not request.user.is_staff:
         messages.error(request, "Akses ditolak.")
         return redirect('dashboard')
@@ -2615,41 +2849,214 @@ def absensi_admin(request):
         pegawai_id = request.POST.get('pegawai')
         keterangan = request.POST.get('keterangan', '').strip()
         
-        # Validasi dasar
+        # ✅ 1. VALIDASI BASIC
         if not pegawai_id:
-            messages.error(request, 'Pilih pegawai terlebih dahulu!')
+            messages.error(request, '❌ Pilih pegawai terlebih dahulu!')
             return redirect('absensi_admin')
         
         if not status:
-            messages.error(request, 'Status absensi wajib dipilih!')
+            messages.error(request, '❌ Status absensi wajib dipilih!')
             return redirect('absensi_admin')
         
         try:
             pegawai_obj = Pegawai.objects.get(id=pegawai_id)
+        except Pegawai.DoesNotExist:
+            messages.error(request, '❌ Pegawai tidak ditemukan!')
+            return redirect('absensi_admin')
+        
+        # ✅ 2. HANDLE STATUS HADIR/ABSEN (SINGLE DATE)
+        if status in ['Hadir', 'Absen']:
+            tanggal_str = request.POST.get('tanggal')
             
-            #  Validasi pegawai sesuai cabang aktif
-            if cabang_aktif and pegawai_obj.cabang != cabang_aktif:
-                messages.error(
+            if not tanggal_str:
+                messages.error(request, '❌ Tanggal wajib diisi!')
+                return redirect('absensi_admin')
+            
+            try:
+                tanggal = datetime.strptime(tanggal_str, '%Y-%m-%d').date()
+            except ValueError:
+                messages.error(request, '❌ Format tanggal tidak valid!')
+                return redirect('absensi_admin')
+            
+            # ✅ Cek duplikat
+            if Absensi.objects.filter(pegawai=pegawai_obj, tanggal=tanggal).exists():
+                messages.warning(
                     request,
-                    f"Pegawai {pegawai_obj.nama_lengkap} tidak terdaftar di cabang {cabang_aktif.nama}"
+                    f'⚠️ Absensi untuk {pegawai_obj.nama_lengkap} pada {tanggal.strftime("%d %b %Y")} sudah ada!'
                 )
                 return redirect('absensi_admin')
             
-            # ... (sisa kode sama seperti sebelumnya)
+            # ✅ Ambil waktu tap
+            tap_masuk = None
+            tap_pulang = None
+            tap_istirahat_keluar = None
+            tap_istirahat_masuk = None
             
-        except Pegawai.DoesNotExist:
-            messages.error(request, 'Pegawai tidak ditemukan')
-        except ValueError as e:
-            messages.error(request, f'Format data tidak valid: {str(e)}')
-        except Exception as e:
-            messages.error(request, f'Error: {str(e)}')
+            if status == 'Hadir':
+                tap_masuk_str = request.POST.get('tap_masuk')
+                if not tap_masuk_str:
+                    messages.error(request, '❌ Waktu masuk wajib diisi untuk status Hadir!')
+                    return redirect('absensi_admin')
+                
+                try:
+                    tap_masuk = datetime.strptime(tap_masuk_str, '%H:%M').time()
+                    
+                    tap_pulang_str = request.POST.get('tap_pulang')
+                    if tap_pulang_str:
+                        tap_pulang = datetime.strptime(tap_pulang_str, '%H:%M').time()
+                    
+                    tap_istirahat_keluar_str = request.POST.get('tap_istirahat_keluar')
+                    if tap_istirahat_keluar_str:
+                        tap_istirahat_keluar = datetime.strptime(tap_istirahat_keluar_str, '%H:%M').time()
+                    
+                    tap_istirahat_masuk_str = request.POST.get('tap_istirahat_masuk')
+                    if tap_istirahat_masuk_str:
+                        tap_istirahat_masuk = datetime.strptime(tap_istirahat_masuk_str, '%H:%M').time()
+                    
+                except ValueError:
+                    messages.error(request, '❌ Format waktu tidak valid!')
+                    return redirect('absensi_admin')
+            
+            # ✅ 3. SIMPAN KE DATABASE (TANPA TRANSACTION - LANGSUNG COMMIT)
+            try:
+                absensi = Absensi(
+                    pegawai=pegawai_obj,
+                    tanggal=tanggal,
+                    status=status,
+                    tap_masuk=tap_masuk,
+                    tap_pulang=tap_pulang,
+                    tap_istirahat_keluar=tap_istirahat_keluar,
+                    tap_istirahat_masuk=tap_istirahat_masuk,
+                    keterangan=keterangan
+                )
+                
+                # ✅ LANGSUNG SAVE (auto-commit)
+                absensi.save()
+                
+                messages.success(
+                    request,
+                    f'✅ Absensi {status} untuk {pegawai_obj.nama_lengkap} berhasil disimpan!'
+                )
+                
+                # ✅ Redirect dengan delay kecil
+                return redirect('riwayat_absensi')
+                
+            except Exception as e:
+                messages.error(request, f'❌ Error menyimpan: {str(e)}')
+                return redirect('absensi_admin')
+        
+        # ✅ 4. HANDLE STATUS IZIN/SAKIT (MULTIPLE DATES)
+        elif status in ['Izin', 'Sakit']:
+            tanggal_mulai_str = request.POST.get('tanggal_mulai')
+            tanggal_selesai_str = request.POST.get('tanggal_selesai')
+            
+            if not tanggal_mulai_str or not tanggal_selesai_str:
+                messages.error(request, '❌ Tanggal mulai dan selesai wajib diisi!')
+                return redirect('absensi_admin')
+            
+            try:
+                tanggal_mulai = datetime.strptime(tanggal_mulai_str, '%Y-%m-%d').date()
+                tanggal_selesai = datetime.strptime(tanggal_selesai_str, '%Y-%m-%d').date()
+            except ValueError:
+                messages.error(request, '❌ Format tanggal tidak valid!')
+                return redirect('absensi_admin')
+            
+            if tanggal_selesai < tanggal_mulai:
+                messages.error(request, '❌ Tanggal selesai tidak boleh lebih awal dari tanggal mulai!')
+                return redirect('absensi_admin')
+            
+            # ✅ Ambil tipe
+            tipe_izin = request.POST.get('tipe_izin', 'full')
+            
+            tap_masuk = None
+            tap_pulang = None
+            
+            if tipe_izin == 'half':
+                tap_masuk_str = request.POST.get('tap_masuk_half')
+                tap_pulang_str = request.POST.get('tap_pulang_half')
+                
+                if tap_masuk_str:
+                    try:
+                        tap_masuk = datetime.strptime(tap_masuk_str, '%H:%M').time()
+                    except ValueError:
+                        pass
+                
+                if tap_pulang_str:
+                    try:
+                        tap_pulang = datetime.strptime(tap_pulang_str, '%H:%M').time()
+                    except ValueError:
+                        pass
+            
+            # ✅ Simpan untuk setiap tanggal
+            created_count = 0
+            skipped_count = 0
+            
+            current_date = tanggal_mulai
+            
+            try:
+                while current_date <= tanggal_selesai:
+                    if not Absensi.objects.filter(pegawai=pegawai_obj, tanggal=current_date).exists():
+                        absensi = Absensi(
+                            pegawai=pegawai_obj,
+                            tanggal=current_date,
+                            status=status,
+                            tap_masuk=tap_masuk,
+                            tap_pulang=tap_pulang,
+                            keterangan=keterangan
+                        )
+                        absensi.save()
+                        created_count += 1
+                    else:
+                        skipped_count += 1
+                    
+                    current_date += timedelta(days=1)
+                
+                msg = f'✅ Berhasil! {created_count} hari {status} disimpan'
+                if skipped_count > 0:
+                    msg += f' ({skipped_count} dilewati karena sudah ada)'
+                
+                messages.success(request, msg)
+                return redirect('riwayat_absensi')
+                
+            except Exception as e:
+                messages.error(request, f'❌ Error: {str(e)}')
+                return redirect('absensi_admin')
+        
+        else:
+            messages.error(request, '❌ Status tidak valid!')
+            return redirect('absensi_admin')
     
-    # GET: Tampilkan form
+    # ✅ GET: Tampilkan form
     form = AbsensiAdminForm()
     
     pegawai_with_fp = get_pegawai_with_fingerprint()
     
-    #  Filter pegawai berdasarkan cabang aktif
+    queryset = Pegawai.objects.filter(
+        is_active=True,
+        uid_mesin__isnull=False,
+        id__in=pegawai_with_fp
+    ).exclude(uid_mesin=0)
+    
+    if cabang_aktif:
+        queryset = queryset.filter(cabang=cabang_aktif)
+    
+    form.fields['pegawai'].queryset = queryset.order_by('nama_lengkap')
+    
+    context = {
+        'form': form,
+        'cabang_aktif': cabang_aktif,
+    }
+    
+    return render(request, 'absensi_app/absensi/absensi_admin_form.html', context)
+    
+    # ========================================
+    # ✅ GET: Tampilkan form
+    # ========================================
+    form = AbsensiAdminForm()
+    
+    pegawai_with_fp = get_pegawai_with_fingerprint()
+    
+    # ✅ Filter pegawai berdasarkan cabang aktif
     queryset = Pegawai.objects.filter(
         is_active=True,
         uid_mesin__isnull=False,
@@ -3284,7 +3691,131 @@ def export_absensi_csv_advanced(request):
     
     return response
 
-
+@login_required
+def preview_export_data(request):
+    """
+    Endpoint AJAX: Menampilkan pratinjau data sebelum diekspor.
+    
+    ✅ OPTIMIZED: Menggunakan select_related dan values untuk performa
+    """
+    if not request.user.is_staff:
+        return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
+    
+    try:
+        # ✅ Query optimized dengan select_related
+        absensi_list = Absensi.objects.select_related(
+            'pegawai',
+            'pegawai__departemen',
+            'pegawai__jabatan'
+        ).all()
+        
+        # ✅ Filter cabang
+        cabang_aktif = get_active_cabang(request)
+        if cabang_aktif:
+            absensi_list = absensi_list.filter(pegawai__cabang=cabang_aktif)
+        
+        # ✅ Filter pegawai
+        pegawai_id = request.GET.get('pegawai_id')
+        if pegawai_id:
+            absensi_list = absensi_list.filter(pegawai_id=pegawai_id)
+        
+        # ✅ Filter departemen
+        departemen = request.GET.get('departemen')
+        if departemen:
+            absensi_list = absensi_list.filter(pegawai__departemen__nama=departemen)
+        
+        # ✅ Filter periode
+        periode = request.GET.get('periode', 'custom')
+        today = date.today()
+        
+        if periode == 'hari_ini':
+            absensi_list = absensi_list.filter(tanggal=today)
+        elif periode == 'minggu_ini':
+            start_week = today - timedelta(days=today.weekday())
+            absensi_list = absensi_list.filter(tanggal__gte=start_week, tanggal__lte=today)
+        elif periode == 'bulan_ini':
+            start_month = today.replace(day=1)
+            absensi_list = absensi_list.filter(tanggal__gte=start_month, tanggal__lte=today)
+        elif periode == 'tahun_ini':
+            start_year = today.replace(month=1, day=1)
+            absensi_list = absensi_list.filter(tanggal__gte=start_year, tanggal__lte=today)
+        elif periode == 'custom':
+            tgl_mulai = request.GET.get('tanggal_mulai')
+            tgl_akhir = request.GET.get('tanggal_akhir')
+            
+            if tgl_mulai:
+                absensi_list = absensi_list.filter(tanggal__gte=tgl_mulai)
+            if tgl_akhir:
+                absensi_list = absensi_list.filter(tanggal__lte=tgl_akhir)
+        
+        # ✅ Order by tanggal (terbaru dulu)
+        absensi_list = absensi_list.order_by('-tanggal', 'pegawai__userid')
+        
+        # ✅ Hitung total SEBELUM limit
+        total_data = absensi_list.count()
+        
+        print(f"\n========== PREVIEW EXPORT ==========")
+        print(f"Total data: {total_data}")
+        print(f"Filter periode: {periode}")
+        print(f"Cabang: {cabang_aktif.nama if cabang_aktif else 'All'}")
+        print(f"====================================\n")
+        
+        # ✅ Apply limit
+        limit = request.GET.get('limit', '10')
+        if limit != 'all':
+            try:
+                limit_num = int(limit)
+                absensi_list = absensi_list[:limit_num]
+            except ValueError:
+                absensi_list = absensi_list[:10]
+        
+        # ✅ Build preview data (minimal processing)
+        preview_data = []
+        for absensi in absensi_list:
+            # ✅ Hitung total jam kerja
+            jam_kerja = absensi.calculate_total_jam_kerja()
+            total_jam_kerja = jam_kerja.get('formatted', '-') if jam_kerja else '-'
+            
+            # ✅ Format shift
+            shift_text = '-'
+            if absensi.tap_masuk and absensi.tap_pulang:
+                shift_text = f"{absensi.tap_masuk.strftime('%H:%M')} - {absensi.tap_pulang.strftime('%H:%M')}"
+            elif absensi.tap_masuk:
+                shift_text = f"{absensi.tap_masuk.strftime('%H:%M')} - ..."
+            
+            preview_data.append({
+                'userid': absensi.pegawai.userid,
+                'nama': absensi.pegawai.nama_lengkap,
+                'departemen': absensi.pegawai.departemen.nama if absensi.pegawai.departemen else '-',
+                'jabatan': absensi.pegawai.jabatan.nama if absensi.pegawai.jabatan else '-',
+                'tanggal': absensi.tanggal.strftime('%d-%m-%Y'),
+                'shift': shift_text,
+                'tap_masuk': absensi.tap_masuk.strftime('%H:%M') if absensi.tap_masuk else '-',
+                'tap_pulang': absensi.tap_pulang.strftime('%H:%M') if absensi.tap_pulang else '-',
+                'total_jam_kerja': total_jam_kerja,
+                'status': absensi.status,
+                'is_late': absensi.is_late,
+                'is_early_departure': absensi.is_early_departure
+            })
+        
+        return JsonResponse({
+            "status": "success",
+            "total": total_data,
+            "preview": preview_data,
+            "limit": limit,
+            "showing": len(preview_data)
+        })
+        
+    except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        print(f"ERROR Preview: {error_detail}")
+        
+        return JsonResponse({
+            "status": "error",
+            "msg": str(e)
+        }, status=500)
+    
 @login_required
 def export_statistik_absensi(request):
     """Mengekspor laporan statistik absensi ke Excel."""
@@ -4145,10 +4676,14 @@ def riwayat_absensi_per_pegawai(request, pk):
     today = date.today()
     jam_kerja_info = WorkModeService.get_jam_kerja_for_pegawai(pegawai, today)
     jadwal_hari_ini = jam_kerja_info.get('jadwal')
-    mode_info = WorkModeService.get_mode_today()
+    mode_info = jam_kerja_info.get('mode')
     
     absensi_list = Absensi.objects.filter(
         pegawai=pegawai
+    ).select_related(
+        'pegawai',
+        'pegawai__departemen', 
+        'pegawai__jabatan'
     ).order_by('-tanggal', '-tap_masuk')
     
     if form.is_valid():
@@ -4180,11 +4715,26 @@ def riwayat_absensi_per_pegawai(request, pk):
     total_terlambat = absensi_list.filter(is_late=True).count()
     total_pulang_cepat = absensi_list.filter(is_early_departure=True).count()
     
+    # ✅ HITUNG TOTAL JAM KERJA
     total_jam_kerja_minutes = 0
+    absensi_with_stats = []
+    
     for absensi in absensi_list:
         jam_kerja_data = absensi.calculate_total_jam_kerja()
+        
         if jam_kerja_data and jam_kerja_data.get('total_minutes'):
             total_jam_kerja_minutes += jam_kerja_data['total_minutes']
+        
+        # Tambahkan attribute untuk template
+        absensi.total_jam_kerja = jam_kerja_data.get('formatted', '-') if jam_kerja_data else '-'
+        
+        # Cek violation istirahat
+        absensi.has_violation = False
+        if absensi.tap_masuk and absensi.tap_pulang:
+            if not absensi.tap_istirahat_keluar or not absensi.tap_istirahat_masuk:
+                absensi.has_violation = True
+        
+        absensi_with_stats.append(absensi)
     
     total_jam_kerja_hours = total_jam_kerja_minutes // 60
     total_jam_kerja_mins = total_jam_kerja_minutes % 60
@@ -4198,7 +4748,7 @@ def riwayat_absensi_per_pegawai(request, pk):
     
     context = {
         'pegawai': pegawai,
-        'absensi_list': absensi_list,
+        'absensi_list': absensi_with_stats,
         'form': form,
         'period': period,
         'total_hadir': total_hadir,
@@ -4214,7 +4764,10 @@ def riwayat_absensi_per_pegawai(request, pk):
         'total_jam_kerja_mins': total_jam_kerja_mins,
         'total_jam_kerja_formatted': total_jam_kerja_formatted,
         'jadwal_hari_ini': jadwal_hari_ini,
-        'mode_info': mode_info,
+        'mode_info': {
+            'mode_nama': mode_info.nama if mode_info else None,
+            'mode_kode': mode_info.kode if mode_info else None,
+        } if mode_info else None,
         'today': today,
     }
     return render(request, 'absensi_app/absensi/riwayat_per_Pegawai.html', context)
@@ -4993,15 +5546,28 @@ def daftar_mode_jam_kerja(request):
     return render(request, 'absensi_app/pengaturan/mode_jam_kerja/daftar.html', context)
 
 
+
 @login_required
 def tambah_mode_jam_kerja(request):
-    """Menambah mode jam kerja baru."""
+    """Menambah mode jam kerja baru dengan auto-generate kode."""
     if request.method == 'POST':
         try:
             with transaction.atomic():
+                nama = request.POST.get('nama')
+                
+                # ✅ AUTO-GENERATE KODE dari nama
+                kode = ''.join([word[0].upper() for word in nama.split()[:3]])
+                
+                # ✅ Pastikan kode unik
+                base_kode = kode
+                counter = 1
+                while MasterModeJamKerja.objects.filter(kode=kode).exists():
+                    kode = f"{base_kode}{counter}"
+                    counter += 1
+                
                 mode = MasterModeJamKerja.objects.create(
-                    nama=request.POST.get('nama'),
-                    kode=request.POST.get('kode').upper(),
+                    nama=nama,
+                    kode=kode,  # Auto-generated
                     warna=request.POST.get('warna', '#3B82F6'),
                     priority=int(request.POST.get('priority', 1)),
                 )
@@ -5010,14 +5576,14 @@ def tambah_mode_jam_kerja(request):
                 
                 if not schedules_json or schedules_json == '{}':
                     mode.delete()
-                    messages.error(request, 'Jadwal belum diatur!')
+                    messages.error(request, '❌ Jadwal belum diatur!')
                     return redirect('tambah_mode_jam_kerja')
                 
                 try:
                     schedules = json.loads(schedules_json)
                 except json.JSONDecodeError as e:
                     mode.delete()
-                    messages.error(request, f'Format JSON tidak valid: {str(e)}')
+                    messages.error(request, f'❌ Format JSON tidak valid: {str(e)}')
                     return redirect('tambah_mode_jam_kerja')
                 
                 jadwal_count = 0
@@ -5066,15 +5632,15 @@ def tambah_mode_jam_kerja(request):
                 
                 if jadwal_count == 0:
                     mode.delete()
-                    messages.error(request, 'Tidak ada jadwal yang valid! Minimal isi jam masuk dan keluar.')
+                    messages.error(request, '❌ Tidak ada jadwal yang valid!')
                     return redirect('tambah_mode_jam_kerja')
                 
                 WorkModeService.clear_cache()
-                messages.success(request, f'Mode "{mode.nama}" berhasil ditambahkan dengan {jadwal_count} jadwal!')
+                messages.success(request, f'✅ Mode "{mode.nama}" berhasil ditambahkan dengan {jadwal_count} jadwal!')
                 return redirect('detail_mode_jam_kerja', pk=mode.id)
             
         except Exception as e:
-            messages.error(request, f'Error: {str(e)}')
+            messages.error(request, f'❌ Error: {str(e)}')
             return redirect('tambah_mode_jam_kerja')
     
     context = {
@@ -5087,7 +5653,7 @@ def tambah_mode_jam_kerja(request):
 
 @login_required
 def edit_mode_jam_kerja(request, pk):
-    """Mengedit mode jam kerja."""
+    """Mengedit mode jam kerja dengan auto-update kode jika nama berubah."""
     if not request.user.is_staff:
         messages.error(request, "Akses ditolak.")
         return redirect('dashboard')
@@ -5097,13 +5663,28 @@ def edit_mode_jam_kerja(request, pk):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                mode.nama = request.POST.get('nama')
-                mode.kode = request.POST.get('kode').upper()
+                nama_baru = request.POST.get('nama')
+                
+                # ✅ Jika nama berubah, generate kode baru
+                if nama_baru != mode.nama:
+                    kode = ''.join([word[0].upper() for word in nama_baru.split()[:3]])
+                    
+                    # ✅ Pastikan kode unik (exclude mode saat ini)
+                    base_kode = kode
+                    counter = 1
+                    while MasterModeJamKerja.objects.filter(kode=kode).exclude(pk=pk).exists():
+                        kode = f"{base_kode}{counter}"
+                        counter += 1
+                    
+                    mode.kode = kode
+                
+                mode.nama = nama_baru
                 mode.warna = request.POST.get('warna', '#3B82F6')
                 mode.icon = request.POST.get('icon', 'fas fa-clock')
                 mode.priority = int(request.POST.get('priority', 1))
                 mode.save()
                 
+                # Hapus jadwal lama
                 mode.jadwal_list.all().delete()
                 
                 schedules_json = request.POST.get('schedules_json', '{}')
@@ -5136,12 +5717,13 @@ def edit_mode_jam_kerja(request, pk):
                             shift_count += 1
                 
                 WorkModeService.clear_cache()
-                messages.success(request, f'Mode "{mode.nama}" berhasil diperbarui dengan {shift_count} jadwal!')
+                messages.success(request, f'✅ Mode "{mode.nama}" berhasil diperbarui!')
                 return redirect('detail_mode_jam_kerja', pk=pk)
             
         except Exception as e:
-            messages.error(request, f'Error: {str(e)}')
+            messages.error(request, f'❌ Error: {str(e)}')
     
+    # Build schedules_json untuk edit
     schedules_by_group = {}
     
     for jadwal in mode.jadwal_list.all():
@@ -5173,7 +5755,6 @@ def edit_mode_jam_kerja(request, pk):
         'schedules_json': json.dumps(schedules_by_group),
     }
     return render(request, 'absensi_app/pengaturan/mode_jam_kerja/form.html', context)
-
 
 @login_required
 def detail_mode_jam_kerja(request, pk):
@@ -5274,6 +5855,48 @@ def hapus_mode_jam_kerja(request, pk):
     context = {'mode': mode}
     return render(request, 'absensi_app/pengaturan/mode_jam_kerja/hapus.html', context)
 
+@login_required
+def hapus_periode_mode(request, pk):
+    """Menghapus periode khusus"""
+    if not request.user.is_staff:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
+        messages.error(request, "Akses ditolak.")
+        return redirect('dashboard')
+    
+    periode = get_object_or_404(ModeJamKerjaPeriode, pk=pk)
+    mode_id = periode.mode.id
+    
+    if request.method == 'POST':
+        try:
+            nama_periode = periode.nama
+            tanggal_mulai = periode.tanggal_mulai
+            tanggal_selesai = periode.tanggal_selesai
+            
+            periode.delete()
+            WorkModeService.clear_cache(tanggal_mulai, tanggal_selesai)
+            
+            # Check if AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    "status": "success",
+                    "msg": f'✅ Periode "{nama_periode}" berhasil dihapus!'
+                })
+            
+            messages.success(request, f'✅ Periode "{nama_periode}" berhasil dihapus!')
+        except Exception as e:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    "status": "error",
+                    "msg": f'❌ Error: {str(e)}'
+                }, status=500)
+            messages.error(request, f'❌ Error: {str(e)}')
+        
+        return redirect('detail_mode_jam_kerja', pk=mode_id)
+    
+    # GET request - tampilkan halaman konfirmasi
+    context = {'periode': periode}
+    return render(request, 'absensi_app/pengaturan/mode_jam_kerja/periode_hapus.html', context)
 
 @login_required
 def duplicate_mode_jam_kerja(request, pk):
@@ -5511,10 +6134,9 @@ def edit_periode_mode(request, pk):
 
 @login_required
 def hapus_periode_mode(request, pk):
-    """Menghapus periode khusus."""
+    """Menghapus periode khusus"""
     if not request.user.is_staff:
-        messages.error(request, "Akses ditolak.")
-        return redirect('dashboard')
+        return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
     
     periode = get_object_or_404(ModeJamKerjaPeriode, pk=pk)
     mode_id = periode.mode.id
@@ -5527,8 +6149,21 @@ def hapus_periode_mode(request, pk):
             
             periode.delete()
             WorkModeService.clear_cache(tanggal_mulai, tanggal_selesai)
+            
+            # Check if AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    "status": "success",
+                    "msg": f'Periode "{nama_periode}" berhasil dihapus!'
+                })
+            
             messages.success(request, f'Periode "{nama_periode}" berhasil dihapus!')
         except Exception as e:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    "status": "error",
+                    "msg": str(e)
+                }, status=500)
             messages.error(request, f'Error: {str(e)}')
         
         return redirect('detail_mode_jam_kerja', pk=mode_id)
@@ -5593,36 +6228,64 @@ def api_get_mode_today(request):
     
     try:
         from .services import WorkModeService
+        from datetime import date
         
+        # ✅ 1. Get mode info hari ini
         mode_info = WorkModeService.get_mode_today()
+        
+        print("\n========== DEBUG API GET MODE TODAY ==========")
+        print(f"Mode Info: {mode_info}")
+        
+        # ✅ 2. Get upcoming modes (14 hari ke depan)
         upcoming = WorkModeService.get_upcoming_modes(14)
+        
+        print(f"Upcoming count: {len(upcoming)}")
+        print("==============================================\n")
+        
+        # ✅ 3. Build response
+        upcoming_data = []
+        for p in upcoming:
+            upcoming_data.append({
+                "nama": p.nama,
+                "mode": p.mode.nama,
+                "warna": p.mode.warna,
+                "icon": p.mode.icon,
+                "tanggal_mulai": p.tanggal_mulai.strftime('%d %b %Y'),
+                "tanggal_selesai": p.tanggal_selesai.strftime('%d %b %Y'),
+            })
         
         return JsonResponse({
             "status": "success",
             "mode": {
-                "nama": mode_info['nama_mode'],
-                "kode": mode_info['mode_kode'],
-                "warna": mode_info['mode_warna'],
-                "icon": mode_info['mode_icon'],
-                "is_libur": mode_info['is_libur'],
+                "nama": mode_info.get('nama_mode', 'Normal'),
+                "kode": mode_info.get('mode_kode', 'N/A'),
+                "warna": mode_info.get('mode_warna', '#3b82f6'),
+                "icon": mode_info.get('mode_icon', 'fa-clock'),
+                "is_libur": mode_info.get('is_libur', False),
                 "periode": mode_info.get('nama_periode'),
             },
-            "upcoming": [
-                {
-                    "nama": p.nama,
-                    "mode": p.mode.nama,
-                    "tanggal_mulai": p.tanggal_mulai.strftime('%d %b %Y'),
-                    "tanggal_selesai": p.tanggal_selesai.strftime('%d %b %Y'),
-                    "warna": p.mode.warna,
-                } for p in upcoming
-            ]
+            "upcoming": upcoming_data
         })
+        
     except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        print(f"❌ ERROR api_get_mode_today:\n{error_detail}")
+        
+        # ✅ Fallback response
         return JsonResponse({
-            "status": "error",
-            "msg": f"Error: {str(e)}"
-        }, status=500)
-
+            "status": "success",
+            "mode": {
+                "nama": "Normal",
+                "kode": "N/A",
+                "warna": "#3b82f6",
+                "icon": "fa-clock",
+                "is_libur": False,
+                "periode": None,
+            },
+            "upcoming": []
+        })
+    
 @login_required
 def api_list_cabang(request):
     """Endpoint API: Daftar semua cabang yang aktif."""
@@ -5848,17 +6511,23 @@ def api_get_mesin_by_pegawai(request):
 
 @login_required
 def assign_mode_jam_kerja_pegawai(request, pegawai_id):
-    """Halaman untuk meng-assign/edit mode jam kerja untuk satu pegawai."""
+    """
+    Halaman untuk meng-assign/edit mode jam kerja untuk satu pegawai.
+    
+    ✅ FIX: Template path yang benar
+    """
     if not request.user.is_staff:
         messages.error(request, "Akses ditolak.")
         return redirect('dashboard')
     
     pegawai = get_object_or_404(Pegawai, pk=pegawai_id)
     
+    # ✅ Ambil semua mode yang aktif
     all_modes = MasterModeJamKerja.objects.filter(
         is_active=True
     ).prefetch_related('jadwal_list', 'periode_list').order_by('-is_default', '-priority', 'nama')
     
+    # ✅ Ambil assignment yang sudah ada
     from .models import PegawaiModeAssignment
     existing_assignments = PegawaiModeAssignment.objects.filter(
         pegawai=pegawai,
@@ -5870,9 +6539,10 @@ def assign_mode_jam_kerja_pegawai(request, pegawai_id):
     for mode in all_modes:
         assignment = existing_assignments.filter(mode=mode).first()
         
+        # ✅ Build jadwal groups untuk dropdown
         jadwal_groups = {}
         for jadwal in mode.jadwal_list.all():
-            group_name = jadwal.group_name
+            group_name = jadwal.group_name or 'Default'
             hari = jadwal.hari
             
             if group_name not in jadwal_groups:
@@ -5899,8 +6569,8 @@ def assign_mode_jam_kerja_pegawai(request, pegawai_id):
         'hari_names': ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
     }
     
-    return render(request, 'absensi_app/pegawai/assign_mode_jam_kerja.html', context)
-
+    # ✅ FIX: Path template yang benar
+    return render(request, 'absensi_app/pengaturan/mode_jam_kerja/assign_mode_pegawai.html', context)
 
 @login_required
 def simpan_assign_mode_jam_kerja(request, pegawai_id):
@@ -6163,10 +6833,67 @@ def api_get_mode_assignment_form(request, pegawai_id):
             "msg": str(e)
         }, status=500)
 
-
+@login_required
+def api_get_mode_assignments(request, pegawai_id):
+    """API: Get mode assignments for pegawai (for edit form)"""
+    if not request.user.is_staff:
+        return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
+    
+    try:
+        from .models import Pegawai, MasterModeJamKerja, PegawaiModeAssignment
+        
+        pegawai = get_object_or_404(Pegawai, pk=pegawai_id)
+        
+        all_modes = MasterModeJamKerja.objects.filter(
+            is_active=True
+        ).prefetch_related('jadwal_list').order_by('-is_default', '-priority', 'nama')
+        
+        existing_assignments = PegawaiModeAssignment.objects.filter(
+            pegawai=pegawai,
+            is_active=True
+        ).select_related('mode')
+        
+        modes_data = []
+        
+        for mode in all_modes:
+            assignment = existing_assignments.filter(mode=mode).first()
+            
+            modes_data.append({
+                'id': mode.id,
+                'nama': mode.nama,
+                'kode': mode.kode,
+                'warna': mode.warna,
+                'icon': mode.icon,
+                'is_default': mode.is_default,
+                'is_assigned': assignment is not None,
+                'assignment_data': {
+                    'jadwal_per_hari': assignment.jadwal_per_hari if assignment else {}
+                } if assignment else {}
+            })
+        
+        return JsonResponse({
+            "status": "success",
+            "pegawai": {
+                'id': pegawai.id,
+                'userid': pegawai.userid,
+                'nama': pegawai.nama_lengkap
+            },
+            "modes": modes_data
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "msg": str(e)
+        }, status=500)
+    
 @login_required
 def api_save_mode_assignment_bulk(request):
-    """Endpoint API: Menyimpan atau memperbarui assignment mode jam kerja secara massal."""
+    """
+    Endpoint API: Menyimpan atau memperbarui assignment mode jam kerja secara massal.
+    
+    ✅ FIX: Support format group_id dari modal assign multiple pegawai
+    """
     if not request.user.is_staff:
         return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
     
@@ -6178,6 +6905,9 @@ def api_save_mode_assignment_bulk(request):
         
         assignments_json = request.POST.get('assignments', '{}')
         
+        print("\n=== DEBUG BULK ASSIGNMENT ===")
+        print(f"Raw JSON: {assignments_json[:200]}...")
+        
         try:
             assignments_list = json.loads(assignments_json)
         except json.JSONDecodeError as e:
@@ -6185,6 +6915,8 @@ def api_save_mode_assignment_bulk(request):
                 "status": "error",
                 "msg": f"Format JSON tidak valid: {str(e)}"
             }, status=400)
+        
+        print(f"Total pegawai to process: {len(assignments_list)}")
         
         total_saved = 0
         total_failed = 0
@@ -6196,78 +6928,147 @@ def api_save_mode_assignment_bulk(request):
                     pegawai_id = assignment_data.get('pegawai_id')
                     modes_data = assignment_data.get('modes', {})
                     
+                    print(f"\n--- Processing Pegawai ID {pegawai_id} ---")
+                    print(f"Modes data: {modes_data}")
+                    
                     pegawai = Pegawai.objects.get(id=pegawai_id)
                     
-                    PegawaiModeAssignment.objects.filter(pegawai=pegawai).delete()
+                    # ✅ Hapus assignment lama
+                    deleted_count = PegawaiModeAssignment.objects.filter(pegawai=pegawai).delete()[0]
+                    print(f"Deleted {deleted_count} old assignments")
+                    
+                    pegawai_saved = 0
                     
                     for mode_id_str, mode_assignment in modes_data.items():
                         try:
                             mode_id = int(mode_id_str)
                             is_assigned = mode_assignment.get('assigned', False)
                             
+                            print(f"\n  Mode ID {mode_id}:")
+                            print(f"    assigned: {is_assigned}")
+                            
                             if not is_assigned:
+                                print(f"    ⏭️ SKIPPED: Not assigned")
                                 continue
+                            
+                            # ✅ SUPPORT 2 FORMAT:
+                            # Format 1: {"assigned": true, "jadwal_per_hari": {"0": 15, "1": 16, ...}}
+                            # Format 2: {"assigned": true, "group_id": 10}
                             
                             jadwal_per_hari = mode_assignment.get('jadwal_per_hari', {})
+                            group_id = mode_assignment.get('group_id')
                             
-                            if not jadwal_per_hari or all(not v for v in jadwal_per_hari.values()):
-                                errors.append(f"{pegawai.nama_lengkap} - Mode ID {mode_id}: Tidak ada jadwal yang dipilih")
-                                total_failed += 1
-                                continue
+                            print(f"    jadwal_per_hari: {jadwal_per_hari}")
+                            print(f"    group_id: {group_id}")
                             
-                            cleaned_jadwal = {}
-                            for hari_str, jadwal_id in jadwal_per_hari.items():
-                                if jadwal_id:
-                                    try:
-                                        hari = int(hari_str)
-                                        jadwal_id = int(jadwal_id)
-                                        
-                                        if not ModeJamKerjaJadwal.objects.filter(
-                                            id=jadwal_id,
-                                            mode_id=mode_id,
-                                            hari=hari
-                                        ).exists():
+                            # ✅ Jika ada jadwal_per_hari, gunakan itu
+                            if jadwal_per_hari and any(v for v in jadwal_per_hari.values()):
+                                cleaned_jadwal = {}
+                                
+                                for hari_str, jadwal_id in jadwal_per_hari.items():
+                                    if jadwal_id:
+                                        try:
+                                            hari = int(hari_str)
+                                            jadwal_id = int(jadwal_id)
+                                            
+                                            # ✅ Validasi jadwal exist
+                                            if ModeJamKerjaJadwal.objects.filter(
+                                                id=jadwal_id,
+                                                mode_id=mode_id,
+                                                hari=hari
+                                            ).exists():
+                                                cleaned_jadwal[str(hari)] = jadwal_id
+                                            else:
+                                                print(f"    ⚠️ Jadwal ID {jadwal_id} not found for hari {hari}")
+                                        except (ValueError, TypeError) as e:
+                                            print(f"    ❌ Error parsing hari {hari_str}: {e}")
                                             continue
-                                        
-                                        cleaned_jadwal[str(hari)] = jadwal_id
-                                    except (ValueError, TypeError):
-                                        continue
+                                
+                                if not cleaned_jadwal:
+                                    errors.append(f"{pegawai.nama_lengkap} - Mode {mode_id}: Tidak ada jadwal valid")
+                                    total_failed += 1
+                                    print(f"    ❌ FAILED: No valid jadwal")
+                                    continue
+                                
+                                # ✅ Create assignment dengan jadwal_per_hari
+                                mode = MasterModeJamKerja.objects.get(id=mode_id)
+                                PegawaiModeAssignment.objects.create(
+                                    pegawai=pegawai,
+                                    mode=mode,
+                                    jadwal_per_hari=cleaned_jadwal,
+                                    is_active=True
+                                )
+                                
+                                total_saved += 1
+                                pegawai_saved += 1
+                                print(f"    ✅ SAVED with jadwal_per_hari: {cleaned_jadwal}")
                             
-                            if not cleaned_jadwal:
+                            # ✅ Jika hanya ada group_id, query jadwal dari group_id
+                            elif group_id:
+                                # ✅ Query semua jadwal dengan group_id ini
+                                jadwal_list = ModeJamKerjaJadwal.objects.filter(
+                                    mode_id=mode_id,
+                                    id=group_id
+                                ).values_list('hari', 'id')
+                                
+                                if not jadwal_list:
+                                    errors.append(f"{pegawai.nama_lengkap} - Mode {mode_id}: Jadwal group {group_id} tidak ditemukan")
+                                    total_failed += 1
+                                    print(f"    ❌ FAILED: Jadwal group {group_id} not found")
+                                    continue
+                                
+                                # ✅ Build jadwal_per_hari dari query result
+                                cleaned_jadwal = {str(hari): jid for hari, jid in jadwal_list}
+                                
+                                # ✅ Create assignment
+                                mode = MasterModeJamKerja.objects.get(id=mode_id)
+                                PegawaiModeAssignment.objects.create(
+                                    pegawai=pegawai,
+                                    mode=mode,
+                                    jadwal_per_hari=cleaned_jadwal,
+                                    is_active=True
+                                )
+                                
+                                total_saved += 1
+                                pegawai_saved += 1
+                                print(f"    ✅ SAVED with group_id: {cleaned_jadwal}")
+                            
+                            else:
+                                errors.append(f"{pegawai.nama_lengkap} - Mode {mode_id}: Tidak ada jadwal atau group_id")
                                 total_failed += 1
-                                continue
-                            
-                            mode = MasterModeJamKerja.objects.get(id=mode_id)
-                            PegawaiModeAssignment.objects.create(
-                                pegawai=pegawai,
-                                mode=mode,
-                                jadwal_per_hari=cleaned_jadwal,
-                                is_active=True
-                            )
-                            
-                            total_saved += 1
+                                print(f"    ❌ FAILED: No jadwal_per_hari or group_id")
                             
                         except MasterModeJamKerja.DoesNotExist:
                             errors.append(f"{pegawai.nama_lengkap} - Mode ID {mode_id}: Mode tidak ditemukan")
                             total_failed += 1
+                            print(f"    ❌ Mode not found")
                         except Exception as e:
                             errors.append(f"{pegawai.nama_lengkap} - Mode ID {mode_id}: {str(e)}")
                             total_failed += 1
-                            
+                            print(f"    ❌ Exception: {str(e)}")
+                    
+                    print(f"  Pegawai total saved: {pegawai_saved}")
+                    
                 except Pegawai.DoesNotExist:
                     errors.append(f"Pegawai ID {pegawai_id}: Tidak ditemukan")
                     total_failed += 1
+                    print(f"❌ Pegawai not found")
                 except Exception as e:
                     errors.append(f"Pegawai ID {pegawai_id}: {str(e)}")
                     total_failed += 1
+                    print(f"❌ Exception: {str(e)}")
+        
+        print(f"\n=== SUMMARY ===")
+        print(f"Total saved: {total_saved}")
+        print(f"Total failed: {total_failed}")
         
         from .services import WorkModeService
         WorkModeService.clear_cache()
         
-        msg = f"{total_saved} assignment berhasil disimpan!"
+        msg = f"✅ {total_saved} assignment berhasil disimpan!"
         
         if total_failed > 0:
-            msg += f"\n\n{total_failed} assignment gagal"
+            msg += f"\n\n⚠️ {total_failed} assignment gagal"
             if errors:
                 msg += "\n\nErrors:\n"
                 msg += "\n".join(errors[:5])
@@ -6282,11 +7083,14 @@ def api_save_mode_assignment_bulk(request):
         })
         
     except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        print(f"\n❌ CRITICAL ERROR:\n{error_detail}")
+        
         return JsonResponse({
             "status": "error",
             "msg": f"Error: {str(e)}"
-        }, status=500)
-    
+        }, status=500)    
 
 # ==============================================================================
 # IMPORT TAP DARI MESIN → SIMPAN KE TAP LOG
@@ -6975,3 +7779,119 @@ def hapus_sesi_absensi(request, pk):
     }
     
     return render(request, 'absensi_app/sesi/hapus_sesi_absensi.html', context)
+
+@login_required
+def api_hapus_sesi(request, pk):
+    """
+    API endpoint untuk menghapus sesi absensi via AJAX
+    """
+    if not request.user.is_staff:
+        return JsonResponse({"status": "error", "message": "Akses ditolak"}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({"status": "error", "message": "Method tidak diizinkan"}, status=405)
+    
+    try:
+        from .models import AbsensiSesi
+        
+        sesi = get_object_or_404(AbsensiSesi, pk=pk)
+        
+        with transaction.atomic():
+            pegawai_nama = sesi.pegawai.nama_lengkap
+            tanggal_mulai = sesi.tanggal_mulai
+            tanggal_selesai = sesi.tanggal_selesai
+            jumlah_tap_logs = sesi.tap_relation.count()
+            
+            sesi.delete()
+            
+            return JsonResponse({
+                "status": "success",
+                "message": f'Sesi untuk {pegawai_nama} ({tanggal_mulai.strftime("%d %b %Y")} - {tanggal_selesai.strftime("%d %b %Y")}) berhasil dihapus beserta {jumlah_tap_logs} tap logs terkait.'
+            })
+            
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "message": f'Gagal menghapus sesi: {str(e)}'
+        }, status=500)
+
+@login_required
+def api_get_mode_pegawai_list(request, pk):
+    """API: Ambil daftar pegawai yang menggunakan mode ini"""
+    if not request.user.is_staff:
+        return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
+    
+    try:
+        from .models import MasterModeJamKerja, Pegawai
+        
+        mode = get_object_or_404(MasterModeJamKerja, pk=pk)
+        
+        # Ambil pegawai yang menggunakan mode ini
+        pegawai_list = Pegawai.objects.filter(
+            mode_assignments__mode=mode,
+            mode_assignments__is_active=True,
+            is_active=True
+        ).select_related('departemen', 'jabatan').distinct().order_by('userid')
+        
+        pegawai_data = []
+        for p in pegawai_list:
+            pegawai_data.append({
+                'id': p.id,
+                'userid': p.userid,
+                'nama': p.nama_lengkap,
+                'departemen': p.departemen.nama if p.departemen else None,
+                'jabatan': p.jabatan.nama if p.jabatan else None
+            })
+        
+        return JsonResponse({
+            "status": "success",
+            "pegawai": pegawai_data,
+            "total": len(pegawai_data)
+        })
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "msg": str(e)
+        }, status=500)
+
+
+@login_required
+def api_get_mode_periode_list(request, pk):
+    """API: Ambil daftar periode untuk mode ini"""
+    if not request.user.is_staff:
+        return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
+    
+    try:
+        from .models import MasterModeJamKerja, ModeJamKerjaPeriode
+        
+        mode = get_object_or_404(MasterModeJamKerja, pk=pk)
+        
+        periode_list = mode.periode_list.filter(
+            is_active=True
+        ).order_by('-tanggal_mulai')
+        
+        periode_data = []
+        today = date.today()
+        
+        for p in periode_list:
+            is_active_today = p.tanggal_mulai <= today <= p.tanggal_selesai
+            
+            periode_data.append({
+                'id': p.id,
+                'nama': p.nama,
+                'tanggal_mulai': p.tanggal_mulai.strftime('%d %b %Y'),
+                'tanggal_selesai': p.tanggal_selesai.strftime('%d %b %Y'),
+                'is_active_today': is_active_today,
+                'catatan': p.catatan
+            })
+        
+        return JsonResponse({
+            "status": "success",
+            "periode": periode_data,
+            "total": len(periode_data)
+        })
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "msg": str(e)
+        }, status=500)

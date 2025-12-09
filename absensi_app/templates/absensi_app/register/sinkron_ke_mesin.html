@@ -5,417 +5,793 @@
 
 {% block extra_css %}
 <style>
-    .breadcrumb-white {
-        font-size: 0.875rem;
+    /* ===== PAGE SPECIFIC STYLES ===== */
+    
+    /* Breadcrumb */
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: var(--font-sm);
     }
 
-    .breadcrumb-white .breadcrumb-item {
-        color: rgba(255, 255, 255, 0.8);
+    .breadcrumb-item {
+        color: var(--gray-600);
     }
 
-    .breadcrumb-white .breadcrumb-item + .breadcrumb-item::before {
-        color: rgba(255, 255, 255, 0.6);
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: '›';
+        color: var(--gray-400);
+        padding: 0 var(--spacing-sm);
     }
 
-    .breadcrumb-white .breadcrumb-item a {
-        color: rgba(255, 255, 255, 0.9);
+    .breadcrumb-item a {
+        color: var(--primary);
         text-decoration: none;
-        transition: color 0.2s;
+        transition: color var(--transition-fast);
     }
 
-    .breadcrumb-white .breadcrumb-item a:hover {
-        color: white;
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
     }
 
-    .breadcrumb-white .breadcrumb-item.active {
-        color: white;
-        font-weight: 500;
-    }
-
-    .dashboard-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        overflow: hidden;
-        border: 1px solid #e5e7eb;
-        margin-bottom: 2rem;
-    }
-
-    .dashboard-card-header {
-        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-        color: white;
-        padding: 1.5rem;
-        border: none;
-    }
-
-    .dashboard-card-header h4 {
-        font-size: 1.25rem;
+    .breadcrumb-item.active {
+        color: var(--gray-900);
         font-weight: 600;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .page-title {
+        font-size: var(--font-2xl);
+        font-weight: 700;
+        color: var(--gray-900);
+        margin: 0 0 var(--spacing-sm) 0;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin: 0;
+        gap: var(--spacing-md);
     }
 
-    .dashboard-card-body {
-        padding: 2rem;
+    .page-title i {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: var(--font-xl);
+        box-shadow: 0 3px 10px rgba(59, 130, 246, 0.25);
+    }
+
+    /* Status Cards Grid */
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
     }
 
     .status-card {
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        border: 2px solid;
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        padding: var(--spacing-xl);
+        transition: all var(--transition-base);
     }
 
-    .status-card h6 {
-        font-size: 1rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
+    .status-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .status-card-header {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
     }
 
-    .status-card.border-primary {
-        border-color: #3b82f6;
-        background: rgba(59, 130, 246, 0.05);
+    .status-card-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--font-xl);
+        flex-shrink: 0;
     }
 
-    .status-card.border-success {
-        border-color: #10b981;
-        background: rgba(16, 185, 129, 0.05);
+    .status-card-icon.primary {
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        color: white;
+        box-shadow: 0 3px 10px rgba(59, 130, 246, 0.25);
+    }
+
+    .status-card-icon.success {
+        background: linear-gradient(135deg, var(--success-dark), var(--success));
+        color: white;
+        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.25);
+    }
+
+    .status-card-title {
+        font-size: var(--font-sm);
+        font-weight: 600;
+        color: var(--gray-600);
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .status-card-content {
+        font-size: var(--font-sm);
+        color: var(--gray-700);
+        line-height: 1.6;
     }
 
     .status-indicator {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        margin-right: 0.5rem;
-        box-shadow: 0 0 8px currentColor;
-    }
-
-    .status-online {
-        background-color: #10b981;
-    }
-
-    .status-offline {
-        background-color: #ef4444;
-    }
-
-    .table-wrapper {
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        margin-bottom: 1.5rem;
-    }
-
-    .table {
-        margin-bottom: 0 !important;
-        font-size: 0.875rem;
-    }
-
-    table.table thead th {
-        background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
-        color: white !important;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
         font-weight: 600;
-        padding: 1rem !important;
-        font-size: 0.75rem;
+    }
+
+    .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        animation: pulse 2s infinite;
+    }
+
+    .status-dot.online {
+        background: var(--success);
+        box-shadow: 0 0 8px var(--success);
+    }
+
+    .status-dot.offline {
+        background: var(--danger);
+        box-shadow: 0 0 8px var(--danger);
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-base);
+        font-weight: 700;
+        background: var(--warning);
+        color: white;
+    }
+
+    /* Form Section */
+    .form-section {
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .form-section-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 2px solid var(--gray-100);
+    }
+
+    .form-section-header i {
+        font-size: var(--font-xl);
+        color: var(--primary);
+    }
+
+    .form-section-title {
+        font-size: var(--font-lg);
+        font-weight: 700;
+        color: var(--gray-900);
+        margin: 0;
+    }
+
+    /* Action Bar */
+    .action-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+    }
+
+    /* Search Box */
+    .search-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+        min-width: 250px;
+    }
+
+    .search-wrapper i {
+        position: absolute;
+        left: var(--spacing-lg);
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-400);
+        font-size: var(--font-sm);
+        pointer-events: none;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 36px;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-sm);
+        transition: all var(--transition-base);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .search-input::placeholder {
+        color: var(--gray-400);
+    }
+
+    /* Table Wrapper */
+    .table-container {
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--font-sm);
+    }
+
+    .data-table thead {
+        background: linear-gradient(135deg, var(--gray-800), var(--gray-700));
+    }
+
+    .data-table thead th {
+        color: white;
+        font-weight: 700;
+        text-align: left;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        font-size: var(--font-xs);
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        border: 1px solid #4b5563 !important;
+        border-bottom: 2px solid var(--gray-600);
+        white-space: nowrap;
     }
 
-    table.table tbody td {
-        padding: 1rem !important;
+    .data-table tbody td {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border-bottom: 1px solid var(--gray-200);
         vertical-align: middle;
-        border: 1px solid #e5e7eb !important;
     }
 
-    table.table tbody tr:hover {
-        background: #f9fafb !important;
+    .data-table tbody tr {
+        transition: background-color var(--transition-fast);
     }
 
-    .badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-        font-weight: 600;
-        border-radius: 4px;
+    .data-table tbody tr:hover {
+        background: var(--gray-50);
     }
 
-    .btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        border-radius: 6px;
-        font-weight: 600;
-        border: none;
-        transition: all 0.2s;
+    .data-table tbody tr:last-child td {
+        border-bottom: none;
     }
 
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .btn-action {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.75rem;
-        min-width: 100px;
-    }
-
-    .action-buttons-group {
+    /* Table Actions */
+    .table-actions {
         display: flex;
-        gap: 0.5rem;
+        gap: var(--spacing-sm);
         justify-content: center;
         flex-wrap: wrap;
     }
 
-    .alert {
-        border-radius: 6px;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
+    .btn-table {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-xs);
+        min-width: 90px;
+        white-space: nowrap;
     }
 
+    /* Status Badge in Table */
+    .status-badge-table {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: 0.4rem var(--spacing-lg);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-xs);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-badge-table.pending {
+        background: var(--warning-light);
+        color: #92400e;
+        border: 1px solid var(--warning);
+    }
+
+    .status-badge-table.success {
+        background: var(--success-light);
+        color: #065f46;
+        border: 1px solid var(--success);
+    }
+
+    /* User Info Cell */
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .user-name i {
+        color: var(--primary);
+        font-size: var(--font-sm);
+    }
+
+    .user-warning {
+        font-size: var(--font-xs);
+        color: var(--warning-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    /* Empty State */
     .empty-state {
         text-align: center;
-        padding: 4rem 2rem;
+        padding: var(--spacing-2xl) var(--spacing-xl);
         background: white;
-        border-radius: 8px;
-        margin-top: 2rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
     }
 
-    .empty-state i {
-        font-size: 5rem;
-        color: #10b981;
-        margin-bottom: 1rem;
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--success-dark), var(--success));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--spacing-xl);
+        font-size: 2.5rem;
+        color: white;
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
     }
 
     .empty-state h5 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 0.5rem;
+        font-size: var(--font-xl);
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-md);
     }
 
     .empty-state p {
-        font-size: 1rem;
-        color: #6b7280;
+        font-size: var(--font-base);
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-xl);
     }
 
-    .search-box {
-        position: relative;
-        margin-bottom: 1rem;
+    /* No Results Message */
+    .no-results {
+        display: none;
+        text-align: center;
+        padding: var(--spacing-xl);
+        background: var(--warning-light);
+        border: 1px solid var(--warning);
+        border-radius: var(--radius-md);
+        margin-top: var(--spacing-xl);
     }
 
-    .search-box input {
-        padding-left: 42px;
+    .no-results i {
+        font-size: var(--font-2xl);
+        color: var(--warning-dark);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .no-results strong {
+        color: var(--warning-dark);
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .page-title {
+            font-size: var(--font-xl);
+        }
+
+        .page-title i {
+            width: 36px;
+            height: 36px;
+            font-size: var(--font-lg);
+        }
+
+        .status-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .action-buttons {
+            width: 100%;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+        }
+
+        .search-wrapper {
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: var(--spacing-lg);
+        }
+
+        .form-section {
+            padding: var(--spacing-lg);
+        }
+
+        .status-card {
+            padding: var(--spacing-lg);
+        }
+
+        .data-table thead th,
+        .data-table tbody td {
+            padding: var(--spacing-md) var(--spacing-lg);
+            font-size: var(--font-xs);
+        }
+
+        .table-actions {
+            flex-direction: column;
+        }
+
+        .btn-table {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .page-title {
+            font-size: var(--font-lg);
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .status-card-icon {
+            width: 36px;
+            height: 36px;
+            font-size: var(--font-lg);
+        }
+
+        .form-section-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        /* Make table scrollable on mobile */
+        .table-responsive {
+            margin: 0 calc(var(--spacing-lg) * -1);
+        }
+
+        .data-table {
+            font-size: 0.65rem;
+        }
+
+        .data-table thead th,
+        .data-table tbody td {
+            padding: var(--spacing-sm) var(--spacing-md);
+        }
+    }
+
+    /* Loading Spinner */
+    .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Utility Classes */
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <div class="dashboard-card">
-        <div class="dashboard-card-header">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-                <div>
-                    <h4>
-                        <i class="fas fa-sync"></i>
-                        Sinkronisasi Pegawai ke Mesin
-                    </h4>
-                </div>
-                <div>
-                    <a href="{% url 'register_Pegawai_menu' %}" class="btn btn-outline-light">
-                        <i class="fas fa-arrow-left"></i>
-                        Kembali
-                    </a>
-                </div>
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div class="flex-grow-1">
+                <h1 class="page-title">
+                    <i class="fas fa-sync"></i>
+                    <span>Sinkronisasi Pegawai ke Mesin</span>
+                </h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'register_Pegawai_menu' %}">Registrasi</a></li>
+                        <li class="breadcrumb-item active">Sinkronisasi</li>
+                    </ol>
+                </nav>
             </div>
-
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-white mb-0">
-                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'register_Pegawai_menu' %}">Registrasi</a></li>
-                    <li class="breadcrumb-item active">Sinkronisasi</li>
-                </ol>
-            </nav>
+            <a href="{% url 'register_Pegawai_menu' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i>
+                <span>Kembali</span>
+            </a>
         </div>
 
-        <div class="dashboard-card-body">
-            <!-- Info Cabang Aktif -->
-            {% if cabang_aktif %}
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                <strong>Cabang Aktif:</strong> {{ cabang_aktif.nama }}
-            </div>
-            {% endif %}
+        <!-- Info Cabang -->
+        {% if cabang_aktif %}
+        <div class="alert alert-info mt-3 mb-0">
+            <i class="fas fa-info-circle"></i>
+            <span><strong>Cabang Aktif:</strong> {{ cabang_aktif.nama }}</span>
+        </div>
+        {% endif %}
+    </div>
 
-            <!-- Dropdown Pilih Mesin -->
-            <div class="mb-4">
-                <label for="selectMesin" class="form-label fw-bold">
-                    <i class="fas fa-server"></i> Pilih Mesin Fingerprint
-                    <span class="text-danger">*</span>
-                </label>
-                <select class="form-select" id="selectMesin" required>
-                    <option value="">-- Pilih Mesin --</option>
-                    {% for mesin in mesin_list %}
-                    <option value="{{ mesin.id }}" 
-                            data-ip="{{ mesin.ip_address }}" 
-                            data-port="{{ mesin.port }}"
-                            data-nama="{{ mesin.nama }}">
-                        {{ mesin.nama }} - {{ mesin.ip_address }}:{{ mesin.port }} 
-                        {% if mesin.cabang %}({{ mesin.cabang.nama }}){% endif %}
-                    </option>
-                    {% endfor %}
-                </select>
-                <small class="text-muted">Pilih mesin yang akan digunakan untuk registrasi pegawai</small>
-            </div>
+    <!-- Form Section: Pilih Mesin -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <i class="fas fa-server"></i>
+            <h3 class="form-section-title">Pilih Mesin Fingerprint</h3>
+        </div>
 
-            <!-- Status Cards -->
-            <div class="row mb-4">
-                <div class="col-md-6 mb-3">
-                    <div class="status-card border-primary">
-                        <h6>
-                            <i class="fas fa-server text-primary"></i>
-                            Status Mesin
-                        </h6>
-                        <div id="mesinStatus">
-                            <span class="status-indicator status-offline"></span>
-                            <span class="text-muted">Pilih mesin terlebih dahulu...</span>
-                        </div>
-                        <small class="text-muted d-block mt-2" id="mesinInfo">
-                            <i class="fas fa-info-circle"></i> Pilih mesin dari dropdown di atas
-                        </small>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="status-card border-success">
-                        <h6>
-                            <i class="fas fa-users text-success"></i>
-                            Pegawai Belum Sync
-                        </h6>
-                        <h3 class="mb-2">
-                            <span class="badge bg-warning text-dark" style="font-size: 1.5rem; padding: 0.5rem 1rem;" id="counterPegawai">
-                                {{ total_pegawai }}
-                            </span>
-                        </h3>
-                        <small class="text-muted">Pegawai perlu didaftarkan</small>
-                    </div>
-                </div>
-            </div>
-
-            {% if total_pegawai > 0 %}
-            <!-- Action Buttons -->
-            <div class="d-flex gap-2 mb-4 flex-wrap">
-                <button type="button" class="btn btn-success" id="btnSyncAll">
-                    <i class="fas fa-sync"></i>
-                    Sync Semua Pegawai (<span id="syncAllCounter">{{ total_pegawai }}</span>)
-                </button>
-                <button type="button" class="btn btn-primary" id="btnRefresh">
-                    <i class="fas fa-redo"></i>
-                    Refresh
-                </button>
-            </div>
-
-            <!-- Search Box -->
-            <div class="search-box position-relative mb-3">
-                <i class="fas fa-search position-absolute" style="left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                <input type="text" id="searchBox" class="form-control" placeholder="Cari User ID atau Nama Pegawai...">
-            </div>
-
-            <!-- Table -->
-            <div class="table-wrapper">
-                <table class="table table-hover table-bordered">
-                    <thead>
-                        <tr>
-                            <th style="width: 5%;">NO</th>
-                            <th style="width: 10%;">USER ID</th>
-                            <th style="width: 23%;">NAMA</th>
-                            <th style="width: 13%;">DEPARTEMEN</th>
-                            <th style="width: 10%;">CABANG</th>
-                            <th style="width: 13%;">JABATAN</th>
-                            <th style="width: 10%;">STATUS</th>
-                            <th style="width: 16%;">AKSI</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pegawaiTableBody">
-                        {% for pegawai in pegawai_list %}
-                        <tr data-userid="{{ pegawai.userid }}" 
-                            data-nama="{{ pegawai.nama_lengkap }}" 
-                            data-pegawai-id="{{ pegawai.id }}">
-                            <td class="text-center fw-bold text-muted">{{ forloop.counter }}</td>
-                            <td>
-                                <span class="badge bg-primary">{{ pegawai.userid }}</span>
-                            </td>
-                            <td>
-                                <strong>
-                                    <i class="fas fa-user text-primary me-2"></i>
-                                    {{ pegawai.nama_lengkap }}
-                                </strong>
-                                {% if not pegawai.cabang %}
-                                <br>
-                                <small class="text-warning">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    Belum ada cabang
-                                </small>
-                                {% endif %}
-                            </td>
-                            <td>{{ pegawai.departemen.nama|default:"-" }}</td>
-                            <td>
-                                {% if pegawai.cabang %}
-                                    <span class="badge bg-info">{{ pegawai.cabang.nama }}</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">-</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ pegawai.jabatan.nama|default:"-" }}</td>
-                            <td class="text-center">
-                                <span class="badge bg-warning text-dark sync-status-{{ pegawai.id }}">
-                                    <i class="fas fa-clock"></i> Belum Sync
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <div class="action-buttons-group">
-                                    <button type="button" 
-                                        class="btn btn-success btn-action btn-sync" 
-                                        data-pegawai-id="{{ pegawai.id }}"
-                                        data-nama="{{ pegawai.nama_lengkap }}">
-                                        <i class="fas fa-upload"></i> Daftar
-                                    </button>
-                                    <button type="button" 
-                                        class="btn btn-danger btn-action btn-cancel" 
-                                        data-pegawai-id="{{ pegawai.id }}"
-                                        data-nama="{{ pegawai.nama_lengkap }}">
-                                        <i class="fas fa-times"></i> Batalkan
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="noResultsMessage" class="alert alert-warning text-center" style="display: none;">
-                <i class="fas fa-search"></i>
-                Tidak ada hasil untuk "<strong id="searchTerm"></strong>"
-            </div>
-
-            {% else %}
-            <!-- Empty State -->
-            <div class="alert alert-success text-center">
-                <i class="fas fa-check-circle"></i>
-                <div>
-                    <strong>Semua Pegawai sudah tersinkronisasi!</strong>
-                    <p class="mb-0 mt-2">Tidak ada pegawai yang perlu didaftarkan ke mesin.</p>
-                </div>
-            </div>
-            {% endif %}
+        <div class="form-group mb-0">
+            <label for="selectMesin" class="form-label">
+                <i class="fas fa-network-wired"></i> 
+                Mesin Terdaftar
+                <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="selectMesin" required>
+                <option value="">-- Pilih Mesin Fingerprint --</option>
+                {% for mesin in mesin_list %}
+                <option value="{{ mesin.id }}" 
+                        data-ip="{{ mesin.ip_address }}" 
+                        data-port="{{ mesin.port }}"
+                        data-nama="{{ mesin.nama }}">
+                    {{ mesin.nama }} - {{ mesin.ip_address }}:{{ mesin.port }} 
+                    {% if mesin.cabang %}({{ mesin.cabang.nama }}){% endif %}
+                </option>
+                {% endfor %}
+            </select>
+            <small class="text-muted d-block mt-2">
+                <i class="fas fa-lightbulb"></i>
+                Pilih mesin yang akan digunakan untuk registrasi pegawai
+            </small>
         </div>
     </div>
+
+    <!-- Status Cards -->
+    <div class="status-grid">
+        <!-- Machine Status -->
+        <div class="status-card">
+            <div class="status-card-header">
+                <div class="status-card-icon primary">
+                    <i class="fas fa-server"></i>
+                </div>
+                <h6 class="status-card-title">Status Mesin</h6>
+            </div>
+            <div class="status-card-content">
+                <div id="mesinStatus" class="status-indicator mb-2">
+                    <span class="status-dot offline"></span>
+                    <span class="text-muted">Pilih mesin terlebih dahulu...</span>
+                </div>
+                <small class="text-muted" id="mesinInfo">
+                    <i class="fas fa-info-circle"></i> 
+                    Pilih mesin dari dropdown di atas
+                </small>
+            </div>
+        </div>
+
+        <!-- Pending Employees -->
+        <div class="status-card">
+            <div class="status-card-header">
+                <div class="status-card-icon success">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h6 class="status-card-title">Pegawai Belum Sync</h6>
+            </div>
+            <div class="status-card-content">
+                <div class="status-badge mb-2">
+                    <i class="fas fa-clock"></i>
+                    <span id="counterPegawai">{{ total_pegawai }}</span> Pegawai
+                </div>
+                <small class="text-muted">
+                    <i class="fas fa-info-circle"></i>
+                    Menunggu registrasi ke mesin
+                </small>
+            </div>
+        </div>
+    </div>
+
+    {% if total_pegawai > 0 %}
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <div class="action-buttons">
+            <button type="button" class="btn btn-success" id="btnSyncAll">
+                <i class="fas fa-sync"></i>
+                <span>Sync Semua (<span id="syncAllCounter">{{ total_pegawai }}</span>)</span>
+            </button>
+            <button type="button" class="btn btn-primary" id="btnRefresh">
+                <i class="fas fa-redo"></i>
+                <span>Refresh</span>
+            </button>
+        </div>
+
+        <div class="search-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchBox" class="search-input" placeholder="Cari User ID atau Nama Pegawai...">
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">No</th>
+                        <th style="width: 10%;">User ID</th>
+                        <th style="width: 22%;">Nama Pegawai</th>
+                        <th style="width: 13%;">Departemen</th>
+                        <th style="width: 10%;">Cabang</th>
+                        <th style="width: 13%;">Jabatan</th>
+                        <th style="width: 10%;" class="text-center">Status</th>
+                        <th style="width: 17%;" class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="pegawaiTableBody">
+                    {% for pegawai in pegawai_list %}
+                    <tr data-userid="{{ pegawai.userid }}" 
+                        data-nama="{{ pegawai.nama_lengkap }}" 
+                        data-pegawai-id="{{ pegawai.id }}">
+                        <td class="text-center">
+                            <strong class="text-muted">{{ forloop.counter }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge badge-info">{{ pegawai.userid }}</span>
+                        </td>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-name">
+                                    <i class="fas fa-user"></i>
+                                    <span>{{ pegawai.nama_lengkap }}</span>
+                                </div>
+                                {% if not pegawai.cabang %}
+                                <div class="user-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span>Belum ada cabang</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>{{ pegawai.departemen.nama|default:"-" }}</td>
+                        <td>
+                            {% if pegawai.cabang %}
+                                <span class="badge badge-info">{{ pegawai.cabang.nama }}</span>
+                            {% else %}
+                                <span class="badge" style="background: var(--gray-200); color: var(--gray-600);">-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ pegawai.jabatan.nama|default:"-" }}</td>
+                        <td class="text-center">
+                            <span class="status-badge-table pending sync-status-{{ pegawai.id }}">
+                                <i class="fas fa-clock"></i> Belum Sync
+                            </span>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <button type="button" 
+                                    class="btn btn-success btn-table btn-sync" 
+                                    data-pegawai-id="{{ pegawai.id }}"
+                                    data-nama="{{ pegawai.nama_lengkap }}">
+                                    <i class="fas fa-upload"></i> Daftar
+                                </button>
+                                <button type="button" 
+                                    class="btn btn-danger btn-table btn-cancel" 
+                                    data-pegawai-id="{{ pegawai.id }}"
+                                    data-nama="{{ pegawai.nama_lengkap }}">
+                                    <i class="fas fa-times"></i> Batalkan
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- No Results Message -->
+    <div id="noResultsMessage" class="no-results">
+        <i class="fas fa-search"></i>
+        <p class="mb-0">
+            Tidak ada hasil untuk "<strong id="searchTerm"></strong>"
+        </p>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h5>Semua Pegawai Sudah Tersinkronisasi!</h5>
+        <p>Tidak ada pegawai yang perlu didaftarkan ke mesin.</p>
+        <a href="{% url 'daftar_Pegawai' %}" class="btn btn-primary">
+            <i class="fas fa-users"></i>
+            <span>Lihat Daftar Pegawai</span>
+        </a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -437,27 +813,21 @@ $(document).ready(function() {
     $('#selectMesin').on('change', function() {
         const mesinId = $(this).val();
         
-        console.log('🔍 Mesin ID dipilih:', mesinId);
-        
         if (!mesinId) {
             selectedMesin = null;
-            $('#mesinStatus').html('<span class="status-indicator status-offline"></span><span class="text-muted">Pilih mesin terlebih dahulu...</span>');
+            $('#mesinStatus').html('<span class="status-dot offline"></span><span class="text-muted">Pilih mesin terlebih dahulu...</span>');
             $('#mesinInfo').html('<i class="fas fa-info-circle"></i> Pilih mesin dari dropdown di atas');
             return;
         }
 
         const selectedOption = $(this).find('option:selected');
         
-        // PENTING: Ambil data dari atribut data-*
         selectedMesin = {
             id: mesinId,
-            ip: selectedOption.attr('data-ip'),      // Gunakan .attr() bukan .data()
+            ip: selectedOption.attr('data-ip'),
             port: selectedOption.attr('data-port'),
             nama: selectedOption.attr('data-nama')
         };
-
-        console.log('✅ selectedMesin:', selectedMesin);
-        console.log('✅ IP Address:', selectedMesin.ip);
 
         checkMachineStatus();
     });
@@ -466,7 +836,7 @@ $(document).ready(function() {
     function checkMachineStatus() {
         if (!selectedMesin) return;
 
-        $('#mesinStatus').html('<span class="spinner-border spinner-border-sm me-2"></span><span class="text-muted">Checking...</span>');
+        $('#mesinStatus').html('<span class="spinner"></span><span class="text-muted ms-2">Checking...</span>');
 
         $.ajax({
             url: "{% url 'cek_status_mesin_bulk' %}",
@@ -474,32 +844,29 @@ $(document).ready(function() {
             data: { ip_address: selectedMesin.ip },
             success: function(response) {
                 if (response.mesin_online) {
-                    $('#mesinStatus').html('<span class="status-indicator status-online"></span><strong class="text-success">Online</strong>');
-                    $('#mesinInfo').html(`IP: <code class="badge bg-secondary">${selectedMesin.ip}:${selectedMesin.port}</code> | <small class="text-muted">${response.msg}</small>`);
+                    $('#mesinStatus').html('<span class="status-dot online"></span><strong class="text-success">Online</strong>');
+                    $('#mesinInfo').html(`<i class="fas fa-server"></i> <code class="badge badge-info">${selectedMesin.ip}:${selectedMesin.port}</code> <small class="text-muted ms-2">${response.msg}</small>`);
                 } else {
-                    $('#mesinStatus').html('<span class="status-indicator status-offline"></span><strong class="text-danger">Offline</strong>');
-                    $('#mesinInfo').html(`IP: <code class="badge bg-secondary">${selectedMesin.ip}:${selectedMesin.port}</code> | <small class="text-danger">${response.msg}</small>`);
+                    $('#mesinStatus').html('<span class="status-dot offline"></span><strong class="text-danger">Offline</strong>');
+                    $('#mesinInfo').html(`<i class="fas fa-server"></i> <code class="badge" style="background: var(--gray-200); color: var(--gray-700);">${selectedMesin.ip}:${selectedMesin.port}</code> <small class="text-danger ms-2">${response.msg}</small>`);
                 }
             },
             error: function() {
-                $('#mesinStatus').html('<span class="status-indicator status-offline"></span><strong class="text-danger">Error</strong>');
-                $('#mesinInfo').html('<small class="text-danger">Tidak dapat mengecek status</small>');
+                $('#mesinStatus').html('<span class="status-dot offline"></span><strong class="text-danger">Error</strong>');
+                $('#mesinInfo').html('<small class="text-danger"><i class="fas fa-exclamation-triangle"></i> Tidak dapat mengecek status</small>');
             }
         });
     }
 
     // ==================== SYNC INDIVIDUAL ====================
     $(document).on('click', '.btn-sync', function() {
-        console.log('🔘 Tombol Daftar diklik');
-        console.log('📌 selectedMesin saat ini:', selectedMesin);
-        
-        // Validasi mesin sudah dipilih
         if (!selectedMesin || !selectedMesin.ip) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Perhatian!',
-                text: 'Pilih mesin fingerprint terlebih dahulu dari dropdown di atas!',
-                confirmButtonColor: '#f59e0b'
+                title: 'Perhatian!',
+                html: '<p class="mb-0">Pilih mesin fingerprint terlebih dahulu dari dropdown di atas!</p>',
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: 'OK'
             });
             $('#selectMesin').focus();
             return;
@@ -509,220 +876,223 @@ $(document).ready(function() {
         const pegawaiId = btn.data('pegawai-id');
         const nama = btn.data('nama');
         
-        console.log('👤 Pegawai ID:', pegawaiId);
-        console.log('📛 Nama:', nama);
-        console.log('🌐 IP yang akan digunakan:', selectedMesin.ip);
-        
         Swal.fire({
-            title: 'Konfirmasi',
+            title: 'Konfirmasi Pendaftaran',
             html: `Daftarkan <strong>${nama}</strong> ke mesin <code>${selectedMesin.nama}</code>?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            confirmButtonText: 'Ya, Daftarkan!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (!result.isConfirmed) return;
+icon: 'question',
+showCancelButton: true,
+confirmButtonColor: '#10b981',
+confirmButtonText: '<i class="fas fa-check"></i> Ya, Daftarkan!',
+cancelButtonText: '<i class="fas fa-times"></i> Batal',
+cancelButtonColor: '#6b7280'
+}).then((result) => {
+if (!result.isConfirmed) return;
+        const originalText = btn.html();
+        btn.prop('disabled', true).html('<span class="spinner"></span> <span>Proses...</span>');
 
-            const originalText = btn.html();
-            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Proses...');
+        const postData = {
+            pegawai_id: pegawaiId,
+            ip_address: selectedMesin.ip
+        };
 
-            // Data yang akan dikirim
-            const postData = {
-                pegawai_id: pegawaiId,
-                ip_address: selectedMesin.ip
-            };
-            
-            console.log('📤 Data yang dikirim:', postData);
-
-            $.ajax({
-                url: "{% url 'daftarkan_Pegawai_ke_mesin' %}",
-                type: "POST",
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrfToken
-                },
-                data: postData,
-                success: function(response) {
-                    console.log('✅ Response sukses:', response);
-                    
-                    if (response.status === 'success') {
-                        $(`.sync-status-${pegawaiId}`).removeClass('bg-warning text-dark').addClass('bg-success').html('<i class="fas fa-check"></i> Tersinkronisasi');
-                        btn.prop('disabled', true).removeClass('btn-success').addClass('btn-secondary').html('<i class="fas fa-check"></i> Sudah Sync');
-                        btn.closest('.action-buttons-group').find('.btn-cancel').hide();
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: '✅ Berhasil!',
-                            html: response.msg,
-                            confirmButtonColor: '#28a745'
-                        });
-                    } else {
-                        btn.prop('disabled', false).html(originalText);
-                        Swal.fire({
-                            icon: 'error',
-                            title: '❌ Gagal!',
-                            text: response.msg
-                        });
-                    }
-                },
-                error: function(xhr) {
-                    console.error('❌ Error AJAX:', xhr);
-                    console.error('❌ Response Text:', xhr.responseText);
-                    
-                    btn.prop('disabled', false).html(originalText);
-                    
-                    const errorMsg = xhr.responseJSON?.msg || 'Gagal mendaftarkan pegawai';
+        $.ajax({
+            url: "{% url 'daftarkan_Pegawai_ke_mesin' %}",
+            type: "POST",
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            },
+            data: postData,
+            success: function(response) {
+                if (response.status === 'success') {
+                    $(`.sync-status-${pegawaiId}`).removeClass('pending').addClass('success').html('<i class="fas fa-check"></i> Tersinkronisasi');
+                    btn.prop('disabled', true).removeClass('btn-success').addClass('btn-secondary').css('opacity', '0.6').html('<i class="fas fa-check"></i> Sudah Sync');
+                    btn.closest('.table-actions').find('.btn-cancel').hide();
                     
                     Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        html: `<div class="text-start">${response.msg}</div>`,
+                        confirmButtonColor: '#10b981',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    btn.prop('disabled', false).html(originalText);
+                    Swal.fire({
                         icon: 'error',
-                        title: '❌ Error!',
-                        text: errorMsg,
-                        confirmButtonColor: '#dc3545'
+                        title: 'Gagal!',
+                        html: `<p class="mb-0">${response.msg}</p>`,
+                        confirmButtonColor: '#ef4444'
                     });
                 }
-            });
+            },
+            error: function(xhr) {
+                btn.prop('disabled', false).html(originalText);
+                
+                const errorMsg = xhr.responseJSON?.msg || 'Gagal mendaftarkan pegawai';
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    html: `<p class="mb-0">${errorMsg}</p>`,
+                    confirmButtonColor: '#ef4444'
+                });
+            }
         });
     });
+});
 
-    // ==================== BATALKAN PEGAWAI ====================
-    $(document).on('click', '.btn-cancel', function() {
-        const btn = $(this);
-        const pegawaiId = btn.data('pegawai-id');
-        const nama = btn.data('nama');
-        const row = btn.closest('tr');
-        
-        Swal.fire({
-            title: '⚠️ Konfirmasi Hapus Permanen',
-            html: `
-                <div class="text-start">
-                    <p class="mb-3">Yakin ingin <strong class="text-danger">MENGHAPUS PERMANEN</strong> data pegawai berikut?</p>
-                    
-                    <div class="alert alert-info">
-                        <strong><i class="fas fa-user"></i> ${nama}</strong>
-                    </div>
-                    
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>PERHATIAN:</strong>
-                        <ul class="mb-0 mt-2 text-start small">
-                            <li><strong>Data akan dihapus PERMANEN</strong> dari database</li>
-                            <li>Pegawai belum terdaftar di mesin (status PENDING)</li>
-                            <li>Riwayat absensi akan dihapus</li>
-                            <li>Mode jam kerja assignment akan dihapus</li>
-                            <li><strong class="text-danger">TIDAK DAPAT DIBATALKAN!</strong></li>
-                        </ul>
+// ==================== BATALKAN PEGAWAI ====================
+$(document).on('click', '.btn-cancel', function() {
+    const btn = $(this);
+    const pegawaiId = btn.data('pegawai-id');
+    const nama = btn.data('nama');
+    const row = btn.closest('tr');
+    
+    Swal.fire({
+        title: 'Konfirmasi Hapus Permanen',
+        html: `
+            <div class="text-start">
+                <p class="mb-3">Yakin ingin <strong class="text-danger">MENGHAPUS PERMANEN</strong> data pegawai berikut?</p>
+                
+                <div class="alert alert-info mb-3">
+                    <strong><i class="fas fa-user"></i> ${nama}</strong>
+                </div>
+                
+                <div class="alert alert-danger mb-0">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fas fa-exclamation-triangle mt-1"></i>
+                        <div>
+                            <strong>PERHATIAN:</strong>
+                            <ul class="mb-0 mt-2 text-start small">
+                                <li>Data akan dihapus <strong>PERMANEN</strong> dari database</li>
+                                <li>Pegawai belum terdaftar di mesin (status PENDING)</li>
+                                <li>Riwayat absensi akan dihapus</li>
+                                <li>Mode jam kerja assignment akan dihapus</li>
+                                <li class="text-danger"><strong>TIDAK DAPAT DIBATALKAN!</strong></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            `,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            confirmButtonText: '<i class="fas fa-trash-alt"></i> Ya, Hapus Permanen!',
-            cancelButtonText: 'Batal',
-            width: '650px'
-        }).then((result) => {
-            if (!result.isConfirmed) return;
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: '<i class="fas fa-trash-alt"></i> Ya, Hapus Permanen!',
+        cancelButtonText: '<i class="fas fa-times"></i> Batal',
+        cancelButtonColor: '#6b7280',
+        width: '600px'
+    }).then((result) => {
+        if (!result.isConfirmed) return;
 
-            const originalText = btn.html();
-            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Menghapus...');
+        const originalText = btn.html();
+        btn.prop('disabled', true).html('<span class="spinner"></span> <span>Menghapus...</span>');
 
-            $.ajax({
-                url: "{% url 'batalkan_pegawai_pending' %}",
-                type: "POST",
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrfToken
-                },
-                data: { pegawai_id: pegawaiId },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        row.fadeOut(400, function() {
-                            $(this).remove();
-                            updateCounter();
-                            
-                            const remainingRows = $('#pegawaiTableBody tr:visible').length;
-                            
-                            if (remainingRows === 0) {
-                                $('.table-wrapper').after(`
-                                    <div class="empty-state">
-                                        <i class="fas fa-check-circle text-success"></i>
-                                        <h5 class="mt-3">Semua Pegawai Sudah Diproses!</h5>
-                                        <p class="text-muted">Tidak ada pegawai yang perlu didaftarkan.</p>
-                                        <a href="{% url 'daftar_Pegawai' %}" class="btn btn-primary mt-3">
+        $.ajax({
+            url: "{% url 'batalkan_pegawai_pending' %}",
+            type: "POST",
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            },
+            data: { pegawai_id: pegawaiId },
+            success: function(response) {
+                if (response.status === 'success') {
+                    row.fadeOut(400, function() {
+                        $(this).remove();
+                        updateCounter();
+                        
+                        const remainingRows = $('#pegawaiTableBody tr:visible').length;
+                        
+                        if (remainingRows === 0) {
+                            $('.table-container, .action-bar').fadeOut(300, function() {
+                                $(this).remove();
+                                $('.container-fluid').append(`
+                                    <div class="empty-state" style="display: none;">
+                                        <div class="empty-state-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <h5>Semua Pegawai Sudah Diproses!</h5>
+                                        <p>Tidak ada pegawai yang perlu didaftarkan.</p>
+                                        <a href="{% url 'daftar_Pegawai' %}" class="btn btn-primary">
                                             <i class="fas fa-users"></i> Lihat Daftar Pegawai
                                         </a>
                                     </div>
                                 `);
-                                $('.table-wrapper, .search-box, .d-flex.gap-2, .status-card').hide();
-                            }
-                        });
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: '✅ Berhasil Dihapus!',
-                            html: response.msg,
-                            confirmButtonColor: '#28a745'
-                        });
-                    } else {
-                        btn.prop('disabled', false).html(originalText);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal!',
-                            html: response.msg
-                        });
-                    }
-                },
-                error: function(xhr) {
+                                $('.empty-state').fadeIn(300);
+                            });
+                        }
+                    });
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil Dihapus!',
+                        html: `<div class="text-start">${response.msg}</div>`,
+                        confirmButtonColor: '#10b981',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
                     btn.prop('disabled', false).html(originalText);
                     Swal.fire({
                         icon: 'error',
-                        title: 'Error!',
-                        text: xhr.responseJSON?.msg || 'Gagal menghapus'
+                        title: 'Gagal!',
+                        html: `<p class="mb-0">${response.msg}</p>`,
+                        confirmButtonColor: '#ef4444'
                     });
                 }
-            });
-        });
-    });
-
-    // ==================== SEARCH ====================
-    $('#searchBox').on('input', function() {
-        const searchTerm = $(this).val().toLowerCase().trim();
-        
-        if (searchTerm === '') {
-            $('#pegawaiTableBody tr').show();
-            $('#noResultsMessage').hide();
-            updateCounter();
-            return;
-        }
-
-        let visibleCount = 0;
-        $('#pegawaiTableBody tr').each(function() {
-            const userid = $(this).data('userid').toString().toLowerCase();
-            const nama = $(this).data('nama').toString().toLowerCase();
-            
-            if (userid.includes(searchTerm) || nama.includes(searchTerm)) {
-                $(this).show();
-                visibleCount++;
-            } else {
-                $(this).hide();
+            },
+            error: function(xhr) {
+                btn.prop('disabled', false).html(originalText);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    html: `<p class="mb-0">${xhr.responseJSON?.msg || 'Gagal menghapus'}</p>`,
+                    confirmButtonColor: '#ef4444'
+                });
             }
         });
+    });
+});
 
-        if (visibleCount === 0) {
-            $('#searchTerm').text(searchTerm);
-            $('#noResultsMessage').show();
-        } else {
-            $('#noResultsMessage').hide();
-        }
-        
+// ==================== SEARCH ====================
+$('#searchBox').on('input', function() {
+    const searchTerm = $(this).val().toLowerCase().trim();
+    
+    if (searchTerm === '') {
+        $('#pegawaiTableBody tr').show();
+        $('#noResultsMessage').hide();
         updateCounter();
+        return;
+    }
+
+    let visibleCount = 0;
+    $('#pegawaiTableBody tr').each(function() {
+        const userid = $(this).data('userid').toString().toLowerCase();
+        const nama = $(this).data('nama').toString().toLowerCase();
+        
+        if (userid.includes(searchTerm) || nama.includes(searchTerm)) {
+            $(this).show();
+            visibleCount++;
+        } else {
+            $(this).hide();
+        }
     });
 
-    // ==================== REFRESH ====================
-    $('#btnRefresh').on('click', function() {
-        location.reload();
-    });
+    if (visibleCount === 0) {
+        $('#searchTerm').text(searchTerm);
+        $('#noResultsMessage').show();
+    } else {
+        $('#noResultsMessage').hide();
+    }
+    
+    updateCounter();
+});
+
+// ==================== REFRESH ====================
+$('#btnRefresh').on('click', function() {
+    location.reload();
+});
 });
 </script>
 {% endblock %}

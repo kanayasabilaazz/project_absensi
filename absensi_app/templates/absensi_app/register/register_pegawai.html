@@ -1079,147 +1079,243 @@ document.addEventListener('DOMContentLoaded', function() {
         modeListContainer.innerHTML = html;
     }
 
-    // ==================== TOGGLE MODE ====================
-    window.toggleMode = function(modeId) {
-        const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
-        const modeBody = modeCard.querySelector('.mode-body');
-        const wasActive = modeCard.classList.contains('active');
-
-        // Close all
-        document.querySelectorAll('.mode-card').forEach(card => {
-            card.classList.remove('active');
-        });
-
-        // Open clicked if wasn't active
-        if (!wasActive) {
-            modeCard.classList.add('active');
-            
-            // Load groups if not loaded
-            if (modeBody.querySelector('.loading-spinner')) {
-                loadJamKerjaGroups(modeId, selectedDepartemenId, modeBody);
-            }
-        }
-    };
-
-    // ==================== LOAD JAM KERJA GROUPS ====================
-    // Di dalam function loadJamKerjaGroups
-    function loadJamKerjaGroups(modeId, departemenId, container) {
-        fetch(`/api/mode/${modeId}/jadwal-groups/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success' && data.groups.length > 0) {
-                    renderJamKerjaGroups(data.groups, modeId, container, data.mode);
-                } else {
-                    container.innerHTML = `
-                        <div class="alert alert-warning">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Belum ada grup jam kerja untuk mode <strong>${data.mode.nama}</strong>
-                        </div>
-                    `;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                container.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-times-circle me-2"></i>
-                        Gagal memuat grup jam kerja
-                    </div>
-                `;
-            });
+// ==================== TOGGLE MODE ====================
+window.toggleMode = function(modeId) {
+    console.log('🔄 Toggle mode:', modeId);
+    
+    const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
+    if (!modeCard) {
+        console.error('❌ Mode card not found:', modeId);
+        return;
     }
-    // ==================== RENDER JAM KERJA GROUPS ====================
-    function renderJamKerjaGroups(groups, modeId, container, modeData) {
-        let html = `
-            <div class="mode-body-header">
-                <h6 class="mode-body-title">
-                    <i class="fas fa-clock text-primary"></i>
-                    Pilih Grup Jam Kerja untuk Mode ${modeData.nama}
-                </h6>
-                <p class="mode-body-subtitle">
-                    Klik salah satu grup jam kerja di bawah ini
-                </p>
-            </div>
-            <div class="group-grid">
-        `;
+    
+    const modeBody = modeCard.querySelector('.mode-body');
+    const wasActive = modeCard.classList.contains('active');
 
-        groups.forEach(group => {
-            const isSelected = modeAssignments[modeId]?.group_id === group.id;
+    // Close all
+    document.querySelectorAll('.mode-card').forEach(card => {
+        card.classList.remove('active');
+    });
+
+    // Open clicked if wasn't active
+    if (!wasActive) {
+        modeCard.classList.add('active');
+        
+        // Load groups if not loaded
+        if (modeBody.querySelector('.loading-spinner')) {
+            loadJamKerjaGroups(modeId, modeBody);
+        }
+    }
+};
+// ==================== LOAD JAM KERJA GROUPS ====================
+function loadJamKerjaGroups(modeId, modeBodyElement) {
+    console.log('🔍 Loading groups for mode:', modeId);
+    
+    // Convert to DOM element jika jQuery
+    const $modeBody = modeBodyElement instanceof jQuery ? modeBodyElement[0] : modeBodyElement;
+    
+    // Set loading state
+    $modeBody.innerHTML = `
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p class="mb-0">Memuat grup jam kerja...</p>
+        </div>
+    `;
+    
+    fetch(`/api/mode/${modeId}/get-jam-kerja-groups/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(response => {
+            console.log('✅ Jam Kerja Groups Response:', response);
             
-            html += `
-                <div class="group-card ${isSelected ? 'selected' : ''}" 
-                     onclick="selectGroup(${modeId}, ${group.id}, '${group.nama}')">
-                    <div class="group-header">
-                        <h6 class="group-name">${group.nama}</h6>
-                        <div class="group-check">
-                            <i class="fas fa-check"></i>
-                        </div>
+            if (response.status === 'success' && response.groups && response.groups.length > 0) {
+                renderJamKerjaGroups(response.groups, modeId, $modeBody, response.mode);
+            } else {
+                const errorMsg = response.msg || `Tidak ada grup jam kerja untuk mode ini`;
+                $modeBody.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        ${errorMsg}
                     </div>
-                    <div class="group-details">
-                        <div class="group-time">
-                            <i class="fas fa-clock"></i>
-                            <span>${group.jam_masuk} - ${group.jam_keluar}</span>
-                        </div>
-                        <div class="group-meta">
-            `;
-            
-            if (group.jam_istirahat) {
-                html += `
-                    <span class="group-meta-item">
-                        <i class="fas fa-coffee"></i>
-                        ${group.jam_istirahat}
-                    </span>
                 `;
             }
+        })
+        .catch(error => {
+            console.error('❌ Error loading jam kerja groups:', error);
             
-            html += `
-                            <span class="group-meta-item">
-                                <i class="fas fa-calendar-check"></i>
-                                ${group.hari_kerja} hari
-                            </span>
-                        </div>
-                    </div>
+            $modeBody.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle me-2"></i>
+                    <strong>Error:</strong> ${error.message}
+                    <br><small>Mode ID: ${modeId}</small>
                 </div>
             `;
         });
+}
+// ==================== RENDER JAM KERJA GROUPS ====================
+// ========================================
 
-        html += '</div>';
-        container.innerHTML = html;
-    }
+function renderJamKerjaGroups(groups, modeId, modeBodyElement, modeData) {
+    console.log('🎨 Rendering groups:', groups);
+    
+    let html = `
+        <div class="mb-3">
+            <h6 class="fw-bold">
+                <i class="fas fa-clock text-primary"></i>
+                Pilih Grup Jam Kerja untuk Mode ${modeData.nama}
+            </h6>
+            <p class="text-muted mb-0">Klik salah satu grup jam kerja di bawah ini</p>
+        </div>
+        <div class="group-grid">
+    `;
 
-    // ==================== SELECT GROUP ====================
-    window.selectGroup = function(modeId, groupId, groupNama) {
-        // Save assignment
-        modeAssignments[modeId] = {
-            group_id: groupId,
-            group_nama: groupNama
+    groups.forEach(group => {
+        const isSelected = modeAssignments[modeId]?.group_id === group.id;
+        
+        // ✅ Build jadwal_per_hari dari response backend
+        let jadwalPerHari = {};
+        
+        // PRIORITAS 1: Gunakan jadwal_per_hari dari backend (jika ada)
+        if (group.jadwal_per_hari && typeof group.jadwal_per_hari === 'object') {
+            jadwalPerHari = group.jadwal_per_hari;
+            console.log('✅ Using jadwal_per_hari from backend:', jadwalPerHari);
+        }
+        // PRIORITAS 2: Build dari hari_kerja_list (jika ada)
+        else if (group.hari_kerja_list && Array.isArray(group.hari_kerja_list)) {
+            const hariNames = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
+            
+            group.hari_kerja_list.forEach(hari => {
+                const hariIndex = hariNames.indexOf(hari.toLowerCase());
+                if (hariIndex !== -1) {
+                    jadwalPerHari[hariIndex.toString()] = group.id.toString();
+                }
+            });
+            
+            console.log('✅ Built jadwal_per_hari from hari_kerja_list:', jadwalPerHari);
+        }
+        // FALLBACK 3: Gunakan hari_kerja count (default Senin-Jumat)
+        else {
+            const jumlahHari = group.hari_kerja || 5;
+            
+            for (let i = 0; i < jumlahHari && i < 7; i++) {
+                jadwalPerHari[i.toString()] = group.id.toString();
+            }
+            
+            console.log('✅ Built jadwal_per_hari from hari_kerja count:', jadwalPerHari);
+        }
+        
+        html += `
+            <div class="group-card ${isSelected ? 'selected' : ''}" 
+                 onclick='selectGroup(${modeId}, ${group.id}, "${group.nama}", ${JSON.stringify(jadwalPerHari)})'>
+                <div class="group-header">
+                    <h6 class="group-name">${group.nama}</h6>
+                    <div class="group-check">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
+                <div class="group-details mt-2">
+                    <div class="group-time mb-2">
+                        <i class="fas fa-clock"></i>
+                        <span>${group.jam_masuk} - ${group.jam_keluar}</span>
+                    </div>
+        `;
+        
+        if (group.jam_istirahat) {
+            html += `
+                <div class="group-meta-item mb-1">
+                    <i class="fas fa-coffee text-muted"></i>
+                    <small class="text-muted">Istirahat: ${group.jam_istirahat}</small>
+                </div>
+            `;
+        }
+        
+        html += `
+                    <div class="group-meta-item">
+                        <i class="fas fa-calendar-check text-primary"></i>
+                        <small>${group.hari_kerja} hari kerja</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    modeBodyElement.innerHTML = html;
+}
+// ==================== SELECT GROUP ====================
+window.selectGroup = function(modeId, groupId, groupNama, jadwalPerHari) {
+    // ✅ FIX: Simpan dengan format jadwal_per_hari yang lengkap
+    console.log('🔍 selectGroup called:', {
+        modeId,
+        groupId,
+        groupNama,
+        jadwalPerHari
+    });
+    
+    // Validasi jadwal_per_hari
+    let jadwalData = {};
+    
+    if (jadwalPerHari && typeof jadwalPerHari === 'object') {
+        jadwalData = jadwalPerHari;
+    } else {
+        // Fallback: semua hari kerja pakai shift group ini
+        console.warn('⚠️ jadwalPerHari tidak valid, gunakan default');
+        jadwalData = {
+            senin: groupId.toString(),
+            selasa: groupId.toString(),
+            rabu: groupId.toString(),
+            kamis: groupId.toString(),
+            jumat: groupId.toString(),
+            sabtu: null,
+            minggu: null
         };
-        
-        // Update hidden input
-        modeAssignmentsInput.value = JSON.stringify(modeAssignments);
-        
-        // Update UI
-        updateModeStatus(modeId);
-        updateProgress();
-        updateSummary();
-        
-        // Update group cards
-        const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
+    }
+    
+    // ✅ Save assignment dengan format BENAR untuk backend
+    modeAssignments[modeId] = {
+        jadwal_per_hari: jadwalData,  // ← YANG INI PENTING untuk backend!
+        group_id: groupId,             // ← Tambahan untuk tracking UI
+        group_nama: groupNama          // ← Tambahan untuk display
+    };
+    
+    // Update hidden input
+    modeAssignmentsInput.value = JSON.stringify(modeAssignments);
+    
+    console.log('✅ Mode Assignment Saved:', {
+        mode_id: modeId,
+        assignment: modeAssignments[modeId],
+        full_json: modeAssignmentsInput.value
+    });
+    
+    // Update UI
+    updateModeStatus(modeId);
+    updateProgress();
+    updateSummary();
+    
+    // Update group cards selection
+    const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
+    if (modeCard) {
         const cards = modeCard.querySelectorAll('.group-card');
         
         cards.forEach(card => {
             card.classList.remove('selected');
         });
         
-        const selectedCard = Array.from(cards).find(card => 
-            card.getAttribute('onclick').includes(`${groupId},`)
-        );
+        // Find and select the clicked card
+        const selectedCard = Array.from(cards).find(card => {
+            const onclickAttr = card.getAttribute('onclick');
+            return onclickAttr && onclickAttr.includes(`, ${groupId},`);
+        });
         
         if (selectedCard) {
             selectedCard.classList.add('selected');
         }
-    };
-
+    }
+};
     // ==================== UPDATE MODE STATUS ====================
     function updateModeStatus(modeId) {
         const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);

@@ -938,39 +938,82 @@ const COLORS = {
 
 // ==================== LOAD MODE TODAY ====================
 function loadModeToday() {
+    console.log(' Loading mode today...');
+    
     fetch('{% url "api_get_mode_today" %}')
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            if (data.status === 'success') {
+            console.log(' Mode data received:', data);
+            
+            if (data.status === 'success' && data.mode) {
                 const mode = data.mode;
                 
+                // Update header background
                 const modeHeader = document.getElementById('modeHeader');
-                modeHeader.style.background = `linear-gradient(135deg, ${mode.warna} 0%, ${mode.warna}dd 100%)`;
-                
-                document.getElementById('modeIcon').className = `fas ${mode.icon || 'fa-clock'}`;
-                document.getElementById('modeName').textContent = mode.nama;
-                document.getElementById('modePeriode').textContent = mode.periode || 'Mode Hari Ini';
-                
-                const upcomingContainer = document.getElementById('upcomingModes');
-                if (data.upcoming && data.upcoming.length > 0) {
-                    upcomingContainer.innerHTML = data.upcoming.slice(0, 3).map(u => `
-                        <span class="mode-badge" style="background: ${u.warna};">
-                            <i class="fas ${u.icon || 'fa-clock'}"></i>
-                            ${u.mode}: ${u.tanggal_mulai}
-                        </span>
-                    `).join('');
-                } else {
-                    upcomingContainer.innerHTML = '<span class="badge bg-secondary">Tidak ada</span>';
+                if (modeHeader) {
+                    modeHeader.style.background = `linear-gradient(135deg, ${mode.warna} 0%, ${mode.warna}dd 100%)`;
                 }
+                
+                // Update icon
+                const modeIcon = document.getElementById('modeIcon');
+                if (modeIcon) {
+                    modeIcon.className = `fas ${mode.icon || 'fa-clock'}`;
+                }
+                
+                // Update name
+                const modeName = document.getElementById('modeName');
+                if (modeName) {
+                    modeName.textContent = mode.nama || 'Mode Tidak Tersedia';
+                }
+                
+                // Update periode
+                const modePeriode = document.getElementById('modePeriode');
+                if (modePeriode) {
+                    modePeriode.textContent = mode.periode || 'Mode Hari Ini';
+                }
+                
+                // Update upcoming modes
+                const upcomingContainer = document.getElementById('upcomingModes');
+                if (upcomingContainer) {
+                    if (data.upcoming && data.upcoming.length > 0) {
+                        upcomingContainer.innerHTML = data.upcoming.slice(0, 3).map(u => `
+                            <span class="mode-badge" style="background: ${u.warna};">
+                                <i class="fas ${u.mode?.icon || 'fa-clock'}"></i>
+                                ${u.mode}: ${u.tanggal_mulai}
+                            </span>
+                        `).join('');
+                    } else {
+                        upcomingContainer.innerHTML = '<span class="badge bg-secondary">Tidak ada mode mendatang</span>';
+                    }
+                }
+                
+                console.log(' Mode loaded successfully!');
+            } else {
+                console.warn('⚠️ Invalid response format:', data);
+                showDefaultMode();
             }
         })
         .catch(error => {
-            console.error('Error loading mode:', error);
-            document.getElementById('modeName').textContent = 'Normal';
-            document.getElementById('modePeriode').textContent = 'Mode Default';
+            console.error('❌ Error loading mode:', error);
+            showDefaultMode();
         });
 }
 
+// Fallback untuk mode default
+function showDefaultMode() {
+    console.log(' Using default mode');
+    
+    document.getElementById('modeIcon').className = 'fas fa-clock';
+    document.getElementById('modeName').textContent = 'Normal';
+    document.getElementById('modePeriode').textContent = 'Mode Default';
+    document.getElementById('upcomingModes').innerHTML = '<span class="badge bg-secondary">-</span>';
+}
 // ==================== LOAD RIWAYAT ABSENSI ====================
 function loadRiwayatAbsensiHariIni() {
     const today = new Date().toISOString().split('T')[0];
@@ -1027,14 +1070,14 @@ function renderRiwayatTable(data) {
             : `<span class="badge bg-secondary">-</span>`;
 
         // Istirahat Keluar
-        const istKeluarDisplay = item.tap_istirahat_keluar && item.tap_istirahat_keluar !== '-'
+        const istKeluarDisplay = item.tap_istirahat_keluar !== '-'
             ? `<span class="jam-text">${item.tap_istirahat_keluar}</span>`
             : (item.tap_masuk !== '-' && item.tap_pulang !== '-' 
                 ? `<span class="jam-text violation" title="Tidak tap istirahat">12:00 <i class="fas fa-exclamation-circle" style="font-size: 0.65rem;"></i></span>`
                 : `<span class="badge bg-secondary">-</span>`);
 
         // Istirahat Masuk
-        const istMasukDisplay = item.tap_istirahat_masuk && item.tap_istirahat_masuk !== '-'
+        const istMasukDisplay = item.tap_istirahat_masuk !== '-'
             ? `<span class="jam-text">${item.tap_istirahat_masuk}</span>`
             : (item.tap_masuk !== '-' && item.tap_pulang !== '-'
                 ? `<span class="jam-text violation" title="Tidak tap istirahat">14:00 <i class="fas fa-exclamation-circle" style="font-size: 0.65rem;"></i></span>`
@@ -1055,7 +1098,7 @@ function renderRiwayatTable(data) {
             <td class="text-center"><strong>${index + 1}</strong></td>
             <td class="text-center"><span class="badge-userid">${item.userid}</span></td>
             <td><span class="user-name">${item.nama}</span></td>
-            <td class="text-center"><span class="badge bg-light">${item.departemen}</span></td>
+            <td class="text-center"><span class="badge bg-light text-dark">${item.departemen}</span></td>
             <td class="text-center"><small>${item.tanggal || '-'}</small></td>
             <td class="text-center">${masukDisplay}</td>
             <td class="text-center">${istKeluarDisplay}</td>
@@ -1164,7 +1207,7 @@ function showDetail(status, color) {
                             <span class="user-name">${item.nama}</span>
                             <small style="display: block; color: var(--gray-600);">${item.jabatan || ''}</small>
                         </td>
-                        <td class="text-center"><span class="badge bg-light">${item.departemen}</span></td>
+                        <td class="text-center"><span class="badge bg-light text-dark">${item.departemen}</span></td>
                         <td class="text-center"><small>${tanggal}</small></td>
                         <td class="text-center">${masukDisplay}</td>
                         <td class="text-center">${istKeluarDisplay}</td>
@@ -1205,7 +1248,6 @@ function showDetail(status, color) {
                 </tr>`;
         });
 }
-
 // ==================== SEARCH IN MODAL ====================
 document.getElementById('searchInput').addEventListener('input', function() {
     const searchTerm = this.value.toLowerCase();

@@ -384,19 +384,11 @@
                         </h5>
                         
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-8 mb-3">
                                 <label class="form-label">Nama Mode <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="nama" 
                                     value="{% if mode %}{{ mode.nama }}{% endif %}"
                                     placeholder="Contoh: Mode Normal" required>
-                            </div>
-
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Kode Mode <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="kode" 
-                                    value="{% if mode %}{{ mode.kode }}{% endif %}"
-                                    placeholder="NORMAL" required 
-                                    style="text-transform: uppercase;">
                             </div>
 
                             <div class="col-md-2 mb-3">
@@ -582,9 +574,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function validateCurrentStep() {
         if (currentStep === 1) {
             const nama = document.querySelector('input[name="nama"]').value.trim();
-            const kode = document.querySelector('input[name="kode"]').value.trim();
-            if (!nama || !kode) {
-                alert("❌ Nama dan Kode wajib diisi!");
+            if (!nama) {
+                alert("❌ Nama mode wajib diisi!");
                 return false;
             }
             return true;

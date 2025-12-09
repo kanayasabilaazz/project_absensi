@@ -33,7 +33,6 @@
         display: flex;
         align-items: center;
         gap: var(--spacing-lg);
-        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
     }
 
     .mode-info-icon {
@@ -294,24 +293,24 @@
     /* ==================== TABLE ==================== */
     .table-wrapper {
         background: white;
-        border-radius: 12px !important;
-        overflow: hidden !important;
+        border-radius: 12px;
+        overflow: hidden;
         border: 1px solid var(--gray-200);
     }
 
     .table-responsive {
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
+        overflow-x: auto;
+        overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
     }
 
     .table {
-        margin-bottom: 0 !important;
+        margin-bottom: 0;
         font-size: var(--font-sm);
-        width: 100% !important;
-        min-width: 1200px !important;
-        border: none !important;
-        table-layout: auto !important;
+        width: 100%;
+        min-width: 1200px;
+        border: none;
+        table-layout: auto;
     }
 
     .table thead {
@@ -319,14 +318,14 @@
     }
 
     .table thead th {
-        background: var(--gray-800) !important;
+        background: var(--gray-800);
         color: white;
         font-weight: 600;
         padding: var(--spacing-md);
         font-size: var(--font-xs);
         text-transform: uppercase;
         letter-spacing: 0.4px;
-        border: none !important;
+        border: none;
         white-space: nowrap;
     }
 
@@ -379,15 +378,14 @@
         white-space: nowrap;
     }
 
-    /* ==================== JAM KERJA ==================== */
+    /* ==================== JAM KERJA DENGAN WARNA DINAMIS ==================== */
     .jam-text {
         font-weight: 700;
         font-size: var(--font-sm);
-        color: var(--gray-600);
     }
 
     .jam-text.violation {
-        color: var(--danger) !important;
+        color: var(--danger);
     }
 
     .total-jam-card {
@@ -396,15 +394,26 @@
         border-radius: var(--radius-sm);
         font-weight: 700;
         font-size: var(--font-sm);
-        background: var(--gray-100);
-        color: var(--gray-700);
-        border: 1px solid var(--gray-300);
+        border: 2px solid;
     }
 
     .total-jam-card.violation {
         background: #fee2e2;
         color: #991b1b;
         border-color: #fca5a5;
+    }
+
+    /* ==================== MODE BADGE ==================== */
+    .mode-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        margin-left: 4px;
+        vertical-align: middle;
     }
 
     /* ==================== USER NAME ==================== */
@@ -861,7 +870,7 @@
 <div class="container-fluid">
     <!-- MODE INFO CARD -->
     <div class="mode-info-card">
-        <div class="mode-info-header">
+        <div class="mode-info-header" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
             <div class="mode-info-icon">
                 <i class="fas fa-clock"></i>
             </div>
@@ -983,6 +992,13 @@
                                     <a href="{% url 'riwayat_per_Pegawai' absensi.pegawai.id %}" class="user-name">
                                         {{ absensi.pegawai.nama_lengkap }}
                                     </a>
+                                    
+                                    {% if absensi.is_mode_khusus %}
+                                    <span class="mode-indicator" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid #3b82f6;">
+                                        <i class="fas fa-calendar-check"></i>
+                                        {{ absensi.mode_nama }}
+                                    </span>
+                                    {% endif %}
                                 </td>
 
                                 <td class="text-center">
@@ -999,7 +1015,7 @@
 
                                 <td class="text-center">
                                     {% if absensi.tap_masuk %}
-                                        <span class="jam-text{% if absensi.is_late %} violation{% endif %}">
+                                        <span class="jam-text" style="color: #3b82f6;">
                                             {{ absensi.tap_masuk|date:"H:i" }}
                                         </span>
                                     {% else %}
@@ -1009,7 +1025,9 @@
 
                                 <td class="text-center">
                                     {% if absensi.tap_istirahat_keluar %}
-                                        <span class="jam-text">{{ absensi.tap_istirahat_keluar|date:"H:i" }}</span>
+                                        <span class="jam-text" style="color: #3b82f6;">
+                                            {{ absensi.tap_istirahat_keluar|date:"H:i" }}
+                                        </span>
                                     {% elif absensi.tap_masuk and absensi.tap_pulang %}
                                         <span class="jam-text violation">12:00</span>
                                     {% else %}
@@ -1019,7 +1037,9 @@
 
                                 <td class="text-center">
                                     {% if absensi.tap_istirahat_masuk %}
-                                        <span class="jam-text">{{ absensi.tap_istirahat_masuk|date:"H:i" }}</span>
+                                        <span class="jam-text" style="color: #3b82f6;">
+                                            {{ absensi.tap_istirahat_masuk|date:"H:i" }}
+                                        </span>
                                     {% elif absensi.tap_masuk and absensi.tap_pulang %}
                                         <span class="jam-text violation">14:00</span>
                                     {% else %}
@@ -1029,7 +1049,7 @@
 
                                 <td class="text-center">
                                     {% if absensi.tap_pulang %}
-                                        <span class="jam-text{% if absensi.is_early_departure %} violation{% endif %}">
+                                        <span class="jam-text" style="color: #3b82f6;">
                                             {{ absensi.tap_pulang|date:"H:i" }}
                                         </span>
                                     {% else %}
@@ -1039,7 +1059,7 @@
 
                                 <td class="text-center">
                                     {% if absensi.total_jam_kerja %}
-                                        <span class="total-jam-card{% if absensi.has_violation %} violation{% endif %}">
+                                        <span class="total-jam-card" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-color: #3b82f6;">
                                             {{ absensi.total_jam_kerja }}
                                         </span>
                                     {% else %}
@@ -1120,7 +1140,7 @@
     </div>
 </div>
 
-<!-- ==================== SYNC MODAL ==================== -->
+<!-- SYNC MODAL -->
 <div class="modal fade" id="syncModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
