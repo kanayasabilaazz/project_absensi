@@ -56,7 +56,7 @@
     }
 
     .header-title {
-        font-size: var(--font-base);
+        font-size: var(--font-xl);
         font-weight: 700;
         margin: 0 0 6px 0;
         display: flex;
@@ -65,11 +65,11 @@
     }
 
     .header-title i {
-        font-size: var(--font-base);
+        font-size: var(--font-xl);
     }
 
     .header-subtitle {
-        font-size: var(--font-xs);
+        font-size: var(--font-sm);
         opacity: 0.9;
         margin: 0;
         display: flex;
@@ -140,7 +140,7 @@
     }
 
     .section-title {
-        font-size: var(--font-base);
+        font-size: var(--font-lg);
         font-weight: 700;
         color: var(--gray-900);
         margin: 0 0 var(--spacing-lg) 0;
@@ -153,7 +153,7 @@
 
     .section-title i {
         color: var(--primary);
-        font-size: var(--font-base);
+        font-size: var(--font-lg);
     }
 
     /* ==================== INFO GRID ==================== */
@@ -286,14 +286,14 @@
 
     .mode-info h3 {
         margin: 0 0 4px 0;
-        font-size: var(--font-base);
+        font-size: var(--font-lg);
         font-weight: 700;
         color: white;
     }
 
     .mode-info p {
         margin: 0;
-        font-size: var(--font-xs);
+        font-size: var(--font-sm);
         color: rgba(255, 255, 255, 0.95);
     }
 
@@ -592,6 +592,11 @@
                         {% if pegawai.uid_mesin %}
                         | Machine UID: <strong>{{ pegawai.uid_mesin }}</strong>
                         {% endif %}
+                        
+                        {% if pegawai.cabang %}
+                        | <i class="fas fa-building"></i> 
+                        <strong>{{ pegawai.cabang.nama }}</strong>
+                        {% endif %}
                     </p>
                 </div>
                 <div class="header-right">
@@ -693,16 +698,21 @@
                             {% endif %}
                         </div>
                     </div>
+                    
                     <div class="info-item">
                         <div class="info-label"><i class="fas fa-building"></i> Cabang</div>
                         <div class="info-value">
                             {% if pegawai.cabang %}
                                 {{ pegawai.cabang.nama }}
+                                {% if pegawai.cabang.kode %}
+                                    <span style="color: var(--gray-500); font-size: 12px; margin-left: 4px;">({{ pegawai.cabang.kode }})</span>
+                                {% endif %}
                             {% else %}
-                                Belum diatur
+                                <span style="color: var(--warning);">⚠️ Belum diatur</span>
                             {% endif %}
                         </div>
                     </div>
+                    
                     <div class="info-item">
                         <div class="info-label"><i class="fas fa-server"></i> Mesin Absensi</div>
                         <div class="info-value">
@@ -820,39 +830,53 @@
                                 {% endwith %}
                             </div>
 
-                            <!-- WEEKLY SCHEDULE -->
+                            <!-- ✅ WEEKLY SCHEDULE - ALWAYS SHOW -->
                             <div class="schedule-section">
                                 <h3 class="schedule-title">
                                     📅 Jadwal Mingguan
                                 </h3>
-                                <div class="schedule-grid">
-                                    {% for hari, hari_nama in hari_names_enum %}
-                                        {% with jadwal=item.jadwal_mingguan|get_item:hari %}
-                                            <div class="day-card {% if hari == today.weekday %}today{% endif %} {% if not jadwal or not jadwal.jam_masuk %}libur{% endif %}">
-                                                <div class="day-name">{{ hari_nama }}</div>
-                                                {% if jadwal and jadwal.jam_masuk %}
-                                                    <div class="day-time">
-                                                        <div>{{ jadwal.jam_masuk|time:"H:i" }}</div>
-                                                        <div class="separator">─</div>
-                                                        <div>{{ jadwal.jam_keluar|time:"H:i" }}</div>
-                                                    </div>
-                                                    {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
-                                                        <div class="day-break">
-                                                            🍽️ {{ jadwal.jam_istirahat_keluar|time:"H:i" }}-{{ jadwal.jam_istirahat_masuk|time:"H:i" }}
+                                
+                                {% if item.jadwal_mingguan %}
+                                    <div class="schedule-grid">
+                                        {% for hari, hari_nama in hari_names_enum %}
+                                            {% with jadwal=item.jadwal_mingguan|get_item:hari %}
+                                                <div class="day-card {% if hari == today.weekday %}today{% endif %} {% if not jadwal or not jadwal.jam_masuk %}libur{% endif %}">
+                                                    <div class="day-name">{{ hari_nama }}</div>
+                                                    {% if jadwal and jadwal.jam_masuk %}
+                                                        <div class="day-time">
+                                                            <div>{{ jadwal.jam_masuk|time:"H:i" }}</div>
+                                                            <div class="separator">─</div>
+                                                            <div>{{ jadwal.jam_keluar|time:"H:i" }}</div>
+                                                        </div>
+                                                        {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
+                                                            <div class="day-break">
+                                                                🍽️ {{ jadwal.jam_istirahat_keluar|time:"H:i" }}-{{ jadwal.jam_istirahat_masuk|time:"H:i" }}
+                                                            </div>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <div class="day-time" style="color: var(--gray-500);">
+                                                            <i class="fas fa-home"></i>
+                                                            <div>Libur</div>
                                                         </div>
                                                     {% endif %}
-                                                {% else %}
-                                                    <div class="day-time" style="color: var(--gray-500);">
-                                                        <i class="fas fa-home"></i>
-                                                        <div>Libur</div>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        {% endwith %}
-                                    {% endfor %}
-                                </div>
+                                                </div>
+                                            {% endwith %}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <!-- ✅ FALLBACK: Jika jadwal_mingguan kosong -->
+                                    <div class="empty-state" style="padding: 30px 20px; margin-top: 20px;">
+                                        <div class="empty-icon" style="font-size: 48px;">
+                                            <i class="fas fa-calendar-times"></i>
+                                        </div>
+                                        <h3 class="empty-title" style="font-size: 16px;">Jadwal Belum Diatur</h3>
+                                        <p class="empty-text" style="font-size: 14px;">
+                                            Mode ini belum memiliki jadwal jam kerja mingguan.
+                                        </p>
+                                    </div>
+                                {% endif %}
                             </div>
-
+                            
                             <!-- MODE FOOTER INFO -->
                             <div class="mode-footer">
                                 <div class="footer-item">
@@ -953,6 +977,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('.mode-tab');
     const cards = document.querySelectorAll('.mode-card');
 
+    // Initialize first tab as active
     tabs.forEach(tab => {
         const color = tab.getAttribute('data-color');
         if (tab.getAttribute('data-active') === 'true') {
@@ -963,6 +988,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Apply gradient to all mode headers
     cards.forEach(card => {
         const color = card.getAttribute('data-color');
         const header = card.querySelector('.mode-header');
@@ -971,18 +997,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Tab click handler
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
             const modeId = this.getAttribute('data-mode-id');
             const color = this.getAttribute('data-color');
 
+            // Hide all cards
             cards.forEach(c => c.classList.remove('active'));
 
+            // Show selected card
             const selectedCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
             if (selectedCard) {
                 selectedCard.classList.add('active');
             }
 
+            // Update tab styles
             tabs.forEach(t => {
                 t.classList.remove('active');
                 t.style.backgroundColor = 'white';
@@ -990,6 +1020,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 t.style.borderColor = 'transparent';
             });
 
+            // Apply active styles
             this.classList.add('active');
             this.style.backgroundColor = color;
             this.style.color = 'white';

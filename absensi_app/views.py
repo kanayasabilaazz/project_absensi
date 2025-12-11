@@ -838,8 +838,16 @@ def daftar_Pegawai(request):
                 pegawai_list = pegawai_list.filter(id__in=pegawai_with_fp)
             status_filter = 'active'
         
+        # ✅ TAMBAHKAN mode_jam_kerja ke select_related
         pegawai_list = pegawai_list.select_related(
-            'departemen', 'jabatan', 'cabang', 'mesin'
+            'departemen', 
+            'jabatan', 
+            'cabang', 
+            'mesin',
+            'mode_jam_kerja'  # ✅ PENTING: Tambahkan ini
+        ).prefetch_related(
+            'mode_assignments',  # ✅ Prefetch assignments untuk performa
+            'mode_assignments__mode'
         ).order_by('userid')
         
     except Exception as e:
@@ -868,7 +876,27 @@ def daftar_Pegawai(request):
                 logger.warning(f"Error in search filter: {str(e)}")
     
     # ========================================
-    #  6: Hitung total per status
+    #  6: Process pegawai untuk display
+    # ========================================
+    pegawai_display_list = []
+    for pegawai in pegawai_list:
+        # ✅ Ambil mode jam kerja info
+        mode_names = []
+        if pegawai.mode_jam_kerja:
+            mode_names.append(pegawai.mode_jam_kerja.nama)
+        
+        # ✅ Tambahkan mode dari assignments
+        for assignment in pegawai.mode_assignments.filter(is_active=True):
+            if assignment.mode.nama not in mode_names:
+                mode_names.append(assignment.mode.nama)
+        
+        pegawai.mode_names_display = ', '.join(mode_names) if mode_names else '-'
+        pegawai.has_mode = len(mode_names) > 0
+        
+        pegawai_display_list.append(pegawai)
+    
+    # ========================================
+    #  7: Hitung total per status
     # ========================================
     total_active = 0
     total_pending = 0
@@ -912,10 +940,10 @@ def daftar_Pegawai(request):
         logger.warning(f"Error counting totals: {str(e)}")
     
     # ========================================
-    #  7: Build context
+    #  8: Build context
     # ========================================
     context = {
-        'pegawai_list': pegawai_list,
+        'pegawai_list': pegawai_display_list,  # ✅ Gunakan list yang sudah diproses
         'search_form': search_form,
         'status_filter': status_filter,
         'total_active': total_active,
@@ -929,23 +957,49 @@ def daftar_Pegawai(request):
     
     return render(request, 'absensi_app/pegawai/daftar_pegawai.html', context)
 
-
 @login_required
 def Pegawai_detail(request, pk):
     """
     Menampilkan detail lengkap data pegawai dengan SEMUA mode jam kerja yang di-assign.
     
-    ✅ FIX: Langsung query PegawaiModeAssignment untuk dapat jadwal_per_hari
+    ✅ FIX: Menampilkan semua jadwal yang sudah di-assign ke pegawai
     """
     if not request.user.is_staff:
         messages.error(request, "Akses ditolak.")
         return redirect('dashboard')
     
-    pegawai = get_object_or_404(Pegawai, pk=pk)
+    # ========================================
+    # 1. AMBIL CABANG AKTIF DARI SESSION
+    # ========================================
+    cabang_aktif = get_active_cabang(request)
+    
+    # ========================================
+    # 2. QUERY PEGAWAI DENGAN FILTER CABANG
+    # ========================================
+    try:
+        pegawai = Pegawai.objects.select_related(
+            'departemen', 
+            'jabatan', 
+            'cabang', 
+            'mesin'
+        ).get(pk=pk)
+        
+        # Validasi cabang
+        if cabang_aktif and pegawai.cabang != cabang_aktif:
+            messages.error(
+                request,
+                f"❌ Pegawai '{pegawai.nama_lengkap}' tidak terdaftar di cabang {cabang_aktif.nama}."
+            )
+            return redirect('daftar_Pegawai')
+    
+    except Pegawai.DoesNotExist:
+        messages.error(request, "Pegawai tidak ditemukan.")
+        return redirect('daftar_Pegawai')
+    
     today = date.today()
     
     # ========================================
-    # 1. Ambil info jam kerja HARI INI (untuk badge aktif)
+    # 3. AMBIL INFO JAM KERJA HARI INI
     # ========================================
     jam_kerja_info = WorkModeService.get_jam_kerja_for_pegawai(pegawai, today)
     jadwal_hari_ini = jam_kerja_info.get('jadwal')
@@ -953,9 +1007,9 @@ def Pegawai_detail(request, pk):
     periode_aktif = jam_kerja_info.get('periode')
     
     # ========================================
-    # 2. ✅ AMBIL SEMUA MODE YANG DI-ASSIGN KE PEGAWAI
+    # 4. ✅ AMBIL SEMUA MODE ASSIGNMENT PEGAWAI
     # ========================================
-    from .models import PegawaiModeAssignment, MasterModeJamKerja, ModeJamKerjaJadwal
+    from .models import PegawaiModeAssignment, ModeJamKerjaJadwal
     
     all_assignments = PegawaiModeAssignment.objects.filter(
         pegawai=pegawai,
@@ -965,72 +1019,78 @@ def Pegawai_detail(request, pk):
         'mode__periode_list'
     ).order_by('mode__nama')
     
-    print(f"\n=== DEBUG PEGAWAI DETAIL ===")
-    print(f"Pegawai: {pegawai.nama_lengkap} ({pegawai.userid})")
-    print(f"Total assignments found: {all_assignments.count()}")
+    print(f"\n{'='*60}")
+    print(f"🔍 DEBUG: Detail Pegawai - {pegawai.nama_lengkap} ({pegawai.userid})")
+    print(f"{'='*60}")
+    print(f"Cabang: {pegawai.cabang.nama if pegawai.cabang else 'Belum diatur'}")
+    print(f"Total Assignments Found: {all_assignments.count()}")
     
     modes_with_schedule = []
     
+    # ========================================
+    # 5. ✅ PROSES SETIAP ASSIGNMENT
+    # ========================================
     for assignment in all_assignments:
         mode = assignment.mode
         
-        print(f"\n--- Processing Mode: {mode.nama} ---")
+        print(f"\n{'─'*60}")
+        print(f"📋 Processing Mode: {mode.nama} (ID: {mode.id})")
         print(f"Assignment ID: {assignment.id}")
-        print(f"jadwal_per_hari: {assignment.jadwal_per_hari}")
+        print(f"jadwal_per_hari TYPE: {type(assignment.jadwal_per_hari)}")
+        print(f"jadwal_per_hari CONTENT: {assignment.jadwal_per_hari}")
+        print(f"jadwal_per_hari IS EMPTY: {not assignment.jadwal_per_hari}")
         
-        # ✅ Cek apakah ada periode aktif untuk mode ini
+        # Cek periode aktif untuk mode ini
         periode_aktif_mode = mode.periode_list.filter(
             is_active=True,
             tanggal_mulai__lte=today,
             tanggal_selesai__gte=today
         ).first()
         
-        # ✅ Build jadwal mingguan untuk mode ini DARI assignment.jadwal_per_hari
+        # ✅ BUILD JADWAL MINGGUAN (7 HARI)
         jadwal_mingguan = {}
+        hari_names = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
         
-        if assignment.jadwal_per_hari:
-            # ✅ Gunakan jadwal yang di-assign ke pegawai
-            for hari_str, jadwal_id in assignment.jadwal_per_hari.items():
-                try:
-                    hari = int(hari_str)
-                    
-                    if jadwal_id:
-                        # ✅ Query jadwal berdasarkan ID
-                        jadwal = ModeJamKerjaJadwal.objects.filter(
+        # ✅ CEK: Apakah ada jadwal di mode ini?
+        total_jadwal_mode = mode.jadwal_list.count()
+        print(f"Total jadwal di mode: {total_jadwal_mode}")
+        
+        # Iterasi untuk semua hari (0-6)
+        for hari in range(7):
+            jadwal = None
+            
+            # ✅ PRIORITAS 1: Cek jadwal dari assignment.jadwal_per_hari
+            if assignment.jadwal_per_hari and isinstance(assignment.jadwal_per_hari, dict):
+                jadwal_id = assignment.jadwal_per_hari.get(str(hari))
+                
+                print(f"  🔍 {hari_names[hari]} (hari {hari}): Checking assignment.jadwal_per_hari['{hari}'] = {jadwal_id}")
+                
+                if jadwal_id:
+                    try:
+                        jadwal = ModeJamKerjaJadwal.objects.get(
                             id=jadwal_id,
                             mode=mode
-                        ).first()
-                        
-                        if jadwal:
-                            jadwal_mingguan[hari] = jadwal
-                            print(f"  ✅ Hari {hari}: {jadwal.jam_masuk} - {jadwal.jam_keluar}")
-                        else:
-                            jadwal_mingguan[hari] = None
-                            print(f"  ⚠️ Hari {hari}: Jadwal ID {jadwal_id} NOT FOUND")
-                    else:
-                        jadwal_mingguan[hari] = None
-                        print(f"  ℹ️ Hari {hari}: None (libur)")
-                
-                except (ValueError, TypeError) as e:
-                    print(f"  ❌ ERROR parsing hari {hari_str}: {e}")
-                    jadwal_mingguan[hari] = None
-        
-        # ✅ FALLBACK: Jika jadwal_per_hari kosong/tidak lengkap (untuk backward compatibility)
-        if not jadwal_mingguan or len(jadwal_mingguan) < 7:
-            print("  ⚠️ Fallback: Jadwal tidak lengkap, ambil dari mode default")
+                        )
+                        print(f"    ✅ FOUND: {jadwal.group_name} ({jadwal.jam_masuk} - {jadwal.jam_keluar})")
+                    except ModeJamKerjaJadwal.DoesNotExist:
+                        print(f"    ⚠️ NOT FOUND: Jadwal ID {jadwal_id} doesn't exist")
+                else:
+                    print(f"    ⭕ NULL: No jadwal_id for this day (libur)")
+            else:
+                print(f"  ⚠️ {hari_names[hari]}: assignment.jadwal_per_hari is EMPTY or NOT DICT")
             
-            for hari in range(7):
-                if hari not in jadwal_mingguan:
-                    # Ambil jadwal default dari mode
-                    jadwal = mode.jadwal_list.filter(hari=hari).order_by('urutan').first()
-                    jadwal_mingguan[hari] = jadwal
-                    
-                    if jadwal:
-                        print(f"  ✅ Hari {hari} (fallback): {jadwal.jam_masuk} - {jadwal.jam_keluar}")
-                    else:
-                        print(f"  ℹ️ Hari {hari} (fallback): Libur")
+            # ✅ FALLBACK: Jika tidak ada jadwal dari assignment, coba ambil default mode
+            if not jadwal:
+                jadwal = mode.jadwal_list.filter(hari=hari).order_by('urutan', 'group_name').first()
+                
+                if jadwal:
+                    print(f"    🔄 FALLBACK: Using default mode schedule ({jadwal.group_name}) - {jadwal.jam_masuk} - {jadwal.jam_keluar}")
+                else:
+                    print(f"    ❌ NO SCHEDULE: Neither assignment nor default mode has schedule for {hari_names[hari]}")
+            
+            jadwal_mingguan[hari] = jadwal
         
-        # ✅ Cek apakah mode ini adalah yang aktif hari ini
+        # ✅ Cek apakah mode ini aktif hari ini
         is_mode_today = mode_aktif_hari_ini and mode.id == mode_aktif_hari_ini.id
         
         modes_with_schedule.append({
@@ -1041,17 +1101,19 @@ def Pegawai_detail(request, pk):
             'is_mode_today': is_mode_today,
         })
         
-        print(f"  ✅ Added to modes_with_schedule (is_mode_today: {is_mode_today})")
+        print(f"  ✅ Mode added to list (Active Today: {is_mode_today})")
     
-    print(f"\n=== TOTAL modes_with_schedule: {len(modes_with_schedule)} ===\n")
+    print(f"\n{'='*60}")
+    print(f"📊 TOTAL MODES WITH SCHEDULE: {len(modes_with_schedule)}")
+    print(f"{'='*60}\n")
     
     # ========================================
-    # 3. Urutkan: Mode aktif hari ini di atas
+    # 6. URUTKAN: Mode aktif hari ini di atas
     # ========================================
     modes_with_schedule.sort(key=lambda x: (not x['is_mode_today'], x['mode'].nama))
     
     # ========================================
-    # 4. HITUNG STATISTIK ABSENSI BULAN INI
+    # 7. HITUNG STATISTIK ABSENSI BULAN INI
     # ========================================
     absensi_bulan_ini = pegawai.absensi.filter(
         tanggal__month=today.month,
@@ -1063,6 +1125,9 @@ def Pegawai_detail(request, pk):
     total_pulang_cepat = absensi_bulan_ini.filter(is_early_departure=True).count()
     total_sakit_izin = absensi_bulan_ini.filter(status__in=['Sakit', 'Izin']).count()
     
+    # ========================================
+    # 8. BUILD CONTEXT
+    # ========================================
     context = {
         'pegawai': pegawai,
         'today': today,
@@ -1070,18 +1135,20 @@ def Pegawai_detail(request, pk):
         'mode_aktif_hari_ini': mode_aktif_hari_ini,
         'periode_aktif': periode_aktif,
         
-        # ⭐ SEMUA MODE DENGAN JADWAL
+        # ⭐ SEMUA MODE DENGAN JADWAL LENGKAP
         'modes_with_schedule': modes_with_schedule,
         'total_mode_assigned': len(modes_with_schedule),
         
         'hari_names_enum': enumerate(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']),
         'jam_kerja_info': jam_kerja_info,
         
-        # ✅ STATISTIK ABSENSI
+        # STATISTIK ABSENSI
         'total_hadir': total_hadir,
         'total_terlambat': total_terlambat,
         'total_pulang_cepat': total_pulang_cepat,
         'total_sakit_izin': total_sakit_izin,
+        
+        'cabang_aktif': cabang_aktif,
     }
     
     return render(request, 'absensi_app/pegawai/pegawai_detail.html', context)
@@ -1111,6 +1178,10 @@ def Pegawai_edit(request, pk):
             pegawai_obj.is_active = request.POST.get('is_active') == 'on'
             
             pegawai_obj.save()
+            
+            from .services import WorkModeService
+            WorkModeService.clear_cache()
+            
             messages.success(
                 request,
                 f"Data {pegawai_obj.nama_lengkap} berhasil diperbarui."
@@ -1125,7 +1196,7 @@ def Pegawai_edit(request, pk):
         'pegawai': pegawai_obj,
         'departemen_list': MasterDepartemen.objects.filter(is_active=True).order_by('nama'),
         'jabatan_list': MasterJabatan.objects.filter(is_active=True).order_by('nama'),
-        'cabang_list': MasterCabang.objects.filter(is_active=True).order_by('nama'),
+        'cabang_list': MasterCabang.objects.filter(is_active=True).order_by('nama'),  # ✅ PENTING
         'mesin_list': MasterMesin.objects.filter(is_active=True).order_by('nama'),
         'mode_jam_kerja_list': MasterModeJamKerja.objects.filter(is_active=True).order_by('nama'),
     }
@@ -1140,15 +1211,19 @@ def _update_pegawai_relations(pegawai, post_data):
     jabatan_id = post_data.get('jabatan')
     pegawai.jabatan = MasterJabatan.objects.get(id=jabatan_id) if jabatan_id else None
     
+    # ✅ FIX: Hanya update cabang jika ada di POST data
+    # Jika tidak ada, pertahankan cabang yang sudah ada
     cabang_id = post_data.get('cabang')
-    pegawai.cabang = MasterCabang.objects.get(id=cabang_id) if cabang_id else None
+    if cabang_id:  # ← TAMBAHKAN KONDISI INI
+        pegawai.cabang = MasterCabang.objects.get(id=cabang_id)
+    # Jika tidak ada cabang_id, biarkan pegawai.cabang tetap seperti sebelumnya
     
     mesin_id = post_data.get('mesin')
     pegawai.mesin = MasterMesin.objects.get(id=mesin_id) if mesin_id else None
     
+    # ✅ PASTIKAN INI ADA
     mode_id = post_data.get('mode_jam_kerja')
     pegawai.mode_jam_kerja = MasterModeJamKerja.objects.get(id=mode_id) if mode_id else None
-
 
 @login_required
 def Pegawai_hapus(request, pk):
@@ -1341,6 +1416,7 @@ def register_Pegawai_menu(request):
     return render(request, 'absensi_app/menu/register_Pegawai_menu.html')
 
 
+# Di views.py, perbaiki fungsi register_Pegawai
 @login_required
 def register_Pegawai(request):
     """Mendaftarkan pegawai secara manual ke database."""
@@ -1387,8 +1463,19 @@ def register_Pegawai(request):
                     else:
                         new_pegawai.tanggal_bergabung = datetime.now().date()
                     
+                    # ✅ TAMBAHKAN INI: Set mode_jam_kerja default jika ada
+                    default_mode_id = None
+                    for mode_id_str, assignment_data in mode_assignments.items():
+                        if assignment_data.get('assigned'):
+                            default_mode_id = int(mode_id_str)
+                            break
+                    
+                    if default_mode_id:
+                        new_pegawai.mode_jam_kerja_id = default_mode_id
+                    
                     new_pegawai.save()
                     
+                    # Simpan PegawaiModeAssignment
                     from .models import PegawaiModeAssignment
                     
                     assignment_count = 0
@@ -1416,10 +1503,11 @@ def register_Pegawai(request):
                     
                     messages.success(
                         request,
-                        f" Pegawai {new_pegawai.nama_lengkap} berhasil didaftarkan dengan {assignment_count} mode!\n\n"
+                        f"✅ Pegawai {new_pegawai.nama_lengkap} berhasil didaftarkan dengan {assignment_count} mode!\n\n"
                         f"📋 Detail:\n"
                         f"• User ID: {new_pegawai.userid}\n"
                         f"• Departemen: {new_pegawai.departemen.nama if new_pegawai.departemen else '-'}\n"
+                        f"• Mode Jam Kerja: {new_pegawai.mode_jam_kerja.nama if new_pegawai.mode_jam_kerja else '-'}\n"
                         f"• Status: PENDING (Menunggu Registrasi)\n\n"
                         f"⚠️ Langkah Selanjutnya:\n"
                         f"Silakan lanjutkan ke menu 'Sinkron ke Mesin' untuk registrasi fingerprint agar pegawai bisa mulai absen!"
@@ -1644,6 +1732,8 @@ def register_Pegawai_dari_mesin(request):
     }
     
     return render(request, 'absensi_app/register/register_dari_mesin.html', context)
+
+# Di views.py, perbaiki fungsi simpan_Pegawai_dari_mesin
 @login_required
 def simpan_Pegawai_dari_mesin(request):
     """Menyimpan data pegawai yang diambil dari mesin ke database."""
@@ -1697,6 +1787,18 @@ def simpan_Pegawai_dari_mesin(request):
             # Buat pegawai baru dan set UID
             new_pegawai = _create_pegawai_from_machine(request.POST, mesin)
             new_pegawai.uid_mesin = int(uid)
+            
+            # ✅ TAMBAHKAN INI: Set mode_jam_kerja default
+            default_mode_id = None
+            for mode_id_str, assignment_data in mode_assignments.items():
+                group_id = assignment_data.get('group_id')
+                if group_id:
+                    default_mode_id = int(mode_id_str)
+                    break
+            
+            if default_mode_id:
+                new_pegawai.mode_jam_kerja_id = default_mode_id
+            
             new_pegawai.save()
             
             # Simpan mode assignments
@@ -1780,7 +1882,7 @@ def simpan_Pegawai_dari_mesin(request):
                 transaction.set_rollback(True)
                 return JsonResponse({
                     "status": "error",
-                    "msg": f" Tidak ada data fingerprint untuk user {new_pegawai.userid}!\n\n"
+                    "msg": f"❌ Tidak ada data fingerprint untuk user {new_pegawai.userid}!\n\n"
                            f"Pastikan pegawai sudah scan sidik jari di mesin terlebih dahulu.\n\n"
                            f"Langkah:\n"
                            f"1. Pegawai scan sidik jari di mesin fisik\n"
@@ -1789,13 +1891,14 @@ def simpan_Pegawai_dari_mesin(request):
                 }, status=400)
             
             # Success response
-            msg = f" Pegawai berhasil didaftarkan!\n\n"
+            msg = f"✅ Pegawai berhasil didaftarkan!\n\n"
             msg += f"Detail:\n"
             msg += f"• Nama: {new_pegawai.nama_lengkap}\n"
             msg += f"• User ID: {new_pegawai.userid}\n"
             msg += f"• Machine UID: {new_pegawai.uid_mesin}\n"
             msg += f"• Fingerprint: {fingers_count} templates\n"
             msg += f"• Mode Assignments: {assignment_count} mode\n"
+            msg += f"• Mode Default: {new_pegawai.mode_jam_kerja.nama if new_pegawai.mode_jam_kerja else '-'}\n"
             msg += f"• Cabang: {new_pegawai.cabang.nama if new_pegawai.cabang else '-'}\n\n"
             msg += f"Status: AKTIF - Pegawai sudah bisa TAP absen!"
             
@@ -1818,7 +1921,7 @@ def simpan_Pegawai_dari_mesin(request):
                 "status": "error", 
                 "msg": f"Error: {str(e)}"
             }, status=500)
-        
+                
 def _validate_pegawai_data(post_data):
     """Helper untuk memvalidasi data pegawai dari POST."""
     userid = post_data.get("userid_mesin")

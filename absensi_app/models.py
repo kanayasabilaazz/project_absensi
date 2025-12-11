@@ -414,6 +414,39 @@ class PegawaiModeAssignment(models.Model):
             except ModeJamKerjaJadwal.DoesNotExist:
                 pass
         return None
+    
+    def save(self, *args, **kwargs):
+        """Validasi otomatis: pastikan jadwal_per_hari selalu valid"""
+        
+        if self.jadwal_per_hari and self.mode_id:
+            from absensi_app.models import ModeJamKerjaJadwal
+            
+            # Ambil semua jadwal yang valid untuk mode ini
+            valid_jadwal_ids = list(
+                ModeJamKerjaJadwal.objects.filter(mode=self.mode)
+                .values_list('id', flat=True)
+            )
+            
+            if valid_jadwal_ids:
+                # Cek apakah ada jadwal_id yang tidak valid
+                needs_fix = False
+                for hari, jadwal_id in self.jadwal_per_hari.items():
+                    if jadwal_id not in valid_jadwal_ids:
+                        needs_fix = True
+                        break
+                
+                # Kalau ada yang invalid, pakai jadwal pertama sebagai default
+                if needs_fix:
+                    default_id = valid_jadwal_ids[0]
+                    self.jadwal_per_hari = {
+                        '0': default_id,
+                        '1': default_id,
+                        '2': default_id,
+                        '3': default_id,
+                        '4': default_id,
+                    }
+        
+        super().save(*args, **kwargs)
 
 
 # ==============================================================================
