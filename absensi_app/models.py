@@ -11,12 +11,12 @@ class MasterDepartemen(models.Model):
     """Departemen/Divisi perusahaan"""
     
     nama = models.CharField(max_length=100, unique=True)
-    id_departemen = models.CharField(max_length=5, unique=True, null=True, blank=True, verbose_name="ID Departemen")
-    keterangan = models.TextField(blank=True)
+    id_departemen = models.CharField(max_length=5, unique=True, null=True, blank=True)
+    keterangan = models.TextField(blank=True, default='')  # ✅ TAMBAH default=''
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'master_departemen'
         ordering = ['id_departemen', 'nama']
@@ -54,11 +54,11 @@ class MasterJabatan(models.Model):
     
     nama = models.CharField(max_length=100, unique=True)
     kode = models.CharField(max_length=20, unique=True)
-    keterangan = models.TextField(blank=True)
+    keterangan = models.TextField(blank=True, default='')  # ✅ TAMBAH default=''
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'master_jabatan'
         ordering = ['nama']
@@ -75,7 +75,7 @@ class MasterCabang(models.Model):
     nama = models.CharField(max_length=100, unique=True)
     kode = models.CharField(max_length=20, unique=True)
     alamat = models.TextField()
-    ip_mesin_fingerprint = models.TextField(blank=True, help_text="Daftar IP mesin, pisahkan dengan koma")
+    ip_mesin_fingerprint = models.TextField(blank=True, default='', help_text="...")  # ✅
     port_mesin = models.IntegerField(default=4370)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -96,7 +96,6 @@ class MasterCabang(models.Model):
             return []
         return [ip.strip() for ip in self.ip_mesin_fingerprint.split(',') if ip.strip()]
 
-
 # ==============================================================================
 # MASTER DATA MESIN ABSENSI
 # ==============================================================================
@@ -108,8 +107,8 @@ class MasterMesin(models.Model):
     kode = models.CharField(max_length=20, unique=True)
     ip_address = models.GenericIPAddressField()
     port = models.IntegerField(default=4370)
-    lokasi = models.CharField(max_length=200, blank=True)
-    keterangan = models.TextField(blank=True)
+    lokasi = models.CharField(max_length=200, blank=True, default='')  # ✅
+    keterangan = models.TextField(blank=True, default='')  # ✅
     cabang = models.ForeignKey(MasterCabang, on_delete=models.CASCADE, related_name='mesin')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -191,6 +190,8 @@ class MasterModeJamKerja(models.Model):
         return periode_aktif is not None or self.is_default
 
 
+# Di models.py, update class ModeJamKerjaJadwal
+
 class ModeJamKerjaJadwal(models.Model):
     """Jadwal jam kerja per grup shift"""
     
@@ -199,7 +200,11 @@ class ModeJamKerjaJadwal(models.Model):
         (4, 'Jumat'), (5, 'Sabtu'), (6, 'Minggu')
     ]
     
-    mode = models.ForeignKey(MasterModeJamKerja, on_delete=models.CASCADE, related_name='jadwal_list')
+    mode = models.ForeignKey(
+        MasterModeJamKerja, 
+        on_delete=models.CASCADE,  # ✅ CASCADE: Hapus jadwal jika mode dihapus
+        related_name='jadwal_list'
+    )
     group_name = models.CharField(max_length=100, verbose_name="Nama Grup")
     hari = models.IntegerField(choices=HARI_CHOICES)
     jam_masuk = models.TimeField(null=True, blank=True)
@@ -214,7 +219,7 @@ class ModeJamKerjaJadwal(models.Model):
         db_table = 'mode_jam_kerja_jadwal'
         verbose_name = 'Jadwal Mode'
         verbose_name_plural = 'Jadwal Mode'
-        unique_together = ['mode', 'group_name', 'hari']
+        unique_together = ['mode', 'group_name', 'hari', 'urutan']  # ✅ Tambah urutan
         ordering = ['mode', 'group_name', 'hari', 'urutan']
         indexes = [
             models.Index(fields=['mode', 'hari']),
@@ -224,49 +229,6 @@ class ModeJamKerjaJadwal(models.Model):
     def __str__(self):
         hari_nama = dict(self.HARI_CHOICES)[self.hari]
         return f"{self.mode.nama} - {self.group_name} ({hari_nama})"
-    
-    def get_jam_kerja_display(self):
-        """Format jam kerja untuk tampilan"""
-        if not self.jam_masuk or not self.jam_keluar:
-            return "Belum diatur"
-        return f"{self.jam_masuk.strftime('%H:%M')} - {self.jam_keluar.strftime('%H:%M')}"
-    
-    def get_duration_minutes(self):
-        """Hitung durasi kerja dalam menit (tanpa waktu istirahat)"""
-        if not self.jam_masuk or not self.jam_keluar:
-            return None
-        
-        today = date.today()
-        dt_masuk = datetime.combine(today, self.jam_masuk)
-        dt_keluar = datetime.combine(today, self.jam_keluar)
-        
-        if dt_keluar < dt_masuk:
-            dt_keluar += timedelta(days=1)
-        
-        total_minutes = int((dt_keluar - dt_masuk).total_seconds() / 60)
-        
-        if self.jam_istirahat_keluar and self.jam_istirahat_masuk:
-            dt_break_out = datetime.combine(today, self.jam_istirahat_keluar)
-            dt_break_in = datetime.combine(today, self.jam_istirahat_masuk)
-            
-            if dt_break_in < dt_break_out:
-                dt_break_in += timedelta(days=1)
-            
-            break_minutes = int((dt_break_in - dt_break_out).total_seconds() / 60)
-            total_minutes -= break_minutes
-        
-        return total_minutes
-    
-    def get_duration_formatted(self):
-        """Format durasi kerja: 8j 30m"""
-        duration = self.get_duration_minutes()
-        if not duration:
-            return None
-        
-        hours = duration // 60
-        minutes = duration % 60
-        return f"{hours}j {minutes}m" if hours > 0 else f"{minutes}m"
-
 
 class ModeJamKerjaPeriode(models.Model):
     """Periode aktif untuk mode tertentu"""
@@ -390,9 +352,20 @@ class FingerprintTemplate(models.Model):
 class PegawaiModeAssignment(models.Model):
     """Assignment jadwal jam kerja pegawai per mode"""
     
-    pegawai = models.ForeignKey(Pegawai, on_delete=models.CASCADE, related_name='mode_assignments')
-    mode = models.ForeignKey(MasterModeJamKerja, on_delete=models.CASCADE, related_name='pegawai_assignments')
-    jadwal_per_hari = models.JSONField(default=dict, verbose_name="Jadwal Per Hari")
+    pegawai = models.ForeignKey(
+        Pegawai, 
+        on_delete=models.CASCADE,  # ✅ Sudah benar
+        related_name='mode_assignments'
+    )
+    mode = models.ForeignKey(
+        MasterModeJamKerja, 
+        on_delete=models.CASCADE,  # ✅ CASCADE: Hapus assignment jika mode dihapus
+        related_name='pegawai_assignments'
+    )
+    jadwal_per_hari = models.JSONField(
+        default=dict, 
+        verbose_name="Jadwal Per Hari"
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -400,7 +373,10 @@ class PegawaiModeAssignment(models.Model):
     class Meta:
         db_table = 'pegawai_mode_assignment'
         unique_together = ['pegawai', 'mode']
-        indexes = [models.Index(fields=['pegawai', 'mode'])]
+        indexes = [
+            models.Index(fields=['pegawai', 'mode']),
+            models.Index(fields=['is_active']),
+        ]
     
     def __str__(self):
         return f"{self.pegawai.nama_lengkap} - {self.mode.nama}"
@@ -412,42 +388,50 @@ class PegawaiModeAssignment(models.Model):
             try:
                 return ModeJamKerjaJadwal.objects.get(id=jadwal_id)
             except ModeJamKerjaJadwal.DoesNotExist:
-                pass
+                return None
         return None
     
     def save(self, *args, **kwargs):
-        """Validasi otomatis: pastikan jadwal_per_hari selalu valid"""
+        """
+        ✅ VALIDASI OTOMATIS: Pastikan jadwal_per_hari selalu valid
         
+        Jika ada jadwal_id yang tidak valid (jadwal sudah dihapus),
+        assignment akan menggunakan jadwal pertama yang tersedia.
+        """
         if self.jadwal_per_hari and self.mode_id:
-            from absensi_app.models import ModeJamKerjaJadwal
-            
             # Ambil semua jadwal yang valid untuk mode ini
-            valid_jadwal_ids = list(
+            valid_jadwal_ids = set(
                 ModeJamKerjaJadwal.objects.filter(mode=self.mode)
                 .values_list('id', flat=True)
             )
             
             if valid_jadwal_ids:
                 # Cek apakah ada jadwal_id yang tidak valid
+                cleaned_jadwal = {}
                 needs_fix = False
-                for hari, jadwal_id in self.jadwal_per_hari.items():
-                    if jadwal_id not in valid_jadwal_ids:
-                        needs_fix = True
-                        break
                 
-                # Kalau ada yang invalid, pakai jadwal pertama sebagai default
-                if needs_fix:
-                    default_id = valid_jadwal_ids[0]
+                for hari, jadwal_id in self.jadwal_per_hari.items():
+                    if jadwal_id in valid_jadwal_ids:
+                        cleaned_jadwal[hari] = jadwal_id
+                    else:
+                        needs_fix = True
+                
+                # Jika ada yang invalid dan tidak ada valid jadwal sama sekali
+                if needs_fix and not cleaned_jadwal:
+                    # Pakai jadwal pertama sebagai default untuk semua hari kerja
+                    default_id = list(valid_jadwal_ids)[0]
                     self.jadwal_per_hari = {
-                        '0': default_id,
-                        '1': default_id,
-                        '2': default_id,
-                        '3': default_id,
-                        '4': default_id,
+                        '0': default_id,  # Senin
+                        '1': default_id,  # Selasa
+                        '2': default_id,  # Rabu
+                        '3': default_id,  # Kamis
+                        '4': default_id,  # Jumat
                     }
+                elif needs_fix:
+                    # Hanya update yang invalid
+                    self.jadwal_per_hari = cleaned_jadwal
         
         super().save(*args, **kwargs)
-
 
 # ==============================================================================
 # DATA ABSENSI (LEGACY)
