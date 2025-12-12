@@ -76,52 +76,18 @@ def get_dict_item(dictionary, key):
 def get_item(dictionary, key):
     """
     Alias untuk get_dict_item - untuk backward compatibility
-    Ambil value dari dictionary berdasarkan key
+    
+    ⚠️ DEPRECATED: Tidak digunakan di detail pegawai yang baru
+    Filter ini tetap ada untuk backward compatibility dengan template lain
     
     Usage: {{ my_dict|get_item:some_key }}
     """
     return get_dict_item(dictionary, key)
 
 
-@register.filter
-def dict_keys(dictionary):
-    """
-    Ambil semua keys dari dictionary sebagai list
-    
-    Usage: {{ my_dict|dict_keys }}
-    """
-    if isinstance(dictionary, dict):
-        return list(dictionary.keys())
-    return []
-
-
-@register.filter
-def dict_values(dictionary):
-    """
-    Ambil semua values dari dictionary sebagai list
-    
-    Usage: {{ my_dict|dict_values }}
-    """
-    if isinstance(dictionary, dict):
-        return list(dictionary.values())
-    return []
-
-
-@register.filter
-def dict_lookup(dictionary, key):
-    """
-    Lookup dictionary dengan key (alias untuk get_dict_item)
-    
-    Usage: {{ my_dict|dict_lookup:key_variable }}
-    """
-    if isinstance(dictionary, dict):
-        return dictionary.get(key)
-    return None
-
-
 # ==============================================================================
-# FILTER - JADWAL
-# Filter untuk operasi jadwal
+# FILTER - JADWAL (OPTIMIZED)
+# Filter untuk operasi jadwal - HANYA yang masih digunakan
 # ==============================================================================
 
 @register.filter
@@ -170,6 +136,54 @@ def jadwal_full_display(jadwal_id):
         return "❌ Invalid"
 
 
+@register.filter
+def has_schedule(jadwal_obj):
+    """
+    ✅ MASIH DIGUNAKAN: Cek apakah jadwal valid
+    
+    Usage dalam template detail pegawai:
+    {% if day_item.jadwal|has_schedule %}
+        <div class="day-time">...</div>
+    {% else %}
+        <div class="day-time">Libur</div>
+    {% endif %}
+    """
+    if not jadwal_obj:
+        return False
+    
+    try:
+        return (
+            hasattr(jadwal_obj, 'jam_masuk') and jadwal_obj.jam_masuk and
+            hasattr(jadwal_obj, 'jam_keluar') and jadwal_obj.jam_keluar
+        )
+    except Exception:
+        return False
+
+
+# ==============================================================================
+# FILTER - DAY NAME (DEPRECATED - Tidak digunakan di detail pegawai baru)
+# ==============================================================================
+
+@register.filter
+def get_day_name(hari_index):
+    """
+    ⚠️ DEPRECATED: Tidak digunakan di detail pegawai yang baru
+    
+    Filter ini tetap ada untuk backward compatibility dengan template lain
+    (misalnya: detail mode jam kerja, assign mode, dll.)
+    
+    Usage: {{ 0|get_day_name }}  => Senin
+    """
+    hari_names = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
+    try:
+        index = int(hari_index)
+        if 0 <= index <= 6:
+            return hari_names[index]
+        return "Unknown"
+    except (ValueError, TypeError):
+        return "Unknown"
+
+
 # ==============================================================================
 # FILTER - TIME & DATE
 # Filter untuk operasi waktu dan tanggal
@@ -215,48 +229,54 @@ def format_date(date_obj, format_string="%d %b %Y"):
 # ==============================================================================
 
 @register.filter
-def add_space(value, spaces=1):
+def default_if_none(value, default_text="-"):
     """
-    Tambah spasi sebelum value
+    Tampilkan default text jika value None atau kosong
     
-    Usage: {{ value|add_space }}
-    atau: {{ value|add_space:3 }}
+    Usage: {{ value|default_if_none }}
+    atau: {{ value|default_if_none:"N/A" }}
     """
-    try:
-        space_count = int(spaces)
-        return "&nbsp;" * space_count + str(value)
-    except (ValueError, TypeError):
-        return str(value)
+    if value is None or value == "":
+        return default_text
+    return value
 
 
 @register.filter
-def replace_newline(value):
+def yes_no_icon(value):
     """
-    Ganti newline dengan <br> (plain text, tidak aman untuk HTML injection)
+    Convert boolean ke icon (✓/✗)
     
-    Usage: {{ value|replace_newline }}
+    Usage: {{ is_active|yes_no_icon }}
     """
-    if not value:
-        return ""
-    
-    return str(value).replace('\n', '<br>')
+    if value:
+        return mark_safe('✓')
+    return mark_safe('✗')
 
 
-@register.filter(is_safe=True)
-def replace_newline_safe(value):
+@register.filter
+def yes_no_badge(value, yes_text="Ya"):
     """
-    Ganti newline dengan <br> dengan escape HTML terlebih dahulu
-    Lebih aman untuk menampilkan user input
+    Convert boolean ke badge HTML
     
-    Usage: {{ value|replace_newline_safe|safe }}
+    Usage: {{ is_active|yes_no_badge }}
+    atau: {{ is_active|yes_no_badge:"Active:Inactive" }}
     """
-    if not value:
-        return ""
-    
-    # Escape HTML entities terlebih dahulu
-    escaped = escape(str(value))
-    # Kemudian ganti newline dengan <br>
-    return mark_safe(escaped.replace('\n', '<br>'))
+    try:
+        no_text = "Tidak"
+        
+        if ":" in str(yes_text):
+            parts = str(yes_text).split(":")
+            yes_text = parts[0]
+            no_text = parts[1] if len(parts) > 1 else "Tidak"
+        
+        if value:
+            badge = f'<span class="badge badge-success">{yes_text}</span>'
+        else:
+            badge = f'<span class="badge badge-danger">{no_text}</span>'
+        
+        return mark_safe(badge)
+    except Exception:
+        return str(value)
 
 
 @register.filter
@@ -299,74 +319,6 @@ def truncate_chars(value, num_chars=50):
         return str(value)
 
 
-@register.filter
-def default_if_none(value, default_text="-"):
-    """
-    Tampilkan default text jika value None atau kosong
-    
-    Usage: {{ value|default_if_none }}
-    atau: {{ value|default_if_none:"N/A" }}
-    """
-    if value is None or value == "":
-        return default_text
-    return value
-
-
-@register.filter
-def yes_no_icon(value):
-    """
-    Convert boolean ke icon (✓/✗)
-    
-    Usage: {{ is_active|yes_no_icon }}
-    """
-    if value:
-        return mark_safe('✓')
-    return mark_safe('✗')
-
-
-@register.filter
-def yes_no_badge(value, yes_text="Ya", no_text="Tidak"):
-    """
-    Convert boolean ke badge HTML
-    
-    Usage: {{ is_active|yes_no_badge }}
-    atau: {{ is_active|yes_no_badge:"Active:Inactive" }}
-    """
-    try:
-        if ":" in str(yes_text):
-            parts = str(yes_text).split(":")
-            yes_text = parts[0]
-            no_text = parts[1] if len(parts) > 1 else "Tidak"
-        
-        if value:
-            badge = f'<span class="badge badge-success">{yes_text}</span>'
-        else:
-            badge = f'<span class="badge badge-danger">{no_text}</span>'
-        
-        return mark_safe(badge)
-    except Exception:
-        return str(value)
-
-
-@register.filter
-def add_ordinal_suffix(value):
-    """
-    Tambah ordinal suffix (st, nd, rd, th) ke number
-    Contoh: 1 → 1st, 2 → 2nd, 3 → 3rd, 4 → 4th
-    
-    Usage: {{ number|add_ordinal_suffix }}
-    """
-    try:
-        num = int(value)
-        if 10 <= num % 100 <= 20:
-            suffix = 'th'
-        else:
-            suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(num % 10, 'th')
-        return f"{num}{suffix}"
-    except (ValueError, TypeError):
-        return str(value)
-
-
 # ==============================================================================
 # FILTER - STRING
 # Filter untuk manipulasi string
@@ -384,20 +336,6 @@ def upper_first(value):
     
     text = str(value)
     return text[0].upper() + text[1:] if text else ""
-
-
-@register.filter
-def lower_first(value):
-    """
-    Lowercase first character
-    
-    Usage: {{ text|lower_first }}
-    """
-    if not value:
-        return ""
-    
-    text = str(value)
-    return text[0].lower() + text[1:] if text else ""
 
 
 @register.filter
@@ -428,3 +366,4 @@ def join_list(value, separator=", "):
         return separator.join(str(item) for item in value)
     except Exception:
         return str(value)
+

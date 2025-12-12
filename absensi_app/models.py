@@ -130,16 +130,27 @@ class MasterMesin(models.Model):
 # ==============================================================================
 
 class MasterModeJamKerja(models.Model):
-    """Mode jam kerja dengan prioritas dan periode"""
+    """Mode jam kerja dengan prioritas, periode, dan support per-cabang"""
     
     PRIORITY_CHOICES = [(1, 'Low'), (2, 'Medium'), (3, 'High')]
     
-    nama = models.CharField(max_length=100, unique=True)
-    kode = models.CharField(max_length=20, unique=True)
+    nama = models.CharField(max_length=100)
+    kode = models.CharField(max_length=20)
     warna = models.CharField(max_length=7, default='#3B82F6')
     icon = models.CharField(max_length=50, default='fas fa-clock')
     priority = models.IntegerField(choices=PRIORITY_CHOICES, default=1)
     is_default = models.BooleanField(default=False)
+    
+    # ✅ NEW: Support per-cabang
+    cabang = models.ForeignKey(
+        'MasterCabang',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='mode_jam_kerja_list',
+        help_text='Cabang yang menggunakan mode ini. Kosongkan untuk GLOBAL.'
+    )
+    
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -152,31 +163,49 @@ class MasterModeJamKerja(models.Model):
         indexes = [
             models.Index(fields=['is_default', 'is_active']),
             models.Index(fields=['priority']),
+            models.Index(fields=['cabang', 'is_active']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['nama', 'cabang'],
+                condition=models.Q(is_active=True),
+                name='unique_mode_per_cabang'
+            )
         ]
     
     def __str__(self):
-        return f"{self.nama}{' (Default)' if self.is_default else ''}"
+        mode_type = f" ({self.cabang.nama})" if self.cabang else " (GLOBAL)"
+        default_mark = " [Default]" if self.is_default else ""
+        return f"{self.nama}{mode_type}{default_mark}"
+    
+    @property
+    def is_global(self):
+        return self.cabang is None
+    
+    @property
+    def is_cabang_specific(self):
+        return self.cabang is not None
     
     def save(self, *args, **kwargs):
-        """Pastikan hanya ada satu mode default"""
+        """Pastikan hanya ada satu mode default per cabang"""
         if self.is_default:
-            MasterModeJamKerja.objects.exclude(pk=self.pk).update(is_default=False)
+            query = MasterModeJamKerja.objects.filter(
+                is_default=True,
+                cabang=self.cabang
+            ).exclude(pk=self.pk)
+            query.update(is_default=False)
         super().save(*args, **kwargs)
     
     def get_jadwal_hari(self, hari):
-        """Ambil jadwal untuk hari tertentu (0=Senin, 6=Minggu)"""
         return self.jadwal_list.filter(hari=hari).first()
     
     def has_schedule_for_day(self, hari):
-        """Cek ketersediaan jadwal untuk hari tertentu"""
         return self.jadwal_list.filter(hari=hari).exists()
     
     def get_total_pegawai(self):
-        """Hitung total pegawai yang menggunakan mode ini"""
         return self.pegawai_list.filter(is_active=True).count()
     
     def get_active_periode(self):
-        """Ambil periode yang sedang aktif hari ini"""
         today = date.today()
         return self.periode_list.filter(
             is_active=True,
@@ -185,13 +214,9 @@ class MasterModeJamKerja(models.Model):
         ).first()
     
     def is_applicable_today(self):
-        """Cek apakah mode ini berlaku hari ini"""
         periode_aktif = self.get_active_periode()
         return periode_aktif is not None or self.is_default
-
-
-# Di models.py, update class ModeJamKerjaJadwal
-
+    
 class ModeJamKerjaJadwal(models.Model):
     """Jadwal jam kerja per grup shift"""
     

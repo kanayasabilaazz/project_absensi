@@ -7,417 +7,332 @@
 <style>
 :root {
   --primary: #3b82f6;
-  --primary-dark: #1e40af;
-  --gray-50: #f9fafb;
-  --gray-200: #e5e7eb;
-  --gray-300: #d1d5db;
-  --gray-900: #111827;
+  --primary-dark: #2563eb;
+  --primary-light: #eff6ff;
   --success: #10b981;
   --danger: #ef4444;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body { 
-  background: var(--gray-50);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --spacing-xs: 0.2rem;
+  --spacing-sm: 0.4rem;
+  --spacing-md: 0.6rem;
+  --spacing-lg: 0.8rem;
+  --spacing-xl: 1.2rem;
+  --spacing-2xl: 1.6rem;
+  --font-xs: 0.55rem;
+  --font-sm: 0.65rem;
+  --font-lg: 0.8rem;
+  --font-xl: 1rem;
+  --font-2xl: 1.2rem;
+  --radius-md: 0.4rem;
+  --radius-lg: 0.6rem;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 3px 10px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 20px rgba(0,0,0,0.12);
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
 }
 
 .assign-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
+  padding: var(--spacing-2xl);
 }
 
 .page-header {
   background: white;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
   border-left: 4px solid var(--primary);
 }
 
 .page-header h2 {
-  font-size: 24px;
+  font-size: var(--font-2xl);
   font-weight: 700;
   color: var(--gray-900);
-  margin: 0 0 12px 0;
+  margin: 0 0 var(--spacing-lg) 0;
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.page-header h2 i { 
-  color: var(--primary);
-  font-size: 28px;
+  gap: var(--spacing-lg);
 }
 
 .page-header .info-line {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 4px 0;
-}
-
-.page-header strong {
-  color: var(--gray-900);
-  font-weight: 700;
-}
-
-.alert-info {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border: 2px solid var(--primary);
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
+  font-size: var(--font-sm);
+  color: var(--gray-500);
+  margin: var(--spacing-sm) 0;
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.page-header .info-line strong {
+  color: var(--gray-900);
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.alert-info-box {
+  background: #dbeafe;
+  border: 1.5px solid var(--primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
+  display: flex;
+  gap: var(--spacing-lg);
   align-items: flex-start;
 }
 
-.alert-info i {
+.alert-info-box i {
   color: var(--primary);
-  font-size: 18px;
+  font-size: var(--font-xl);
   margin-top: 2px;
   flex-shrink: 0;
 }
 
-.alert-info-content strong {
+.alert-info-box-content strong {
   display: block;
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 700;
-  margin-bottom: 4px;
-  color: var(--primary-dark);
+  margin-bottom: var(--spacing-sm);
+  color: #0c4a6e;
 }
 
-.alert-info-content p {
+.alert-info-box-content p {
   margin: 0;
-  font-size: 13px;
-  color: #1e40af;
-  line-height: 1.5;
+  font-size: var(--font-sm);
+  color: #0c4a6e;
+  line-height: 1.6;
 }
 
 .modes-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
 }
 
 .mode-card {
   background: white;
   border: 2px solid var(--gray-200);
-  border-radius: 10px;
-  padding: 20px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  transition: all var(--transition-slow);
 }
 
 .mode-card:hover {
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
   border-color: var(--primary);
 }
 
 .mode-card.selected {
   border-color: var(--primary);
-  background: linear-gradient(135deg, rgba(59,130,246,0.02) 0%, rgba(59,130,246,0.05) 100%);
-  box-shadow: 0 10px 25px rgba(59,130,246,0.15);
+  background: var(--primary-light);
+  box-shadow: 0 8px 24px rgba(59,130,246,0.12);
 }
 
 .mode-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
-  gap: 12px;
+  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-lg);
 }
 
 .mode-info {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
   flex: 1;
-  min-width: 0;
 }
 
 .mode-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: var(--font-xl);
   color: white;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.mode-details {
-  flex: 1;
-  min-width: 0;
+  box-shadow: var(--shadow-md);
 }
 
 .mode-details h4 {
-  margin: 0 0 4px 0;
-  font-size: 16px;
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-lg);
   font-weight: 700;
   color: var(--gray-900);
-  word-break: break-word;
 }
 
-.mode-details small {
-  font-size: 12px;
-  color: #6b7280;
-  font-weight: 500;
+.mode-details .mode-code {
+  font-size: var(--font-xs);
+  color: var(--gray-500);
+  background: var(--gray-100);
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-top: var(--spacing-xs);
 }
 
 .mode-checkbox-wrapper {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-sm);
   cursor: pointer;
-  flex-shrink: 0;
-  padding: 8px 12px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   background: var(--gray-50);
-  border-radius: 6px;
-  transition: all 0.2s;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+  transition: all var(--transition-base);
 }
 
 .mode-checkbox-wrapper:hover {
-  background: var(--gray-200);
+  background: var(--primary-light);
+  border-color: var(--primary);
 }
 
 .mode-checkbox-wrapper input {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   accent-color: var(--primary);
   cursor: pointer;
 }
 
-.mode-checkbox-wrapper span {
-  font-size: 13px;
-  font-weight: 600;
-  color: #374151;
-  white-space: nowrap;
-}
-
 .group-selection {
-  padding: 12px;
+  padding: var(--spacing-lg);
   background: var(--gray-50);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--gray-200);
-  margin-top: 16px;
+  margin-top: var(--spacing-lg);
   max-height: 500px;
   overflow-y: auto;
-  transition: all 0.3s ease;
 }
 
-.group-selection.hidden { 
+.group-selection.hidden {
   display: none;
-  opacity: 0;
 }
 
 .group-selection label {
-  font-size: 12px;
+  font-size: var(--font-xs);
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-md);
   display: block;
-  color: var(--gray-900);
+  color: var(--gray-700);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .group-select {
   width: 100%;
-  padding: 10px 12px;
+  padding: var(--spacing-md) var(--spacing-lg);
   border: 1px solid var(--gray-300);
-  border-radius: 6px;
-  font-size: 13px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
   background: white;
   cursor: pointer;
   font-weight: 500;
-  transition: all 0.2s;
-  color: var(--gray-900);
+  transition: all var(--transition-base);
 }
 
 .group-select:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-  background: white;
-}
-
-.group-select option {
-  padding: 8px;
-  background: white;
-  color: var(--gray-900);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 80px 20px;
-  background: white;
-  border: 2px dashed var(--gray-300);
-  border-radius: 12px;
-  color: #6b7280;
-}
-
-.empty-state i {
-  font-size: 64px;
-  color: var(--gray-300);
-  margin-bottom: 20px;
-  display: block;
-}
-
-.empty-state h3 {
-  margin: 0 0 10px 0;
-  color: var(--gray-900);
-  font-size: 18px;
-}
-
-.empty-state p {
-  margin: 0;
-  font-size: 14px;
 }
 
 .action-buttons {
   display: flex;
-  gap: 12px;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 2px solid var(--gray-200);
-  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-2xl);
+  padding-top: var(--spacing-2xl);
+  border-top: 1px solid var(--gray-200);
 }
 
-.btn {
-  padding: 11px 24px;
-  border-radius: 8px;
-  font-size: 14px;
+.btn-action {
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
   font-weight: 700;
   border: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-sm);
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
 }
 
-.btn:hover:not(:disabled) {
+.btn-action:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  text-decoration: none;
+  box-shadow: var(--shadow-md);
 }
 
-.btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-primary {
+.btn-action-primary {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
 }
 
-.btn-primary:hover:not(:disabled) {
+.btn-action-primary:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--primary-dark) 0%, #0c2d6b 100%);
 }
 
-.btn-primary:disabled {
+.btn-action-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
 }
 
-.btn-secondary {
-  background: #6b7280;
+.btn-action-secondary {
+  background: var(--gray-400);
   color: white;
 }
 
-.btn-secondary:hover:not(:disabled) {
-  background: #4b5563;
+.btn-action-secondary:hover {
+  background: var(--gray-600);
 }
 
 .validation-error {
   display: none;
   background: #fee2e2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  font-size: 14px;
+  border: 1px solid var(--danger);
+  color: #7f1d1d;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-xl);
+  font-size: var(--font-sm);
 }
 
 .validation-error.show {
   display: block;
-  animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @media (max-width: 768px) {
-  .modes-container {
-    grid-template-columns: 1fr;
+  .assign-container {
+    padding: var(--spacing-xl);
   }
 
-  .mode-header {
-    flex-wrap: wrap;
+  .modes-container {
+    grid-template-columns: 1fr;
   }
 
   .action-buttons {
     flex-direction: column;
   }
 
-  .btn {
+  .btn-action {
     width: 100%;
     justify-content: center;
-  }
-
-  .page-header {
-    padding: 16px;
-  }
-
-  .page-header h2 {
-    font-size: 18px;
-  }
-}
-
-@media (max-width: 480px) {
-  .assign-container {
-    padding: 12px;
-  }
-
-  .page-header {
-    padding: 12px;
-    margin-bottom: 16px;
-  }
-
-  .mode-checkbox-wrapper {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-
-  .mode-checkbox-wrapper input {
-    width: 18px;
-    height: 18px;
   }
 }
 </style>
@@ -426,50 +341,68 @@ body {
 {% block content %}
 <div class="assign-container">
 
-  <!-- ========== PAGE HEADER ========== -->
   <div class="page-header">
-    <h2><i class="fas fa-clock"></i> Assign Mode Jam Kerja</h2>
-    <div class="info-line"><strong>👤 Pegawai:</strong> {{ pegawai.nama_lengkap }} ({{ pegawai.userid }})</div>
-    <div class="info-line"><strong>🏢 Departemen:</strong> {{ pegawai.departemen.nama|default:"-" }}</div>
-    <div class="info-line"><strong>🏭 Cabang:</strong> {{ pegawai.cabang.nama|default:"-" }}</div>
-  </div>
-
-  <!-- ========== INFO ALERT ========== -->
-  <div class="alert-info">
-    <i class="fas fa-info-circle"></i>
-    <div class="alert-info-content">
-      <strong>📌 Cara Menggunakan:</strong>
-      <p>1. Centang mode yang ingin di-assign<br>2. Pilih grup jam kerja untuk setiap mode<br>3. Klik tombol "Simpan" untuk menyimpan</p>
+    <h2>
+      <i class="fas fa-clock"></i>
+      Assign Mode Jam Kerja
+    </h2>
+    
+    <div class="info-line">
+      <strong>👤 Pegawai:</strong>
+      <span>{{ pegawai.nama_lengkap }} ({{ pegawai.userid }})</span>
+    </div>
+    
+    <div class="info-line">
+      <strong>🏢 Departemen:</strong>
+      <span>{{ pegawai.departemen.nama|default:"-" }}</span>
+    </div>
+    
+    <div class="info-line">
+      <strong>🏭 Cabang:</strong>
+      <span>
+        {% if cabang_aktif %}
+          <strong>{{ cabang_aktif.nama }}</strong>
+        {% else %}
+          <span style="color: var(--gray-400);">-</span>
+        {% endif %}
+      </span>
     </div>
   </div>
 
-  <!-- ========== FORM ========== -->
+  <div class="alert-info-box">
+    <i class="fas fa-info-circle"></i>
+    <div class="alert-info-box-content">
+      <strong>📌 Cara Menggunakan:</strong>
+      <p>
+        1. Centang mode yang ingin di-assign<br>
+        2. Pilih grup jam kerja untuk setiap mode<br>
+        3. Klik tombol "Simpan Assignment"
+      </p>
+    </div>
+  </div>
+
   <form id="assignForm" method="POST" novalidate>
     {% csrf_token %}
 
-    <!-- ========== VALIDATION ERROR ========== -->
     <div class="validation-error" id="validationError"></div>
 
-    <!-- ========== MODES GRID ========== -->
     {% if modes_with_assignment %}
       <div class="modes-container">
         {% for item in modes_with_assignment %}
         <div class="mode-card {% if item.is_assigned %}selected{% endif %}" 
              data-mode-id="{{ item.mode.id }}" 
-             data-color="{{ item.mode.warna }}" 
-             data-icon="{{ item.mode.icon }}">
+             data-color="{{ item.mode.warna }}">
 
-          <!-- ========== MODE HEADER ========== -->
           <div class="mode-header">
             <div class="mode-info">
               <div class="mode-icon"></div>
               <div class="mode-details">
                 <h4>{{ item.mode.nama }}</h4>
-                <small>{{ item.mode.kode }}</small>
+                <div class="mode-code">{{ item.mode.kode }}</div>
               </div>
             </div>
 
-            <label class="mode-checkbox-wrapper" title="Centang untuk assign mode ini">
+            <label class="mode-checkbox-wrapper">
               <input type="checkbox" 
                      class="mode-checkbox" 
                      data-mode-id="{{ item.mode.id }}" 
@@ -478,23 +411,19 @@ body {
             </label>
           </div>
 
-          <!-- ========== GROUP SELECTION ========== -->
           <div class="group-selection {% if not item.is_assigned %}hidden{% endif %}">
-            <label for="group_{{ item.mode.id }}">📋 Pilih Grup Jam Kerja:</label>
+            <label for="group_{{ item.mode.id }}">
+              📅 Pilih Jadwal Kerja:
+            </label>
             <select class="group-select" 
                     id="group_{{ item.mode.id }}" 
-                    data-mode-id="{{ item.mode.id }}"
-                    title="Pilih grup jam kerja untuk mode ini">
-              <option value="">-- Pilih Grup --</option>
+                    data-mode-id="{{ item.mode.id }}">
+              <option value="">-- Pilih Jadwal --</option>
               {% for group_name, group_info in item.jadwal_groups.items %}
                 {% if group_info.days %}
-                  <option value="{{ group_info.first_jadwal_id }}" 
-                        {% if item.is_assigned and item.assignment.jadwal_per_hari %}
-                            {% if item.assignment.jadwal_per_hari|get_dict_item:"0" == group_info.first_jadwal_id %}selected{% endif %}
-                        {% endif %}
-                    {{ group_name }} 
-                    <i class="fas fa-clock"></i> 
-                    ({{ group_info.jam_masuk_display }}-{{ group_info.jam_keluar_display }})
+                  <option value="{{ group_info.first_jadwal_id }}"
+                        {% if item.is_assigned %}selected{% endif %}>
+                    {{ group_name }} ({{ group_info.jam_masuk_display }}-{{ group_info.jam_keluar_display }})
                   </option>
                 {% endif %}
               {% endfor %}
@@ -505,20 +434,14 @@ body {
         {% endfor %}
       </div>
     {% else %}
-      <!-- ========== EMPTY STATE ========== -->
-      <div class="empty-state">
-        <i class="fas fa-clock"></i>
-        <h3>Belum Ada Mode</h3>
-        <p>Silakan buat mode jam kerja terlebih dahulu di menu Pengaturan → Mode Jam Kerja</p>
-      </div>
+      <p style="text-align: center; color: var(--gray-500);">Belum ada mode. Buat di Pengaturan → Mode Jam Kerja</p>
     {% endif %}
 
-    <!-- ========== ACTION BUTTONS ========== -->
     <div class="action-buttons">
-      <button type="submit" class="btn btn-primary" id="submitBtn">
+      <button type="submit" class="btn-action btn-action-primary" id="submitBtn">
         <i class="fas fa-save"></i> Simpan Assignment
       </button>
-      <a href="{% url 'Pegawai_detail' pegawai.id %}" class="btn btn-secondary">
+      <a href="{% url 'Pegawai_detail' pegawai.id %}" class="btn-action btn-action-secondary">
         <i class="fas fa-arrow-left"></i> Kembali
       </a>
     </div>
@@ -527,7 +450,6 @@ body {
 
 </div>
 
-<!-- ========== SCRIPTS ========== -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -535,37 +457,21 @@ body {
 $(document).ready(function() {
   'use strict';
 
-  console.log('✓ Script initialized');
-
-  // ============================================================================
-  // INITIALIZE MODE CARD ICONS
-  // ============================================================================
   $('.mode-card').each(function() {
     const color = $(this).data('color') || '#3b82f6';
-    const icon = $(this).data('icon') || 'fas fa-clock';
     const $icon = $(this).find('.mode-icon');
-    
     $icon.css('background-color', color);
-    $icon.html('<i class="' + icon + '"></i>');
-    
-    console.log(`✓ Mode icon initialized: color=${color}, icon=${icon}`);
+    $icon.html('<i class="fas fa-clock"></i>');
   });
 
-  // ============================================================================
-  // TOGGLE GROUP SELECTION VISIBILITY
-  // ============================================================================
   $(document).on('change', '.mode-checkbox', function() {
     const modeId = $(this).data('mode-id');
     const $card = $(`.mode-card[data-mode-id="${modeId}"]`);
     const $groupSelection = $card.find('.group-selection');
-    const isChecked = $(this).is(':checked');
 
-    console.log(`Mode ${modeId}: isChecked=${isChecked}`);
-
-    if (isChecked) {
+    if ($(this).is(':checked')) {
       $card.addClass('selected');
-      $groupSelection.removeClass('hidden');
-      $groupSelection.slideDown(200);
+      $groupSelection.removeClass('hidden').slideDown(200);
     } else {
       $card.removeClass('selected');
       $groupSelection.slideUp(200, function() {
@@ -575,32 +481,20 @@ $(document).ready(function() {
     }
   });
 
-  // ============================================================================
-  // FORM SUBMISSION
-  // ============================================================================
   $('#assignForm').on('submit', function(e) {
     e.preventDefault();
 
-    console.log('📝 Form submitted');
-
-    // Reset error display
     $('#validationError').removeClass('show').text('');
 
     const assignments = {};
-    let hasError = false;
     const errors = [];
 
-    // Collect data from checked modes
     $('.mode-checkbox:checked').each(function() {
       const modeId = $(this).data('mode-id');
-      const $groupSelect = $(`.group-select[data-mode-id="${modeId}"]`);
-      const groupId = $groupSelect.val();
-
-      console.log(`Collecting Mode ${modeId}: groupId=${groupId}`);
+      const groupId = $(`.group-select[data-mode-id="${modeId}"]`).val();
 
       if (!groupId) {
-        errors.push(`❌ Mode ${modeId}: Pilih grup jam kerja`);
-        hasError = true;
+        errors.push(`Mode: Pilih grup jam kerja`);
         return;
       }
 
@@ -608,77 +502,40 @@ $(document).ready(function() {
         assigned: true,
         group_id: parseInt(groupId)
       };
-
-      console.log(`✓ Mode ${modeId} collected`);
     });
 
-    console.log('Collected assignments:', assignments);
-
-    // ========== VALIDATION 1: At least 1 mode selected ==========
     if (Object.keys(assignments).length === 0) {
-      console.warn('⚠️ No modes selected');
-      
-      const errorMsg = '❌ Minimal 1 mode harus dipilih dan gruonya harus ditentukan!';
-      
-      $('#validationError')
-        .text(errorMsg)
-        .addClass('show');
-
       Swal.fire({
         icon: 'warning',
         title: 'Pilih Mode!',
-        text: 'Minimal 1 mode harus dipilih',
-        confirmButtonColor: '#3b82f6'
+        text: 'Minimal 1 mode harus dipilih'
       });
-      
       return false;
     }
 
-    // ========== VALIDATION 2: All selected modes have group ==========
-    if (hasError) {
-      console.warn('⚠️ Validation errors:', errors);
-      
-      $('#validationError')
-        .html(errors.join('<br>'))
-        .addClass('show');
-
+    if (errors.length > 0) {
       Swal.fire({
         icon: 'error',
-        title: 'Error Validasi!',
-        html: errors.join('<br>'),
-        confirmButtonColor: '#3b82f6'
+        title: 'Error!',
+        html: errors.join('<br>')
       });
-      
       return false;
     }
 
-    // ========== DISABLE SUBMIT BUTTON ==========
     $('#submitBtn').prop('disabled', true);
 
-    // ========== SHOW LOADING ==========
     Swal.fire({
       title: '⏳ Menyimpan...',
       allowOutsideClick: false,
-      allowEscapeKey: false,
       didOpen: () => Swal.showLoading()
     });
 
-    // ========== PREPARE AJAX REQUEST ==========
     const pegawaiId = "{{ pegawai.id }}";
     const csrfToken = $('[name="csrfmiddlewaretoken"]').val();
-    const url = `/pegawai/${pegawaiId}/simpan-assign-mode/`;
 
-    console.log('🌐 AJAX Request Details:', {
-      url: url,
-      pegawaiId: pegawaiId,
-      csrfToken: csrfToken ? '✓ Present' : '✗ Missing',
-      assignmentCount: Object.keys(assignments).length
-    });
-
-    // ========== SEND AJAX REQUEST ==========
     $.ajax({
       type: 'POST',
-      url: url,
+      url: `/pegawai/${pegawaiId}/simpan-assign-mode/`,
       data: {
         assignments: JSON.stringify(assignments),
         csrfmiddlewaretoken: csrfToken
@@ -686,84 +543,26 @@ $(document).ready(function() {
       dataType: 'json',
       timeout: 30000,
       
-      // ========== SUCCESS HANDLER ==========
       success: function(response) {
-        console.log('✅ SUCCESS:', response);
-        
         Swal.fire({
           icon: 'success',
           title: '✅ Berhasil!',
-          html: response.msg.replace(/\n/g, '<br>'),
-          confirmButtonColor: '#3b82f6'
+          html: response.msg.replace(/\n/g, '<br>')
         }).then(() => {
-          console.log('🔀 Redirecting to detail page...');
           window.location.href = `/pegawai/${pegawaiId}/`;
         });
       },
       
-      // ========== ERROR HANDLER ==========
-      error: function(xhr, status, error) {
-        console.error('❌ ERROR:', {
-          status: status,
-          error: error,
-          statusCode: xhr.status
-        });
-
+      error: function(xhr) {
         $('#submitBtn').prop('disabled', false);
-
-        let errorMsg = '❌ Terjadi kesalahan saat menyimpan';
-        let errorTitle = 'Gagal!';
-
-        if (status === 'timeout') {
-          errorMsg = '⏱️ <strong>Timeout!</strong><br>Server tidak merespons dalam 30 detik.<br>Periksa koneksi internet Anda.';
-          errorTitle = 'Request Timeout';
-        } else if (xhr.responseJSON && xhr.responseJSON.msg) {
-          errorMsg = xhr.responseJSON.msg;
-        } else if (xhr.status === 500) {
-          errorMsg = '❌ <strong>Server Error (500)</strong><br>Ada error di server. Hubungi administrator.';
-          errorTitle = 'Server Error';
-        } else if (xhr.status === 404) {
-          errorMsg = '❌ <strong>URL Not Found (404)</strong><br>Endpoint tidak ditemukan. Cek Django urls.py';
-          errorTitle = 'URL Error';
-        } else if (xhr.status === 403) {
-          errorMsg = '❌ <strong>Forbidden (403)</strong><br>CSRF token tidak valid atau izin ditolak.';
-          errorTitle = 'Permission Error';
-        } else if (xhr.status === 400) {
-          errorMsg = '❌ <strong>Bad Request (400)</strong><br>Data yang dikirim tidak valid.';
-          errorTitle = 'Validation Error';
-          if (xhr.responseJSON && xhr.responseJSON.msg) {
-            errorMsg += '<br>' + xhr.responseJSON.msg;
-          }
-        } else if (xhr.responseText) {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            errorMsg = response.msg || 'Server error';
-          } catch (e) {
-            errorMsg = `<strong>Error:</strong><br>${xhr.responseText.substring(0, 150)}...`;
-          }
-        }
-
-        console.log('Final error message:', errorMsg);
-
         Swal.fire({
           icon: 'error',
-          title: errorTitle,
-          html: errorMsg,
-          confirmButtonColor: '#3b82f6'
+          title: 'Gagal!',
+          text: xhr.responseJSON?.msg || 'Terjadi kesalahan'
         });
-      },
-      
-      // ========== COMPLETE HANDLER ==========
-      complete: function() {
-        console.log('✓ Request complete');
-        $('#submitBtn').prop('disabled', false);
       }
     });
-
   });
-
-  console.log('✓ All event handlers registered. Ready to submit form.');
-
 });
 </script>
 

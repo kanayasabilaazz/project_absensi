@@ -157,18 +157,13 @@ LOGOUT_REDIRECT_URL = '/'
 # ========================================
 # ✅ FIX: SESSION PERSISTEN (30 HARI)
 # ========================================
-SESSION_COOKIE_AGE = 86400 * 30  # 30 hari (2,592,000 detik)
+SESSION_COOKIE_AGE = 86400 * 30
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Session tidak hilang saat close browser
-
-# ✅ Session backend (database untuk stabilitas)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-
-# ✅ Cookie settings untuk keamanan
-SESSION_COOKIE_SECURE = False  # Set True jika pakai HTTPS di production
-SESSION_COOKIE_HTTPONLY = True  # Tidak bisa diakses via JavaScript
-SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
-
+SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 # ==============================================================================
 # MESSAGES FRAMEWORK

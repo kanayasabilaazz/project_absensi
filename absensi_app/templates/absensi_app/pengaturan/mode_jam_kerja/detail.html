@@ -515,75 +515,64 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for hari_idx in "0123456" %}
-                                            {% with hari_int=hari_idx|add:0 %}
-                                            {% with day_info=group_data.days|dict_lookup:hari_int %}
-                                                {% if day_info.jadwal_list %}
-                                                    {% for jadwal in day_info.jadwal_list %}
-                                                    <tr>
-                                                        {% if forloop.first %}
-                                                        <td rowspan="{{ day_info.jadwal_list|length }}" style="font-weight: 700; color: #374151;">
-                                                            {% if hari_int == 0 %}Senin
-                                                            {% elif hari_int == 1 %}Selasa
-                                                            {% elif hari_int == 2 %}Rabu
-                                                            {% elif hari_int == 3 %}Kamis
-                                                            {% elif hari_int == 4 %}Jumat
-                                                            {% elif hari_int == 5 %}Sabtu
-                                                            {% elif hari_int == 6 %}Minggu
-                                                            {% endif %}
-                                                        </td>
+                                        {% for hari_int, day_info in group_data.days.items %}
+                                            {% if day_info.jadwal_list %}
+                                                {% for jadwal in day_info.jadwal_list %}
+                                                <tr>
+                                                    {% if forloop.first %}
+                                                    <td rowspan="{{ day_info.jadwal_list|length }}" style="font-weight: 700; color: #374151;">
+                                                        {{ day_info.hari_nama }}
+                                                    </td>
+                                                    {% endif %}
+                                                    
+                                                    <td>
+                                                        {% if jadwal.jam_masuk %}
+                                                            <span class="time-badge time-in">{{ jadwal.jam_masuk|time:"H:i" }}</span>
+                                                        {% else %}
+                                                            <span style="color: #9ca3af;">-</span>
                                                         {% endif %}
-                                                        
-                                                        <td>
-                                                            {% if jadwal.jam_masuk %}
-                                                                <span class="time-badge time-in">{{ jadwal.jam_masuk|time:"H:i" }}</span>
-                                                            {% else %}
-                                                                <span style="color: #9ca3af;">-</span>
-                                                            {% endif %}
-                                                        </td>
-                                                        
-                                                        <td>
-                                                            {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
-                                                                <small style="color: #6b7280;">
-                                                                    {{ jadwal.jam_istirahat_keluar|time:"H:i" }} - 
-                                                                    {{ jadwal.jam_istirahat_masuk|time:"H:i" }}
-                                                                </small>
-                                                            {% else %}
-                                                                <span style="color: #9ca3af; font-style: italic;">Tidak ada</span>
-                                                            {% endif %}
-                                                        </td>
-                                                        
-                                                        <td>
-                                                            {% if jadwal.jam_keluar %}
-                                                                <span class="time-badge time-out">{{ jadwal.jam_keluar|time:"H:i" }}</span>
-                                                            {% else %}
-                                                                <span style="color: #9ca3af;">-</span>
-                                                            {% endif %}
-                                                        </td>
-                                                        
-                                                        <td>
-                                                            {% with duration_formatted=jadwal.get_duration_formatted %}
-                                                                {% if duration_formatted %}
-                                                                    <span class="duration-badge">
-                                                                        <i class="fas fa-business-time"></i> {{ duration_formatted }}
-                                                                    </span>
-                                                                {% else %}
-                                                                    <span style="color: #9ca3af;">-</span>
-                                                                {% endif %}
-                                                            {% endwith %}
-                                                        </td>
-                                                        
-                                                        <td>
+                                                    </td>
+                                                    
+                                                    <td>
+                                                        {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
                                                             <small style="color: #6b7280;">
-                                                                <i class="fas fa-clock"></i> 
-                                                                {{ jadwal.toleransi_terlambat }} menit
+                                                                {{ jadwal.jam_istirahat_keluar|time:"H:i" }} - 
+                                                                {{ jadwal.jam_istirahat_masuk|time:"H:i" }}
                                                             </small>
-                                                        </td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                {% endif %}
-                                            {% endwith %}
-                                            {% endwith %}
+                                                        {% else %}
+                                                            <span style="color: #9ca3af; font-style: italic;">Tidak ada</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    
+                                                    <td>
+                                                        {% if jadwal.jam_keluar %}
+                                                            <span class="time-badge time-out">{{ jadwal.jam_keluar|time:"H:i" }}</span>
+                                                        {% else %}
+                                                            <span style="color: #9ca3af;">-</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    
+                                                    <td>
+                                                        {% with duration_formatted=jadwal.get_duration_formatted %}
+                                                            {% if duration_formatted %}
+                                                                <span class="duration-badge">
+                                                                    <i class="fas fa-business-time"></i> {{ duration_formatted }}
+                                                                </span>
+                                                            {% else %}
+                                                                <span style="color: #9ca3af;">-</span>
+                                                            {% endif %}
+                                                        {% endwith %}
+                                                    </td>
+                                                    
+                                                    <td>
+                                                        <small style="color: #6b7280;">
+                                                            <i class="fas fa-clock"></i> 
+                                                            {{ jadwal.toleransi_terlambat }} menit
+                                                        </small>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
@@ -679,60 +668,47 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for hari_idx in "0123456" %}
-                                            {% with hari_int=hari_idx|add:0 %}
-                                            {% with day_info=group_data.days|dict_lookup:hari_int %}
-                                                {% if day_info.jadwal_list %}
-                                                    {% for jadwal in day_info.jadwal_list %}
-                                                    <tr>
-                                                        <td class="fw-bold">
-                                                            {% if hari_int == 0 %}Senin
-                                                            {% elif hari_int == 1 %}Selasa
-                                                            {% elif hari_int == 2 %}Rabu
-                                                            {% elif hari_int == 3 %}Kamis
-                                                            {% elif hari_int == 4 %}Jumat
-                                                            {% elif hari_int == 5 %}Sabtu
-                                                            {% elif hari_int == 6 %}Minggu
-                                                            {% endif %}
-                                                        </td>
-                                                        <td>
-                                                            {% if jadwal.jam_masuk %}
-                                                                <span class="badge bg-success">{{ jadwal.jam_masuk|time:"H:i" }}</span>
+                                        {% for hari_int, day_info in group_data.days.items %}
+                                            {% if day_info.jadwal_list %}
+                                                {% for jadwal in day_info.jadwal_list %}
+                                                <tr>
+                                                    <td class="fw-bold">{{ day_info.hari_nama }}</td>
+                                                    <td>
+                                                        {% if jadwal.jam_masuk %}
+                                                            <span class="badge bg-success">{{ jadwal.jam_masuk|time:"H:i" }}</span>
+                                                        {% else %}
+                                                            <span class="text-muted">-</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
+                                                            <small>{{ jadwal.jam_istirahat_keluar|time:"H:i" }} - {{ jadwal.jam_istirahat_masuk|time:"H:i" }}</small>
+                                                        {% else %}
+                                                            <span class="text-muted fst-italic">Tidak ada</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if jadwal.jam_keluar %}
+                                                            <span class="badge bg-danger">{{ jadwal.jam_keluar|time:"H:i" }}</span>
+                                                        {% else %}
+                                                            <span class="text-muted">-</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% with duration_formatted=jadwal.get_duration_formatted %}
+                                                            {% if duration_formatted %}
+                                                                <span class="badge bg-primary">{{ duration_formatted }}</span>
                                                             {% else %}
                                                                 <span class="text-muted">-</span>
                                                             {% endif %}
-                                                        </td>
-                                                        <td>
-                                                            {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
-                                                                <small>{{ jadwal.jam_istirahat_keluar|time:"H:i" }} - {{ jadwal.jam_istirahat_masuk|time:"H:i" }}</small>
-                                                            {% else %}
-                                                                <span class="text-muted fst-italic">Tidak ada</span>
-                                                            {% endif %}
-                                                        </td>
-                                                        <td>
-                                                            {% if jadwal.jam_keluar %}
-                                                                <span class="badge bg-danger">{{ jadwal.jam_keluar|time:"H:i" }}</span>
-                                                            {% else %}
-                                                                <span class="text-muted">-</span>
-                                                            {% endif %}
-                                                        </td>
-                                                        <td>
-                                                            {% with duration_formatted=jadwal.get_duration_formatted %}
-                                                                {% if duration_formatted %}
-                                                                    <span class="badge bg-primary">{{ duration_formatted }}</span>
-                                                                {% else %}
-                                                                    <span class="text-muted">-</span>
-                                                                {% endif %}
-                                                            {% endwith %}
-                                                        </td>
-                                                        <td>
-                                                            <small><i class="fas fa-clock"></i> {{ jadwal.toleransi_terlambat }} menit</small>
-                                                        </td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                {% endif %}
-                                            {% endwith %}
-                                            {% endwith %}
+                                                        {% endwith %}
+                                                    </td>
+                                                    <td>
+                                                        <small><i class="fas fa-clock"></i> {{ jadwal.toleransi_terlambat }} menit</small>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>

@@ -367,7 +367,7 @@
         padding-left: 28px;
     }
 
-    /* ==================== WEEKLY SCHEDULE ==================== */
+    /* ==================== WEEKLY SCHEDULE (RESPONSIVE GRID) ==================== */
     .schedule-section {
         padding: var(--spacing-lg);
     }
@@ -384,8 +384,26 @@
 
     .schedule-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: var(--spacing-md);
+    }
+
+    /* ✅ Jika hanya 1 hari: Center dan limit width */
+    .schedule-grid:has(.day-card:only-child) {
+        grid-template-columns: minmax(180px, 300px);
+        justify-content: center;
+    }
+
+    /* ✅ Jika hanya 2 hari: 2 kolom center */
+    .schedule-grid:has(.day-card:nth-child(2):last-child) {
+        grid-template-columns: repeat(2, minmax(160px, 250px));
+        justify-content: center;
+    }
+
+    /* ✅ Jika hanya 3 hari: 3 kolom center */
+    .schedule-grid:has(.day-card:nth-child(3):last-child) {
+        grid-template-columns: repeat(3, minmax(150px, 220px));
+        justify-content: center;
     }
 
     .day-card {
@@ -421,6 +439,10 @@
         color: var(--gray-600);
         margin-bottom: 10px;
         letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
     }
 
     .day-card.today .day-name {
@@ -567,10 +589,21 @@
         .detail-body { padding: var(--spacing-lg); }
         .header-content { flex-direction: column; }
         .info-grid { grid-template-columns: 1fr; }
-        .schedule-grid { grid-template-columns: repeat(2, 1fr); }
+        .schedule-grid { 
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+        .schedule-grid:has(.day-card:only-child) {
+            grid-template-columns: 1fr !important;
+        }
         .mode-header { flex-direction: column; align-items: flex-start; }
         .action-buttons { flex-direction: column; }
         .btn { width: 100%; justify-content: center; }
+    }
+
+    @media (max-width: 480px) {
+        .schedule-grid {
+            grid-template-columns: 1fr !important;
+        }
     }
 </style>
 {% endblock %}
@@ -810,168 +843,182 @@
                                     <i class="fas fa-calendar-day"></i>
                                     Jadwal Hari Ini - {{ today|date:"l, d F Y" }}
                                 </div>
-                                {% with jadwal=item.jadwal_mingguan|get_item:today.weekday %}
-                                    {% if jadwal and jadwal.jam_masuk %}
-                                        <div class="today-value">
-                                            <i class="fas fa-clock"></i>
-                                            {{ jadwal.jam_masuk|time:"H:i" }} - {{ jadwal.jam_keluar|time:"H:i" }}
-                                        </div>
-                                        {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
-                                            <div class="today-break">
-                                                🍽️ Istirahat: {{ jadwal.jam_istirahat_keluar|time:"H:i" }} - {{ jadwal.jam_istirahat_masuk|time:"H:i" }}
-                                            </div>
-                                        {% endif %}
-                                    {% else %}
-                                        <div class="today-value libur">
-                                            <i class="fas fa-home"></i>
-                                            Hari Libur
-                                        </div>
-                                    {% endif %}
-                                {% endwith %}
-                            </div>
-
-                            <!-- ✅ WEEKLY SCHEDULE - ALWAYS SHOW -->
-                            <div class="schedule-section">
-                                <h3 class="schedule-title">
-                                    📅 Jadwal Mingguan
-                                </h3>
-                                
-                                {% if item.jadwal_mingguan %}
-                                    <div class="schedule-grid">
-                                        {% for hari, hari_nama in hari_names_enum %}
-                                            {% with jadwal=item.jadwal_mingguan|get_item:hari %}
-                                                <div class="day-card {% if hari == today.weekday %}today{% endif %} {% if not jadwal or not jadwal.jam_masuk %}libur{% endif %}">
-                                                    <div class="day-name">{{ hari_nama }}</div>
-                                                    {% if jadwal and jadwal.jam_masuk %}
-                                                        <div class="day-time">
-                                                            <div>{{ jadwal.jam_masuk|time:"H:i" }}</div>
-                                                            <div class="separator">─</div>
-                                                            <div>{{ jadwal.jam_keluar|time:"H:i" }}</div>
-                                                        </div>
-                                                        {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
-                                                            <div class="day-break">
-                                                                🍽️ {{ jadwal.jam_istirahat_keluar|time:"H:i" }}-{{ jadwal.jam_istirahat_masuk|time:"H:i" }}
-                                                            </div>
-                                                        {% endif %}
-                                                    {% else %}
-                                                        <div class="day-time" style="color: var(--gray-500);">
-                                                            <i class="fas fa-home"></i>
-                                                            <div>Libur</div>
-                                                        </div>
-                                                    {% endif %}
-                                                </div>
-                                            {% endwith %}
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    <!-- ✅ FALLBACK: Jika jadwal_mingguan kosong -->
-                                    <div class="empty-state" style="padding: 30px 20px; margin-top: 20px;">
-                                        <div class="empty-icon" style="font-size: 48px;">
-                                            <i class="fas fa-calendar-times"></i>
-                                        </div>
-                                        <h3 class="empty-title" style="font-size: 16px;">Jadwal Belum Diatur</h3>
-                                        <p class="empty-text" style="font-size: 14px;">
-                                            Mode ini belum memiliki jadwal jam kerja mingguan.
-                                        </p>
-                                    </div>
-                                {% endif %}
-                            </div>
+                                {% if jadwal_hari_ini and item.is_mode_today %}
+                                    <div class="today-value">
+                                        <i class="fas fa-clock"></i>
+                                        {{ jadwal_hari_ini.jam_masuk|time:"H:i" }} - {{ jadwal_hari_ini.jam_keluar|time:"H:i" }}
+</div>
+{% if jadwal_hari_ini.jam_istirahat_keluar and jadwal_hari_ini.jam_istirahat_masuk %}
+<div class="today-break">
+🍽️ Istirahat: {{ jadwal_hari_ini.jam_istirahat_keluar|time:"H:i" }} - {{ jadwal_hari_ini.jam_istirahat_masuk|time:"H:i" }}
+</div>
+{% endif %}
+{% else %}
+<div class="today-value libur">
+<i class="fas fa-home"></i>
+{% if item.is_mode_today %}
+Hari Libur
+{% else %}
+Mode tidak aktif hari ini
+{% endif %}
+</div>
+{% endif %}
+</div>
+<!-- ✅ WEEKLY SCHEDULE - HANYA HARI YANG ADA -->
+                        <div class="schedule-section">
+                            <h3 class="schedule-title">
+                                📅 Jadwal Mingguan
+                            </h3>
                             
-                            <!-- MODE FOOTER INFO -->
-                            <div class="mode-footer">
-                                <div class="footer-item">
-                                    <div class="footer-label">Toleransi Terlambat</div>
-                                    {% with first_jadwal=item.jadwal_mingguan|get_item:0 %}
-                                        <div class="footer-value">{{ first_jadwal.toleransi_terlambat|default:"0" }} menit</div>
-                                    {% endwith %}
-                                </div>
-                                <div class="footer-item">
-                                    <div class="footer-label">Toleransi Pulang Cepat</div>
-                                    {% with first_jadwal=item.jadwal_mingguan|get_item:0 %}
-                                        <div class="footer-value">{{ first_jadwal.toleransi_pulang_cepat|default:"0" }} menit</div>
-                                    {% endwith %}
-                                </div>
-                                <div class="footer-item">
-                                    <div class="footer-label">Status Mode</div>
-                                    <div class="footer-value" style="color: var(--success);">
-                                        <i class="fas fa-check-circle"></i> Aktif
-                                    </div>
-                                </div>
-                                <div class="footer-item">
-                                    <div class="footer-label">Total Hari Kerja</div>
-                                    <div class="footer-value">
-                                        {% with count=0 %}
-                                            {% for hari in item.jadwal_mingguan.values %}
-                                                {% if hari and hari.jam_masuk %}
-                                                    {% with count=count|add:1 %}{% endwith %}
+                            {% if item.jadwal_display %}
+                                <!-- ✅ HANYA TAMPILKAN HARI YANG ADA JADWAL -->
+                                <div class="schedule-grid">
+                                    {% for day_item in item.jadwal_display %}
+                                        <div class="day-card {% if day_item.is_today %}today{% endif %}">
+                                            <div class="day-name">
+                                                {{ day_item.hari_nama }}
+                                                {% if day_item.is_today %}
+                                                    <i class="fas fa-star" style="color: var(--primary); font-size: 10px;"></i>
                                                 {% endif %}
-                                            {% endfor %}
-                                            {{ item.jadwal_mingguan|length }}
-                                        {% endwith %}
-                                        / 7 hari
+                                            </div>
+                                            
+                                            {% if day_item.jadwal %}
+                                                <div class="day-time">
+                                                    <div>{{ day_item.jadwal.jam_masuk|time:"H:i" }}</div>
+                                                    <div class="separator">─</div>
+                                                    <div>{{ day_item.jadwal.jam_keluar|time:"H:i" }}</div>
+                                                </div>
+                                                
+                                                {% if day_item.jadwal.jam_istirahat_keluar and day_item.jadwal.jam_istirahat_masuk %}
+                                                    <div class="day-break">
+                                                        🍽️ {{ day_item.jadwal.jam_istirahat_keluar|time:"H:i" }}-{{ day_item.jadwal.jam_istirahat_masuk|time:"H:i" }}
+                                                    </div>
+                                                {% endif %}
+                                            {% else %}
+                                                <div class="day-time" style="color: var(--gray-500);">
+                                                    <i class="fas fa-times"></i> Libur
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- ✅ INFO TOTAL HARI KERJA -->
+                                <div style="margin-top: 16px; padding: 12px; background: var(--gray-50); border-radius: 8px; border-left: 4px solid var(--primary); text-align: center;">
+                                    <small style="color: var(--gray-600); font-weight: 600;">
+                                        📊 Total Hari Kerja: <strong style="color: var(--primary);">{{ item.total_hari_kerja }}</strong> hari
+                                    </small>
+                                </div>
+
+                            {% else %}
+                                <!-- EMPTY STATE -->
+                                <div class="empty-state" style="padding: 30px 20px; margin-top: 20px;">
+                                    <div class="empty-icon" style="font-size: 48px; color: var(--gray-400);">
+                                        <i class="fas fa-calendar-times"></i>
                                     </div>
+                                    <h3 class="empty-title" style="font-size: 16px; color: var(--gray-700); margin-bottom: 10px;">
+                                        Jadwal Belum Diatur
+                                    </h3>
+                                    <p class="empty-text" style="font-size: 14px; color: var(--gray-600);">
+                                        Mode ini belum memiliki jadwal jam kerja.
+                                    </p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- MODE FOOTER INFO -->
+                        <div class="mode-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Toleransi Terlambat</div>
+                                <div class="footer-value">
+                                    {% if item.jadwal_display %}
+                                        {{ item.jadwal_display.0.jadwal.toleransi_terlambat|default:"0" }} menit
+                                    {% else %}
+                                        0 menit
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Toleransi Pulang Cepat</div>
+                                <div class="footer-value">
+                                    {% if item.jadwal_display %}
+                                        {{ item.jadwal_display.0.jadwal.toleransi_pulang_cepat|default:"0" }} menit
+                                    {% else %}
+                                        0 menit
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Status Mode</div>
+                                <div class="footer-value" style="color: var(--success);">
+                                    <i class="fas fa-check-circle"></i> Aktif
+                                </div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Total Hari Kerja</div>
+                                <div class="footer-value">
+                                    <strong style="color: var(--primary);">{{ item.total_hari_kerja }}</strong> / 7 hari
                                 </div>
                             </div>
                         </div>
-                    {% endfor %}
-
-                {% else %}
-                    <!-- EMPTY STATE -->
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <h3 class="empty-title">Belum Ada Mode Jam Kerja</h3>
-                        <p class="empty-text">
-                            Pegawai ini belum di-assign ke mode jam kerja manapun.
-                            <br>
-                            Silakan assign mode jam kerja terlebih dahulu.
-                        </p>
-                        <a href="{% url 'assign_mode_jam_kerja_pegawai' pegawai.id %}" class="btn btn-primary">
-                            <i class="fas fa-plus-circle"></i>
-                            Assign Mode Jam Kerja
-                        </a>
                     </div>
-                {% endif %}
-            </div>
+                {% endfor %}
 
-            <!-- ACTION BUTTONS -->
-            <div class="action-buttons">
-                <a href="{% url 'daftar_Pegawai' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Kembali
-                </a>
-                <a href="{% url 'Pegawai_edit' pegawai.pk %}" class="btn btn-warning">
-                    <i class="fas fa-edit"></i> Edit Data
-                </a>
-                <a href="{% url 'riwayat_per_Pegawai' pegawai.pk %}" class="btn btn-info">
-                    <i class="fas fa-history"></i> Riwayat Absensi
-                </a>
-                <a href="{% url 'assign_mode_jam_kerja_pegawai' pegawai.id %}" class="btn btn-primary">
-                    <i class="fas fa-clock"></i> Kelola Mode Jam Kerja
-                </a>
-                {% if pegawai.is_active %}
-                    <form method="POST" action="{% url 'toggle_pegawai_status' pegawai.pk %}" style="display: inline; margin: 0;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('⚠️ Yakin ingin NONAKTIFKAN pegawai ini?')">
-                            <i class="fas fa-user-times"></i> Nonaktifkan
-                        </button>
-                    </form>
-                {% else %}
-                    <form method="POST" action="{% url 'toggle_pegawai_status' pegawai.pk %}" style="display: inline; margin: 0;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success" onclick="return confirm('✅ Yakin ingin AKTIFKAN pegawai ini?')">
-                            <i class="fas fa-user-check"></i> Aktifkan
-                        </button>
-                    </form>
-                {% endif %}
-                <a href="{% url 'Pegawai_hapus' pegawai.pk %}" class="btn btn-danger" onclick="return confirm('🗑️ PERINGATAN!\n\nYakin ingin menghapus pegawai ini secara PERMANEN?\n\nSemua data absensi akan ikut terhapus!')">
-                    <i class="fas fa-trash"></i> Hapus Permanen
-                </a>
-            </div>
+            {% else %}
+                <!-- EMPTY STATE - NO MODES ASSIGNED -->
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="empty-title">Belum Ada Mode Jam Kerja</h3>
+                    <p class="empty-text">
+                        Pegawai ini belum di-assign ke mode jam kerja manapun.
+                        <br>
+                        Silakan assign mode jam kerja terlebih dahulu.
+                    </p>
+                    <a href="{% url 'assign_mode_jam_kerja_pegawai' pegawai.id %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Assign Mode Jam Kerja
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="action-buttons">
+            <a href="{% url 'daftar_Pegawai' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+            <a href="{% url 'Pegawai_edit' pegawai.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Edit Data
+            </a>
+            <a href="{% url 'riwayat_per_Pegawai' pegawai.pk %}" class="btn btn-info">
+                <i class="fas fa-history"></i> Riwayat Absensi
+            </a>
+            <a href="{% url 'assign_mode_jam_kerja_pegawai' pegawai.id %}" class="btn btn-primary">
+                <i class="fas fa-clock"></i> Kelola Mode Jam Kerja
+            </a>
+            {% if pegawai.is_active %}
+                <form method="POST" action="{% url 'toggle_pegawai_status' pegawai.pk %}" style="display: inline; margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('⚠️ Yakin ingin NONAKTIFKAN pegawai ini?')">
+                        <i class="fas fa-user-times"></i> Nonaktifkan
+                    </button>
+                </form>
+            {% else %}
+                <form method="POST" action="{% url 'toggle_pegawai_status' pegawai.pk %}" style="display: inline; margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success" onclick="return confirm('✅ Yakin ingin AKTIFKAN pegawai ini?')">
+                        <i class="fas fa-user-check"></i> Aktifkan
+                    </button>
+                </form>
+            {% endif %}
+            <a href="{% url 'Pegawai_hapus' pegawai.pk %}" class="btn btn-danger" onclick="return confirm('🗑️ PERINGATAN!\n\nYakin ingin menghapus pegawai ini secara PERMANEN?\n\nSemua data absensi akan ikut terhapus!')">
+                <i class="fas fa-trash"></i> Hapus Permanen
+            </a>
         </div>
     </div>
 </div>
-
+</div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('.mode-tab');

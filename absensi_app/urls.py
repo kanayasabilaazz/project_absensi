@@ -44,7 +44,7 @@ urlpatterns = [
     path('pegawai/transfer/bulk/', views.bulk_transfer_pegawai, name='bulk_transfer_pegawai'),
     
     # Assignment Mode Jam Kerja
-    path('pegawai/<int:pegawai_id>/assign-mode-jam-kerja/', views.assign_mode_jam_kerja_pegawai, name='assign_mode_jam_kerja_pegawai'),
+    path('pegawai/<int:pegawai_id>/assign-mode-jam-kerja_pegawai/', views.assign_mode_jam_kerja_pegawai, name='assign_mode_jam_kerja_pegawai'),
     path('pegawai/<int:pegawai_id>/simpan-assign-mode/', views.simpan_assign_mode_jam_kerja, name='simpan_assign_mode_jam_kerja'),
     path('pegawai/daftar-assign-mode/', views.daftar_assign_mode_pegawai, name='daftar_assign_mode_pegawai'),
 
