@@ -1,1014 +1,678 @@
 {% extends 'absensi_app/base.html' %}
-{% load static %}
-{% load custom_filters %}
+{% load widget_tweaks %}
 
-{% block title %}Detail Pegawai - {{ pegawai.nama_lengkap }}{% endblock %}
+{% block title %}Export Data Absensi{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* ==================== VARIABLES (CONSISTENT) ==================== */
-    :root {
-        --card-radius: var(--radius-md);
-        --card-shadow: var(--shadow-sm);
-        --card-shadow-hover: var(--shadow-md);
+    /* ===== FILTER CARD ===== */
+    .filter-card {
+        background: white;
+        border-radius: var(--radius-sm);
+        padding: var(--space-4);
+        box-shadow: var(--shadow);
+        margin-bottom: var(--space-4);
+        border: 1px solid var(--gray-200);
     }
 
-    body {
+    .filter-card h5 {
+        font-size: var(--text-base);
+        font-weight: 600;
+        margin-bottom: var(--space-3);
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    .filter-card h5 i {
+        color: var(--primary);
+        font-size: var(--text-sm);
+    }
+
+    /* ===== DASHBOARD CARD ===== */
+    .dashboard-card {
+        background: white;
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+        margin-bottom: var(--space-4);
+    }
+
+    .dashboard-card-header {
+        background: var(--gray-800);
+        color: white;
+        padding: var(--space-3) var(--space-4);
+        border: none;
+    }
+
+    .dashboard-card-header h4 {
+        font-size: var(--text-base);
+        font-weight: 600;
+        margin: 0 0 var(--space-1) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    .dashboard-card-header p {
+        font-size: var(--text-xs);
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .dashboard-card-body {
+        padding: var(--space-4);
+    }
+
+    /* ===== FORM ELEMENTS ===== */
+    .form-control, .form-select {
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: 0 var(--space-3);
+        font-size: var(--text-sm);
+        transition: all 0.2s;
+        height: 36px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+        outline: none;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: var(--text-sm);
+        margin-bottom: var(--space-2);
+        color: var(--gray-700);
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+    }
+
+    .form-label i {
+        color: var(--primary);
+        font-size: var(--text-xs);
+    }
+
+    small.text-muted {
+        font-size: var(--text-xs);
+        display: block;
+        margin-top: var(--space-1);
+        color: var(--gray-500);
+    }
+
+    /* ===== PERIODE SECTION ===== */
+    .periode-section {
+        background: var(--gray-50);
+        border-radius: var(--radius-sm);
+        padding: var(--space-3);
+        margin-bottom: var(--space-3);
+        border: 1px solid var(--gray-200);
+    }
+
+    .btn-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: var(--space-2);
+        width: 100%;
+    }
+
+    .btn-group .btn-check {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .btn-group .btn-check + label {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        background: white;
+        color: var(--gray-700);
+        transition: all 0.2s;
+        text-align: center;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        height: 32px;
+    }
+
+    .btn-group .btn-check:checked + label {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: var(--shadow);
+        transform: translateY(-1px);
+    }
+
+    .btn-group .btn-check + label:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-1px);
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+        padding: 0 var(--space-4);
+        height: 36px;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: var(--text-sm);
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow);
+    }
+
+    .btn-info {
+        background: #0ea5e9;
+        color: white;
+    }
+
+    .btn-info:hover {
+        background: #0284c7;
+    }
+
+    .btn-export {
+        width: 100%;
+        height: 40px;
+    }
+
+    .btn-export-csv {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-export-csv:hover {
+        background: var(--primary-hover);
+    }
+
+    /* ===== CONTROL SECTION ===== */
+    .control-section {
+        background: var(--gray-50);
+        border-radius: var(--radius-sm);
+        padding: var(--space-3);
+        margin-bottom: var(--space-3);
+        border: 1px solid var(--gray-200);
+    }
+
+    /* ===== PREVIEW BOX ===== */
+    .preview-box {
+        display: none;
+        margin-top: var(--space-3);
+    }
+
+    .preview-box h6 {
+        font-size: var(--text-base);
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: var(--space-3);
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    .preview-box h6 i {
+        color: var(--primary);
+        font-size: var(--text-sm);
+    }
+
+    /* ===== TABLE ===== */
+    .table-wrapper {
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        max-height: 400px;
+        overflow-y: auto;
+        margin-bottom: var(--space-3);
+    }
+
+    .table {
+        margin-bottom: 0;
+        font-size: var(--text-sm);
+        width: 100%;
+    }
+
+    .table thead th {
+        background: var(--gray-800);
+        color: white;
+        font-weight: 600;
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border: none;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table tbody td {
+        padding: var(--space-2) var(--space-3);
+        vertical-align: middle;
+        border-bottom: 1px solid var(--gray-200);
+        font-size: var(--text-sm);
+    }
+
+    .table tbody tr:hover {
         background: var(--gray-50);
     }
 
-    .detail-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 20px;
+    /* ===== BADGES ===== */
+    .badge {
+        font-size: var(--text-xs);
+        padding: 2px var(--space-2);
+        font-weight: 600;
+        border-radius: var(--radius-sm);
     }
 
-    /* ==================== HEADER CARD ==================== */
-    .detail-card {
-        background: white;
-        border-radius: var(--card-radius);
-        box-shadow: var(--card-shadow);
-        overflow: hidden;
-        margin-bottom: var(--spacing-xl);
-        border: 1px solid var(--gray-200);
-        transition: var(--transition-base);
-    }
-
-    .detail-card:hover {
-        box-shadow: var(--card-shadow-hover);
-    }
-
-    .detail-header {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    .badge-userid {
+        background: var(--primary);
         color: white;
-        padding: var(--spacing-xl);
-        position: relative;
-    }
-
-    .header-content {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: var(--spacing-lg);
-    }
-
-    .header-left {
-        flex: 1;
-    }
-
-    .header-title {
-        font-size: var(--font-size-xl);
-        font-weight: 700;
-        margin: 0 0 var(--spacing-sm) 0;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-    }
-
-    .header-title i {
-        font-size: var(--font-size-lg);
-    }
-
-    .header-subtitle {
-        font-size: var(--font-size-xs);
-        opacity: 0.9;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .status-badge {
-        padding: var(--spacing-sm) var(--spacing-lg);
+        padding: 2px var(--space-2);
         border-radius: var(--radius-sm);
         font-weight: 700;
-        font-size: var(--font-size-xs);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        font-size: var(--text-xs);
+        display: inline-block;
     }
 
-    .badge-success {
+    .badge.bg-success {
         background: var(--success);
         color: white;
     }
 
-    .badge-danger {
+    .badge.bg-info {
+        background: #0ea5e9;
+        color: white;
+    }
+
+    .badge.bg-warning {
+        background: var(--warning);
+        color: white;
+    }
+
+    .badge.bg-danger {
         background: var(--danger);
         color: white;
     }
 
-    /* ==================== STATS ROW ==================== */
-    .stats-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-md);
-        padding: var(--spacing-lg) var(--spacing-xl);
-        background: white;
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .stat-item {
-        text-align: center;
-        padding: var(--spacing-md);
+    /* ===== ALERTS ===== */
+    .alert {
+        padding: var(--space-3);
         border-radius: var(--radius-sm);
-        background: var(--gray-50);
-        border: 1px solid var(--gray-200);
-    }
-
-    .stat-value {
-        font-size: var(--font-size-xl);
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: var(--spacing-xs);
-    }
-
-    .stat-label {
-        font-size: var(--font-size-xs);
-        color: var(--gray-600);
-        text-transform: uppercase;
-        font-weight: 600;
-    }
-
-    /* ==================== BODY SECTION ==================== */
-    .detail-body {
-        padding: var(--spacing-xl);
-    }
-
-    .section {
-        margin-bottom: var(--spacing-xl);
-    }
-
-    .section-title {
-        font-size: var(--font-size-md);
-        font-weight: 700;
-        color: var(--gray-900);
-        margin: 0 0 var(--spacing-lg) 0;
-        padding-bottom: var(--spacing-sm);
-        border-bottom: 3px solid var(--primary);
+        margin-bottom: var(--space-3);
         display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .section-title i {
-        color: var(--primary);
-        font-size: var(--font-size-md);
-    }
-
-    /* ==================== INFO GRID ==================== */
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: var(--spacing-lg);
-    }
-
-    .info-item {
-        background: var(--gray-50);
-        padding: var(--spacing-md);
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--gray-200);
-    }
-
-    .info-label {
-        font-size: var(--font-size-xs);
-        color: var(--gray-600);
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: var(--spacing-xs);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .info-label i {
-        color: var(--primary);
-        font-size: var(--font-size-xs);
-    }
-
-    .info-value {
-        font-size: var(--font-size-sm);
-        color: var(--gray-900);
-        font-weight: 600;
-    }
-
-    /* ==================== MODE TABS ==================== */
-    .mode-tabs {
-        display: flex;
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-lg);
-        flex-wrap: wrap;
-        padding: var(--spacing-xs);
-        background: var(--gray-100);
-        border-radius: var(--radius-md);
-    }
-
-    .mode-tab {
-        cursor: pointer;
-        padding: var(--spacing-md) var(--spacing-lg);
-        border-radius: var(--radius-sm);
-        background: white;
-        color: var(--gray-700);
-        border: 2px solid transparent;
-        font-weight: 700;
-        font-size: var(--font-size-xs);
-        transition: var(--transition-base);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        box-shadow: var(--shadow-sm);
-    }
-
-    .mode-tab:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .mode-tab.active {
-        color: white;
-        border-color: currentColor;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-
-    .mode-tab i {
-        font-size: var(--font-size-sm);
-    }
-
-    /* ==================== MODE CARD ==================== */
-    .mode-card {
-        background: white;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--card-radius);
-        overflow: hidden;
-        margin-bottom: var(--spacing-xl);
-        box-shadow: var(--card-shadow);
-        display: none;
-    }
-
-    .mode-card.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .mode-header {
-        padding: var(--spacing-lg);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: var(--spacing-lg);
-    }
-
-    .mode-header-left {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-lg);
-        flex: 1;
-    }
-
-    .mode-icon-box {
-        width: 50px;
-        height: 50px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: var(--font-size-xl);
-        color: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-
-    .mode-info h3 {
-        margin: 0 0 var(--spacing-xs) 0;
-        font-size: var(--font-size-lg);
-        font-weight: 700;
-        color: white;
-    }
-
-    .mode-info p {
-        margin: 0;
-        font-size: var(--font-size-xs);
-        color: rgba(255, 255, 255, 0.9);
-    }
-
-    .mode-badge-active {
-        background: rgba(255, 255, 255, 0.3);
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: 20px;
-        font-size: var(--font-size-xs);
-        font-weight: 700;
-        color: white;
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        margin-left: var(--spacing-sm);
-    }
-
-    .periode-badge {
-        background: rgba(255, 255, 255, 0.2);
-        padding: var(--spacing-md) var(--spacing-lg);
-        border-radius: var(--radius-sm);
-        text-align: right;
-    }
-
-    .periode-badge small {
-        opacity: 0.9;
-        font-size: var(--font-size-xs);
-        text-transform: uppercase;
-    }
-
-    .periode-badge strong {
-        display: block;
-        font-size: var(--font-size-sm);
-        margin-top: var(--spacing-xs);
-    }
-
-    /* ==================== TODAY SCHEDULE ==================== */
-    .today-schedule {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-        padding: var(--spacing-lg) var(--spacing-xl);
-        border-top: 1px solid var(--gray-200);
-    }
-
-    .today-label {
-        font-size: var(--font-size-xs);
-        color: var(--gray-600);
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: var(--spacing-sm);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-    }
-
-    .today-value {
-        font-size: var(--font-size-lg);
-        font-weight: 700;
-        color: var(--primary);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .today-value.libur {
-        color: var(--gray-500);
-    }
-
-    .today-break {
-        font-size: var(--font-size-xs);
-        color: var(--gray-600);
-        margin-top: var(--spacing-xs);
-        padding-left: 28px;
-    }
-
-    /* ==================== WEEKLY SCHEDULE ==================== */
-    .schedule-section {
-        padding: var(--spacing-lg);
-    }
-
-    .schedule-title {
-        font-size: var(--font-size-sm);
-        font-weight: 700;
-        color: var(--gray-900);
-        margin: 0 0 var(--spacing-lg) 0;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .schedule-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: var(--spacing-md);
-    }
-
-    .day-card {
-        background: white;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-md);
-        text-align: center;
-        transition: var(--transition-base);
-    }
-
-    .day-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-        border-color: var(--primary);
-    }
-
-    .day-card.today {
-        border-color: var(--primary);
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
-
-    .day-card.libur {
-        opacity: 0.6;
-        background: var(--gray-50);
-    }
-
-    .day-name {
-        font-size: var(--font-size-xs);
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--gray-600);
-        margin-bottom: var(--spacing-sm);
-        letter-spacing: 0.5px;
-    }
-
-    .day-card.today .day-name {
-        color: var(--primary);
-    }
-
-    .day-time {
-        font-weight: 700;
-        color: var(--gray-900);
-        line-height: 1.5;
-        font-size: var(--font-size-sm);
-    }
-
-    .day-time .separator {
-        font-size: var(--font-size-xs);
-        color: var(--gray-400);
-    }
-
-    .day-break {
-        font-size: var(--font-size-xs);
-        color: var(--gray-600);
-        margin-top: var(--spacing-sm);
-        padding-top: var(--spacing-sm);
-        border-top: 1px solid var(--gray-200);
-    }
-
-    /* ==================== MODE FOOTER ==================== */
-    .mode-footer {
-        padding: var(--spacing-lg) var(--spacing-xl);
-        background: var(--gray-50);
-        border-top: 1px solid var(--gray-200);
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: var(--spacing-lg);
-    }
-
-    .footer-item {
-        text-align: center;
-        padding: var(--spacing-md);
-        background: white;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--gray-200);
-    }
-
-    .footer-label {
-        font-size: var(--font-size-xs);
-        color: var(--gray-600);
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: var(--spacing-xs);
-    }
-
-    .footer-value {
-        font-size: var(--font-size-sm);
-        color: var(--gray-900);
-        font-weight: 700;
-    }
-
-    /* ==================== ACTION BUTTONS ==================== */
-    .action-buttons {
-        display: flex;
-        gap: var(--spacing-md);
-        margin-top: var(--spacing-xl);
-        padding-top: var(--spacing-lg);
-        border-top: 2px solid var(--gray-200);
-        flex-wrap: wrap;
-    }
-
-    .btn {
-        padding: var(--spacing-sm) var(--spacing-lg);
-        border-radius: var(--radius-sm);
-        font-size: var(--font-size-xs);
-        font-weight: 700;
+        align-items: flex-start;
+        gap: var(--space-2);
+        font-size: var(--text-sm);
         border: none;
-        cursor: pointer;
-        transition: var(--transition-base);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        text-decoration: none;
-        box-shadow: var(--shadow-sm);
     }
 
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-        text-decoration: none;
+    .alert i {
+        font-size: var(--text-base);
+        flex-shrink: 0;
+        margin-top: 2px;
     }
 
-    .btn i {
-        font-size: var(--font-size-xs);
+    .alert-success {
+        background: var(--success-light);
+        color: #065f46;
+        border-left: 4px solid var(--success);
     }
 
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-dark); }
-    
-    .btn-warning { background: var(--warning); color: white; }
-    .btn-warning:hover { background: #d97706; }
-    
-    .btn-secondary { background: var(--gray-600); color: white; }
-    .btn-secondary:hover { background: var(--gray-700); }
-    
-    .btn-success { background: var(--success); color: white; }
-    .btn-success:hover { background: #059669; }
-    
-    .btn-danger { background: var(--danger); color: white; }
-    .btn-danger:hover { background: #dc2626; }
-
-    .btn-info { background: var(--info); color: white; }
-    .btn-info:hover { background: #0891b2; }
-
-    /* ==================== EMPTY STATE ==================== */
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-50) 100%);
-        border-radius: var(--card-radius);
-        border: 2px dashed var(--gray-300);
+    .alert-info {
+        background: #dbeafe;
+        color: #1e40af;
+        border-left: 4px solid var(--primary);
     }
 
-    .empty-icon {
-        font-size: 4rem;
-        color: var(--gray-400);
-        margin-bottom: var(--spacing-lg);
+    .alert-warning {
+        background: var(--warning-light);
+        color: #92400e;
+        border-left: 4px solid var(--warning);
     }
 
-    .empty-title {
-        font-size: var(--font-size-lg);
-        font-weight: 700;
-        color: var(--gray-700);
-        margin-bottom: var(--spacing-sm);
-    }
-
-    .empty-text {
-        font-size: var(--font-size-sm);
-        color: var(--gray-600);
-        margin-bottom: var(--spacing-lg);
-    }
-
-    /* ==================== RESPONSIVE ==================== */
+    /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
-        .detail-container { padding: var(--spacing-md); }
-        .detail-header { padding: var(--spacing-lg); }
-        .detail-body { padding: var(--spacing-lg); }
-        .header-content { flex-direction: column; }
-        .info-grid { grid-template-columns: 1fr; }
-        .schedule-grid { grid-template-columns: repeat(2, 1fr); }
-        .mode-header { flex-direction: column; align-items: flex-start; }
-        .action-buttons { flex-direction: column; }
-        .btn { width: 100%; justify-content: center; }
+        .filter-card,
+        .dashboard-card-header,
+        .dashboard-card-body {
+            padding: var(--space-3);
+        }
+
+        .btn-group {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: var(--space-2);
+            font-size: var(--text-xs);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .btn-group {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="detail-container">
-    <!-- HEADER CARD -->
-    <div class="detail-card">
-        <div class="detail-header">
-            <div class="header-content">
-                <div class="header-left">
-                    <h1 class="header-title">
-                        <i class="fas fa-user-circle"></i>
-                        {{ pegawai.nama_lengkap }}
-                    </h1>
-                    <p class="header-subtitle">
-                        <i class="fas fa-fingerprint"></i>
-                        User ID: <strong>{{ pegawai.userid }}</strong>
-                        {% if pegawai.uid_mesin %}
-                        | Machine UID: <strong>{{ pegawai.uid_mesin }}</strong>
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="header-right">
-                    {% if pegawai.is_active %}
-                        <span class="status-badge badge-success">
-                            <i class="fas fa-check-circle"></i> AKTIF
-                        </span>
-                    {% else %}
-                        <span class="status-badge badge-danger">
-                            <i class="fas fa-times-circle"></i> NONAKTIF
-                        </span>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- STATISTICS ROW -->
-        <div class="stats-row">
-            <div class="stat-item">
-                <div class="stat-value">{{ total_hadir }}</div>
-                <div class="stat-label">Hadir (Bulan Ini)</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" style="color: var(--warning);">{{ total_terlambat }}</div>
-                <div class="stat-label">Terlambat</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" style="color: var(--danger);">{{ total_pulang_cepat }}</div>
-                <div class="stat-label">Pulang Cepat</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" style="color: var(--info);">{{ total_sakit_izin }}</div>
-                <div class="stat-label">Sakit/Izin</div>
-            </div>
-        </div>
-
-        <!-- BODY CONTENT -->
-        <div class="detail-body">
-            <!-- DATA PRIBADI -->
-            <div class="section">
-                <h2 class="section-title">
-                    <i class="fas fa-id-card"></i>
-                    Data Pribadi
-                </h2>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label"><i class="fas fa-user"></i> Nama Lengkap</div>
-                        <div class="info-value">{{ pegawai.nama_lengkap }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label"><i class="fas fa-envelope"></i> Email</div>
-                        <div class="info-value">{{ pegawai.email|default:"Tidak ada" }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label"><i class="fas fa-phone"></i> Nomor HP</div>
-                        <div class="info-value">{{ pegawai.nomor_hp|default:"Tidak ada" }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label"><i class="fas fa-birthday-cake"></i> Tanggal Lahir</div>
-                        <div class="info-value">
-                            {% if pegawai.tanggal_lahir %}
-                                {{ pegawai.tanggal_lahir|date:"d F Y" }}
-                            {% else %}
-                                Tidak ada
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label"><i class="fas fa-map-marker-alt"></i> Alamat</div>
-                        <div class="info-value">{{ pegawai.alamat|default:"Tidak ada" }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- DATA ORGANISASI -->
-            <div class="section">
-                <h2 class="section-title">
-                    <i class="fas fa-briefcase"></i>
-                    Informasi Organisasi
-                </h2>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label"><i class="fas fa-sitemap"></i> Departemen</div>
-                        <div class="info-value">
-                            {% if pegawai.departemen %}
-                                {{ pegawai.departemen.nama }}
-                            {% else %}
-                                Belum diatur
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label"><i class="fas fa-user-tie"></i> Jabatan</div>
-                        <div class="info-value">
-                            {% if pegawai.jabatan %}
-                                {{ pegawai.jabatan.nama }}
-                            {% else %}
-                                Belum diatur
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label"><i class="fas fa-building"></i> Cabang</div>
-                        <div class="info-value">
-                            {% if pegawai.cabang %}
-                                {{ pegawai.cabang.nama }}
-                            {% else %}
-                                Belum diatur
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label"><i class="fas fa-server"></i> Mesin Absensi</div>
-                        <div class="info-value">
-                            {% if pegawai.mesin %}
-                                {{ pegawai.mesin.nama }}
-                            {% else %}
-                                Belum diatur
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label"><i class="fas fa-calendar-plus"></i> Tanggal Bergabung</div>
-                        <div class="info-value">
-                            {% if pegawai.tanggal_bergabung %}
-                                {{ pegawai.tanggal_bergabung|date:"d F Y" }}
-                            {% else %}
-                                Tidak ada
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% if not pegawai.is_active and pegawai.tanggal_nonaktif %}
-                    <div class="info-item">
-                        <div class="info-label"><i class="fas fa-calendar-times"></i> Tanggal Nonaktif</div>
-                        <div class="info-value" style="color: var(--danger);">
-                            {{ pegawai.tanggal_nonaktif|date:"d F Y" }}
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- MODE JAM KERJA -->
-            <div class="section">
-                <h2 class="section-title">
-                    <i class="fas fa-clock"></i>
-                    Mode Jam Kerja
-                    {% if total_mode_assigned > 0 %}
-                        <span style="font-size: var(--font-size-xs); margin-left: var(--spacing-sm); color: var(--gray-600);">({{ total_mode_assigned }} mode)</span>
-                    {% endif %}
-                </h2>
-
-                {% if modes_with_schedule %}
-                    <!-- MODE TABS -->
-                    <div class="mode-tabs">
-                        {% for item in modes_with_schedule %}
-                            <div class="mode-tab" 
-                                 data-mode-id="{{ item.mode.id }}" 
-                                 data-color="{{ item.mode.warna }}"
-                                 {% if forloop.first %}data-active="true"{% endif %}>
-                                <i class="{{ item.mode.icon }}"></i>
-                                {{ item.mode.nama }}
-                                {% if item.is_mode_today %}
-                                    <i class="fas fa-star" style="color: gold;"></i>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- MODE CARDS -->
-                    {% for item in modes_with_schedule %}
-                        <div class="mode-card {% if forloop.first %}active{% endif %}" 
-                             data-mode-id="{{ item.mode.id }}"
-                             data-color="{{ item.mode.warna }}">
-                            
-                            <!-- MODE HEADER -->
-                            <div class="mode-header">
-                                <div class="mode-header-left">
-                                    <div class="mode-icon-box">
-                                        <i class="{{ item.mode.icon }}"></i>
-                                    </div>
-                                    <div class="mode-info">
-                                        <h3>{{ item.mode.nama }}</h3>
-                                        <p>
-                                            Kode: <strong>{{ item.mode.kode }}</strong>
-                                            {% if item.is_mode_today %}
-                                                <span class="mode-badge-active">
-                                                    <i class="fas fa-star"></i>
-                                                    Aktif Hari Ini
-                                                </span>
-                                            {% endif %}
-                                        </p>
-                                    </div>
-                                </div>
-                                {% if item.periode_aktif %}
-                                    <div class="periode-badge">
-                                        <small>Periode Khusus</small>
-                                        <strong>{{ item.periode_aktif.nama }}</strong>
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            <!-- TODAY'S SCHEDULE -->
-                            <div class="today-schedule">
-                                <div class="today-label">
-                                    <i class="fas fa-calendar-day"></i>
-                                    Jadwal Hari Ini - {{ today|date:"l, d F Y" }}
-                                </div>
-                                {% with jadwal=item.jadwal_mingguan|get_item:today.weekday %}
-                                    {% if jadwal and jadwal.jam_masuk %}
-                                        <div class="today-value">
-                                            <i class="fas fa-clock"></i>
-                                            {{ jadwal.jam_masuk|time:"H:i" }} - {{ jadwal.jam_keluar|time:"H:i" }}
-                                        </div>
-                                        {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
-                                            <div class="today-break">
-                                                🍽️ Istirahat: {{ jadwal.jam_istirahat_keluar|time:"H:i" }} - {{ jadwal.jam_istirahat_masuk|time:"H:i" }}
-                                            </div>
-                                        {% endif %}
-                                    {% else %}
-                                        <div class="today-value libur">
-                                            <i class="fas fa-home"></i>
-                                            Hari Libur
-                                        </div>
-                                    {% endif %}
-                                {% endwith %}
-                            </div>
-
-                            <!-- WEEKLY SCHEDULE -->
-                            <div class="schedule-section">
-                                <h3 class="schedule-title">
-                                    📅 Jadwal Mingguan
-                                </h3>
-                                <div class="schedule-grid">
-                                    {% for hari, hari_nama in hari_names_enum %}
-                                        {% with jadwal=item.jadwal_mingguan|get_item:hari %}
-                                            <div class="day-card {% if hari == today.weekday %}today{% endif %} {% if not jadwal or not jadwal.jam_masuk %}libur{% endif %}">
-                                                <div class="day-name">{{ hari_nama }}</div>
-                                                {% if jadwal and jadwal.jam_masuk %}
-                                                    <div class="day-time">
-                                                        <div>{{ jadwal.jam_masuk|time:"H:i" }}</div>
-                                                        <div class="separator">─</div>
-                                                        <div>{{ jadwal.jam_keluar|time:"H:i" }}</div>
-                                                    </div>
-                                                    {% if jadwal.jam_istirahat_keluar and jadwal.jam_istirahat_masuk %}
-                                                        <div class="day-break">
-                                                            🍽️ {{ jadwal.jam_istirahat_keluar|time:"H:i" }}-{{ jadwal.jam_istirahat_masuk|time:"H:i" }}
-                                                        </div>
-                                                    {% endif %}
-                                                {% else %}
-                                                    <div class="day-time" style="color: var(--gray-500);">
-                                                        <i class="fas fa-home"></i>
-                                                        <div>Libur</div>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        {% endwith %}
-                                    {% endfor %}
-                                </div>
-                            </div>
-
-                            <!-- MODE FOOTER INFO -->
-                            <div class="mode-footer">
-                                <div class="footer-item">
-                                    <div class="footer-label">Toleransi Terlambat</div>
-                                    {% with first_jadwal=item.jadwal_mingguan|get_item:0 %}
-                                        <div class="footer-value">{{ first_jadwal.toleransi_terlambat|default:"0" }} menit</div>
-                                    {% endwith %}
-                                </div>
-                                <div class="footer-item">
-                                    <div class="footer-label">Toleransi Pulang Cepat</div>
-                                    {% with first_jadwal=item.jadwal_mingguan|get_item:0 %}
-                                        <div class="footer-value">{{ first_jadwal.toleransi_pulang_cepat|default:"0" }} menit</div>
-                                    {% endwith %}
-                                </div>
-                                <div class="footer-item">
-                                    <div class="footer-label">Status Mode</div>
-                                    <div class="footer-value" style="color: var(--success);">
-                                        <i class="fas fa-check-circle"></i> Aktif
-                                    </div>
-                                </div>
-                                <div class="footer-item">
-                                    <div class="footer-label">Total Hari Kerja</div>
-                                    <div class="footer-value">
-                                        {% with count=0 %}
-                                            {% for hari in item.jadwal_mingguan.values %}
-                                                {% if hari and hari.jam_masuk %}
-                                                    {% with count=count|add:1 %}{% endwith %}
-                                                {% endif %}
-                                            {% endfor %}
-                                            {{ item.jadwal_mingguan|length }}
-                                        {% endwith %}
-                                        / 7 hari
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-
-                {% else %}
-                    <!-- EMPTY STATE -->
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <h3 class="empty-title">Belum Ada Mode Jam Kerja</h3>
-                        <p class="empty-text">
-                            Pegawai ini belum di-assign ke mode jam kerja manapun.
-                            <br>
-                            Silakan assign mode jam kerja terlebih dahulu.
-                        </p>
-                        <a href="{% url 'assign_mode_jam_kerja_pegawai' pegawai.id %}" class="btn btn-primary">
-                            <i class="fas fa-plus-circle"></i>
-                            Assign Mode Jam Kerja
-                        </a>
-                    </div>
-                {% endif %}
-            </div>
-
-            <!-- ACTION BUTTONS -->
-            <div class="action-buttons">
-                <a href="{% url 'daftar_Pegawai' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Kembali
-                </a>
-                <a href="{% url 'Pegawai_edit' pegawai.pk %}" class="btn btn-warning">
-                    <i class="fas fa-edit"></i> Edit Data
-                </a>
-                <a href="{% url 'riwayat_per_Pegawai' pegawai.pk %}" class="btn btn-info">
-                    <i class="fas fa-history"></i> Riwayat Absensi
-                </a>
-                <a href="{% url 'assign_mode_jam_kerja_pegawai' pegawai.id %}" class="btn btn-primary">
-                    <i class="fas fa-clock"></i> Kelola Mode Jam Kerja
-                </a>
-                {% if pegawai.is_active %}
-                    <form method="POST" action="{% url 'toggle_pegawai_status' pegawai.pk %}" style="display: inline; margin: 0;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('⚠️ Yakin ingin NONAKTIFKAN pegawai ini?')">
-                            <i class="fas fa-user-times"></i> Nonaktifkan
-                        </button>
-                    </form>
-                {% else %}
-                    <form method="POST" action="{% url 'toggle_pegawai_status' pegawai.pk %}" style="display: inline; margin: 0;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success" onclick="return confirm('✅ Yakin ingin AKTIFKAN pegawai ini?')">
-                            <i class="fas fa-user-check"></i> Aktifkan
-                        </button>
-                    </form>
-                {% endif %}
-                <a href="{% url 'Pegawai_hapus' pegawai.pk %}" class="btn btn-danger" onclick="return confirm('🗑️ PERINGATAN!\n\nYakin ingin menghapus pegawai ini secara PERMANEN?\n\nSemua data absensi akan ikut terhapus!')">
-                    <i class="fas fa-trash"></i> Hapus Permanen
-                </a>
-            </div>
+<div class="container-fluid">
+    
+    <div class="dashboard-card">
+        <div class="dashboard-card-header">
+            <h4>
+                <i class="fas fa-download"></i>
+                Export Data Absensi
+            </h4>
+            <p>Pilih filter dan format export yang diinginkan</p>
         </div>
     </div>
+
+    <form method="get" id="exportForm">
+        
+        <div class="filter-card">
+            <h5>
+                <i class="fas fa-user-friends"></i>
+                Filter Pegawai
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i>
+                        Pilih Pegawai 
+                    </label>
+                    <select name="pegawai_id" class="form-select" id="pegawai_select">
+                        <option value="">-- Semua Pegawai --</option>
+                        {% for pegawai in pegawai_list %}
+                        <option value="{{ pegawai.id }}">{{ pegawai.userid }} - {{ pegawai.nama_lengkap }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Kosongkan untuk export semua pegawai</small>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-building"></i>
+                        Pilih Departemen 
+                    </label>
+                    <select name="departemen" class="form-select" id="departemen_select">
+                        <option value="">-- Semua Departemen --</option>
+                        {% for dept in departemen_list %}
+                        <option value="{{ dept.nama }}">{{ dept.nama }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Kosongkan untuk export semua departemen</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-card">
+            <h5>
+                <i class="fas fa-calendar-alt"></i>
+                Filter Periode Waktu
+            </h5>
+            
+            <div class="periode-section">
+                <label class="form-label">Pilih Periode:</label>
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="periode" id="periode_hari" value="hari_ini" autocomplete="off">
+                    <label class="btn" for="periode_hari">
+                        <i class="fas fa-calendar-day"></i>
+                        Hari Ini
+                    </label>
+
+                    <input type="radio" class="btn-check" name="periode" id="periode_minggu" value="minggu_ini" autocomplete="off">
+                    <label class="btn" for="periode_minggu">
+                        <i class="fas fa-calendar-week"></i>
+                        Minggu Ini
+                    </label>
+
+                    <input type="radio" class="btn-check" name="periode" id="periode_bulan" value="bulan_ini" autocomplete="off">
+                    <label class="btn" for="periode_bulan">
+                        <i class="fas fa-calendar"></i>
+                        Bulan Ini
+                    </label>
+
+                    <input type="radio" class="btn-check" name="periode" id="periode_tahun" value="tahun_ini" autocomplete="off">
+                    <label class="btn" for="periode_tahun">
+                        <i class="fas fa-calendar-alt"></i>
+                        Tahun Ini
+                    </label>
+
+                    <input type="radio" class="btn-check" name="periode" id="periode_custom" value="custom" autocomplete="off" checked>
+                    <label class="btn" for="periode_custom">
+                        <i class="fas fa-calendar-check"></i>
+                        Custom
+                    </label>
+                </div>
+            </div>
+
+            <div class="row g-3" id="custom_date_range">
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-calendar"></i>
+                        Tanggal Mulai
+                    </label>
+                    <input type="date" name="tanggal_mulai" class="form-control" id="tanggal_mulai">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-calendar"></i>
+                        Tanggal Akhir
+                    </label>
+                    <input type="date" name="tanggal_akhir" class="form-control" id="tanggal_akhir">
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h4>
+                    <i class="fas fa-eye"></i>
+                    Preview & Export Data
+                </h4>
+                <p>Lihat preview data sebelum melakukan export</p>
+            </div>
+
+            <div class="dashboard-card-body">
+
+                <div class="control-section">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-8">
+                            <label class="form-label">
+                                <i class="fas fa-list-ol"></i>
+                                Jumlah Data Preview
+                            </label>
+                            <select class="form-select" id="previewLimit">
+                                <option value="10">10 Data</option>
+                                <option value="25">25 Data</option>
+                                <option value="50" selected>50 Data</option>
+                                <option value="100">100 Data</option>
+                                <option value="200">200 Data</option>
+                                <option value="all">Semua Data</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-info w-100" id="btnPreview">
+                                <i class="fas fa-eye"></i>Preview Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preview-box" id="previewBox">
+                    <h6 id="previewTitle">
+                        <i class="fas fa-table"></i>
+                        Preview Data:
+                    </h6>
+                    <div id="previewContent"></div>
+                </div>
+
+                <div class="row g-3 mt-2">
+                    <div class="col-md-12">
+                        <button type="button" class="btn btn-export btn-export-csv" id="btnExportCSV">
+                            <i class="fas fa-file-csv"></i>Export ke CSV (.csv)
+                        </button>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>Format universal untuk semua aplikasi
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tabs = document.querySelectorAll('.mode-tab');
-    const cards = document.querySelectorAll('.mode-card');
-
-    tabs.forEach(tab => {
-        const color = tab.getAttribute('data-color');
-        if (tab.getAttribute('data-active') === 'true') {
-            tab.classList.add('active');
-            tab.style.backgroundColor = color;
-            tab.style.color = 'white';
-            tab.style.borderColor = color;
+$(document).ready(function() {
+    
+    $('input[name="periode"]').change(function() {
+        if ($(this).val() === 'custom') {
+            $('#custom_date_range').slideDown();
+        } else {
+            $('#custom_date_range').slideUp();
+            $('#tanggal_mulai, #tanggal_akhir').val('');
         }
     });
 
-    cards.forEach(card => {
-        const color = card.getAttribute('data-color');
-        const header = card.querySelector('.mode-header');
-        if (header) {
-            header.style.background = `linear-gradient(135deg, ${color} 0%, ${adjustBrightness(color, -20)} 100%)`;
+    $('#pegawai_select').change(function() {
+        if ($(this).val()) {
+            $('#departemen_select').prop('disabled', true).val('');
+        } else {
+            $('#departemen_select').prop('disabled', false);
         }
     });
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const modeId = this.getAttribute('data-mode-id');
-            const color = this.getAttribute('data-color');
-
-            cards.forEach(c => c.classList.remove('active'));
-
-            const selectedCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
-            if (selectedCard) {
-                selectedCard.classList.add('active');
+    $('#departemen_select').change(function() {
+        if ($(this).val()) {
+            $('#pegawai_select').prop('disabled', true).val('');
+        } else {
+            $('#pegawai_select').prop('disabled', false);
+        }
+    });
+    
+    $('#btnPreview').click(function() {
+        const formData = $('#exportForm').serialize();
+        const previewLimit = $('#previewLimit').val();
+        
+        $.ajax({
+            url: '{% url "preview_export_data" %}',
+            method: 'GET',
+            data: formData + '&limit=' + previewLimit,
+            beforeSend: function() {
+                $('#btnPreview').html('<i class="fas fa-spinner fa-spin"></i>Loading...').prop('disabled', true);
+                $('#previewBox').slideUp();
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    let limitText = previewLimit === 'all' ? 'Semua' : previewLimit;
+                    $('#previewTitle').html('<i class="fas fa-table"></i>Preview Data (' + limitText + ' dari ' + response.total + ' total):');
+                    
+                    let html = '<div class="alert alert-success">';
+                    html += '<i class="fas fa-check-circle"></i>';
+                    html += '<div>';
+                    html += '<strong>Total Data: ' + response.total + ' record</strong><br>';
+                    html += 'Ditampilkan: ' + response.preview.length + ' record';
+                    html += '</div></div>';
+                    
+                    if (response.preview.length > 0) {
+                        html += '<div class="table-wrapper">';
+                        html += '<table class="table table-hover">';
+                        html += '<thead><tr>';
+                        html += '<th class="text-center">No</th>';
+                        html += '<th>User ID</th>';
+                        html += '<th>Nama</th>';
+                        html += '<th>Departemen</th>';
+                        html += '<th>Tanggal</th>';
+                        html += '<th>Shift</th>';
+                        html += '<th class="text-center">Status</th>';
+                        html += '</tr></thead><tbody>';
+                        
+                        response.preview.forEach(function(item, index) {
+                            html += '<tr>';
+                            html += '<td class="text-center">' + (index + 1) + '</td>';
+                            html += '<td><span class="badge-userid">' + item.userid + '</span></td>';
+                            html += '<td><strong>' + item.nama + '</strong></td>';
+                            html += '<td>' + item.departemen + '</td>';
+                            html += '<td>' + item.tanggal + '</td>';
+                            html += '<td>' + item.shift + '</td>';
+                            
+                            let statusClass = 'secondary';
+                            
+                            if (item.status === 'Hadir') {
+                                statusClass = 'success';
+                            } else if (item.status === 'Sakit') {
+                                statusClass = 'info';
+                            } else if (item.status === 'Izin') {
+                                statusClass = 'warning';
+                            } else if (item.status === 'Absen') {
+                                statusClass = 'danger';
+                            }
+                            
+                            html += '<td class="text-center">';
+                            html += '<span class="badge bg-' + statusClass + '">' + item.status + '</span>';
+                            html += '</td></tr>';
+                        });
+                        
+                        html += '</tbody></table></div>';
+                        
+                        if (response.total > response.preview.length) {
+                            let sisaData = response.total - response.preview.length;
+                            html += '<div class="alert alert-info">';
+                            html += '<i class="fas fa-info-circle"></i>';
+                            html += '<div><strong>Info:</strong> Masih ada <strong>' + sisaData + ' data lagi</strong> yang tidak ditampilkan.</div>';
+                            html += '</div>';
+                        }
+                    } else {
+                        html += '<div class="alert alert-warning">';
+                        html += '<i class="fas fa-exclamation-triangle"></i>';
+                        html += '<div><strong>Tidak ada data</strong> yang sesuai dengan filter.</div>';
+                        html += '</div>';
+                    }
+                    
+                    $('#previewContent').html(html);
+                    $('#previewBox').slideDown();
+                } else {
+                    alert('Error: ' + response.msg);
+                }
+            },
+            error: function(xhr) {
+                alert('Gagal mengambil preview data');
+            },
+            complete: function() {
+                $('#btnPreview').html('<i class="fas fa-eye"></i>Preview Data').prop('disabled', false);
             }
-
-            tabs.forEach(t => {
-                t.classList.remove('active');
-                t.style.backgroundColor = 'white';
-                t.style.color = 'var(--gray-700)';
-                t.style.borderColor = 'transparent';
-            });
-
-            this.classList.add('active');
-            this.style.backgroundColor = color;
-            this.style.color = 'white';
-            this.style.borderColor = color;
         });
     });
 
-    function adjustBrightness(color, percent) {
-        const num = parseInt(color.replace("#", ""), 16);
-        const amt = Math.round(2.55 * percent);
-        const R = (num >> 16) + amt;
-        const G = (num >> 8 & 0x00FF) + amt;
-        const B = (num & 0x0000FF) + amt;
-        return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + 
-                     (G<255?G<1?0:G:255)*0x100 + 
-                     (B<255?B<1?0:B:255)).toString(16).slice(1);
-    }
+    $('#btnExportCSV').click(function() {
+        const formData = $('#exportForm').serialize();
+        window.location.href = '{% url "export_absensi_csv_advanced" %}?' + formData;
+    });
 });
 </script>
 {% endblock %}

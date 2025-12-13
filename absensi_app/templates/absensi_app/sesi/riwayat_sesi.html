@@ -6,47 +6,41 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <style>
-    /* ==================== INFO ALERT ==================== */
+    /* ===== INFO ALERT ===== */
     .sesi-info-alert {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        background: var(--primary);
         color: white;
-        padding: var(--spacing-lg) var(--spacing-xl);
-        border-radius: var(--radius-lg);
-        margin-bottom: var(--spacing-xl);
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--space-4);
         display: flex;
         align-items: center;
-        gap: var(--spacing-md);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        gap: var(--space-3);
+        box-shadow: var(--shadow);
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .sesi-info-alert i {
-        font-size: var(--font-xl);
+        font-size: var(--text-lg);
         flex-shrink: 0;
     }
 
     .sesi-info-alert h6 {
-        margin: 0 0 var(--spacing-xs) 0;
+        margin: 0;
         opacity: 0.9;
-        font-size: var(--font-xs);
+        font-size: var(--text-sm);
         text-transform: uppercase;
         font-weight: 600;
         letter-spacing: 0.3px;
     }
 
-    .sesi-info-alert p {
-        margin: 0;
-        font-size: var(--font-sm);
-        line-height: 1.5;
-    }
-
-    /* ==================== FILTER SECTION ==================== */
+    /* ===== FILTER SECTION ===== */
     .filter-section {
         background: white;
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
-        box-shadow: var(--shadow-sm);
-        margin-bottom: var(--spacing-xl);
+        border-radius: var(--radius-sm);
+        padding: var(--space-4);
+        box-shadow: var(--shadow);
+        margin-bottom: var(--space-4);
         border: 1px solid var(--gray-200);
     }
 
@@ -54,78 +48,74 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: var(--spacing-lg);
-        padding-bottom: var(--spacing-md);
+        margin-bottom: var(--space-3);
+        padding-bottom: var(--space-2);
         border-bottom: 2px solid var(--gray-200);
         flex-wrap: wrap;
-        gap: var(--spacing-md);
+        gap: var(--space-3);
     }
 
     .filter-title {
-        font-size: var(--font-base);
+        font-size: var(--text-base);
         font-weight: 600;
         color: var(--gray-900);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
         margin: 0;
     }
 
     .filter-title i {
         color: var(--primary);
-        font-size: var(--font-base);
     }
 
-    /* ==================== BUTTONS ==================== */
+    /* ===== BUTTONS ===== */
     .btn {
-        padding: var(--spacing-sm) var(--spacing-lg);
-        font-size: var(--font-xs);
+        padding: 0 var(--space-4);
+        height: 36px;
+        font-size: var(--text-sm);
         border-radius: var(--radius-sm);
         font-weight: 600;
         border: none;
-        transition: all var(--transition-base);
+        transition: all 0.2s;
         display: inline-flex;
         align-items: center;
-        gap: var(--spacing-xs);
+        gap: var(--space-2);
         cursor: pointer;
-    }
-
-    .btn i {
-        font-size: 0.7rem;
     }
 
     .btn:hover {
         transform: translateY(-1px);
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--shadow);
     }
 
     .btn-sync {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        background: var(--primary);
         color: white;
     }
 
     .btn-sync:hover {
-        background: linear-gradient(135deg, #1e40af 0%, var(--primary-dark) 100%);
+        background: var(--primary-hover);
         color: white;
     }
 
     .btn-proses {
-        background: linear-gradient(135deg, #059669 0%, var(--success) 100%);
+        background: var(--success);
         color: white;
     }
 
     .btn-proses:hover {
-        background: linear-gradient(135deg, #047857 0%, #059669 100%);
+        background: var(--success-dark);
         color: white;
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: var(--primary);
         color: white;
     }
 
     .btn-primary:hover {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, #1e40af 100%);
+        background: var(--primary-hover);
         color: white;
     }
 
@@ -140,109 +130,107 @@
     }
 
     .btn-action {
-        padding: 0.2rem 0.5rem;
-        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        padding: 0 var(--space-2);
+        height: 28px;
+        background: #0ea5e9;
         color: white;
         border: none;
         border-radius: var(--radius-sm);
         font-weight: 600;
-        font-size: 0.65rem;
-        transition: all var(--transition-base);
+        font-size: var(--text-xs);
+        transition: all 0.2s;
     }
 
     .btn-action:hover {
-        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        background: #0284c7;
         color: white;
         transform: translateY(-1px);
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--shadow);
     }
 
-    /* ✅ TOMBOL HAPUS */
     .btn-delete {
-        padding: 0.2rem 0.5rem;
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        padding: 0 var(--space-2);
+        height: 28px;
+        background: var(--danger);
         color: white;
         border: none;
         border-radius: var(--radius-sm);
         font-weight: 600;
-        font-size: 0.65rem;
-        transition: all var(--transition-base);
+        font-size: var(--text-xs);
+        transition: all 0.2s;
     }
 
     .btn-delete:hover {
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        background: var(--danger-dark);
         color: white;
         transform: translateY(-1px);
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--shadow);
     }
 
-    /* ==================== FORM CONTROLS ==================== */
+    /* ===== FORM CONTROLS ===== */
     .form-label {
         font-weight: 600;
-        font-size: var(--font-xs);
-        margin-bottom: var(--spacing-xs);
+        font-size: var(--text-sm);
+        margin-bottom: var(--space-2);
         display: flex;
         align-items: center;
-        gap: var(--spacing-xs);
+        gap: var(--space-1);
         color: var(--gray-700);
     }
 
     .form-label i {
         color: var(--primary);
-        font-size: 0.7rem;
+        font-size: var(--text-xs);
     }
 
     .form-control {
         border: 1px solid var(--gray-300);
         border-radius: var(--radius-sm);
-        padding: var(--spacing-sm) var(--spacing-md);
-        font-size: var(--font-xs);
-        transition: all var(--transition-base);
-        height: 38px;
+        padding: 0 var(--space-3);
+        font-size: var(--text-sm);
+        transition: all 0.2s;
+        height: 36px;
     }
 
     .form-control:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 2px var(--primary-light);
+        box-shadow: 0 0 0 3px var(--primary-light);
         outline: none;
     }
 
-    /* ==================== TABLE SECTION ==================== */
+    /* ===== TABLE SECTION ===== */
     .table-section {
         background: white;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow);
         overflow: hidden;
         border: 1px solid var(--gray-200);
     }
 
     .table {
         margin-bottom: 0;
-        font-size: var(--font-xs);
+        font-size: var(--text-sm);
         width: 100%;
-    }
-
-    table.dataTable {
-        border-collapse: collapse !important;
     }
 
     table.dataTable thead th {
         border: none !important;
-        background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%) !important;
+        background: var(--gray-800) !important;
         color: white !important;
         font-weight: 600;
-        padding: var(--spacing-md) !important;
-        font-size: 0.65rem;
+        padding: var(--space-2) var(--space-3) !important;
+        font-size: var(--text-xs);
         text-transform: uppercase;
         letter-spacing: 0.3px;
         white-space: nowrap;
     }
 
     table.dataTable tbody td {
-        padding: var(--spacing-md) !important;
+        padding: var(--space-2) var(--space-3) !important;
         vertical-align: middle;
         border-bottom: 1px solid var(--gray-200) !important;
         background: white;
+        font-size: var(--text-sm);
     }
 
     table.dataTable tbody tr:hover {
@@ -253,22 +241,22 @@
         border-bottom: none !important;
     }
 
-    /* ==================== BADGES ==================== */
+    /* ===== BADGES ===== */
     .badge {
-        padding: 0.2rem 0.5rem;
+        padding: 2px var(--space-2);
         border-radius: var(--radius-sm);
         font-weight: 600;
-        font-size: 0.65rem;
+        font-size: var(--text-xs);
         white-space: nowrap;
     }
 
     .badge.bg-success {
-        background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        background: var(--success);
         color: white;
     }
 
     .badge.bg-warning {
-        background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+        background: var(--warning);
         color: white;
     }
 
@@ -285,45 +273,41 @@
 
     .sesi-badge {
         display: inline-block;
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        background: var(--primary);
         color: white;
-        padding: 0.25rem 0.6rem;
+        padding: 2px var(--space-2);
         border-radius: var(--radius-sm);
         font-weight: 700;
-        font-size: 0.65rem;
-        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        font-size: var(--text-xs);
+        box-shadow: var(--shadow);
     }
 
     .cross-day-badge {
-        background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+        background: var(--warning);
         color: white;
-        padding: 0.15rem 0.5rem;
+        padding: 2px var(--space-2);
         border-radius: 10px;
-        font-size: 0.6rem;
+        font-size: var(--text-xs);
         font-weight: 600;
-        margin-left: var(--spacing-xs);
+        margin-left: var(--space-1);
         display: inline-flex;
         align-items: center;
-        gap: 2px;
+        gap: 4px;
     }
 
-    .cross-day-badge i {
-        font-size: 0.55rem;
-    }
-
-    /* ==================== USER INFO ==================== */
+    /* ===== USER INFO ===== */
     .userid-text {
         color: var(--primary);
         font-weight: 700;
-        font-family: 'Consolas', monospace;
-        font-size: 0.7rem;
+        font-family: 'Courier New', monospace;
+        font-size: var(--text-xs);
     }
 
     .user-name {
         font-weight: 600;
         color: var(--gray-900);
         text-decoration: none;
-        font-size: var(--font-xs);
+        font-size: var(--text-sm);
     }
 
     .user-name:hover {
@@ -331,17 +315,17 @@
         text-decoration: none;
     }
 
-    /* ==================== MODAL ==================== */
+    /* ===== MODAL ===== */
     .modal-content {
         border: none;
-        border-radius: var(--radius-lg);
+        border-radius: var(--radius-sm);
         overflow: hidden;
     }
 
     .modal-header {
-        background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%);
+        background: var(--gray-800);
         color: white;
-        padding: var(--spacing-lg) var(--spacing-xl);
+        padding: var(--space-4);
         border: none;
     }
 
@@ -352,53 +336,45 @@
 
     .modal-title {
         font-weight: 600;
-        font-size: var(--font-base);
+        font-size: var(--text-base);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
         margin: 0;
     }
 
-    .modal-title i {
-        font-size: var(--font-base);
-    }
-
     .modal-body {
-        padding: var(--spacing-xl);
+        padding: var(--space-4);
     }
 
-    /* ==================== CROSS DAY INFO ==================== */
+    /* ===== CROSS DAY INFO ===== */
     .cross-day-info {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        background: var(--warning-light);
         border-left: 4px solid var(--warning);
-        padding: var(--spacing-lg);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--spacing-lg);
+        padding: var(--space-4);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--space-4);
     }
 
     .cross-day-info-title {
         font-weight: 700;
         color: #92400e;
-        font-size: var(--font-sm);
-        margin-bottom: var(--spacing-md);
+        font-size: var(--text-sm);
+        margin-bottom: var(--space-3);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .cross-day-info-title i {
-        font-size: var(--font-sm);
+        gap: var(--space-2);
     }
 
     .cross-day-info-dates {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: var(--spacing-md);
+        gap: var(--space-3);
     }
 
     .cross-day-date-item {
         background: white;
-        padding: var(--spacing-md);
+        padding: var(--space-3);
         border-radius: var(--radius-sm);
         border: 1px solid #fcd34d;
     }
@@ -407,76 +383,72 @@
         font-weight: 600;
         color: #b45309;
         display: block;
-        margin-bottom: var(--spacing-xs);
-        font-size: 0.65rem;
+        margin-bottom: var(--space-1);
+        font-size: var(--text-xs);
     }
 
     .cross-day-date-value {
         color: #92400e;
         font-weight: 700;
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         display: block;
     }
 
     .cross-day-day-name {
         color: #b45309;
-        font-size: 0.6rem;
+        font-size: var(--text-xs);
         font-weight: 500;
         display: block;
         margin-top: 2px;
     }
 
-    /* ==================== DETAIL TABLE ==================== */
+    /* ===== DETAIL TABLE ===== */
     .detail-section-title {
         font-weight: 600;
-        font-size: var(--font-sm);
+        font-size: var(--text-base);
         border-bottom: 2px solid var(--gray-100);
-        padding-bottom: var(--spacing-sm);
-        margin-bottom: var(--spacing-md);
+        padding-bottom: var(--space-2);
+        margin-bottom: var(--space-3);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .detail-section-title i {
-        font-size: var(--font-sm);
+        gap: var(--space-2);
     }
 
     .table-sm {
-        font-size: var(--font-xs);
+        font-size: var(--text-sm);
     }
 
     .table-sm td {
-        padding: var(--spacing-sm) var(--spacing-md);
+        padding: var(--space-2) var(--space-3);
     }
 
-    /* ==================== EMPTY STATE ==================== */
+    /* ===== EMPTY STATE ===== */
     .empty-state {
         text-align: center;
-        padding: 48px var(--spacing-xl);
+        padding: var(--space-8);
     }
 
     .empty-state i {
-        font-size: 2.5rem;
+        font-size: 40px;
         color: var(--gray-300);
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: var(--space-3);
     }
 
     .empty-state p {
         color: var(--gray-600);
-        margin-bottom: var(--spacing-xs);
-        font-size: var(--font-sm);
+        margin-bottom: var(--space-1);
+        font-size: var(--text-sm);
     }
 
     .empty-state small {
         color: var(--gray-500);
-        font-size: var(--font-xs);
+        font-size: var(--text-sm);
     }
 
-    /* ==================== RESPONSIVE ==================== */
+    /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
         .filter-section {
-            padding: var(--spacing-lg);
+            padding: var(--space-3);
         }
 
         .filter-header {
@@ -487,7 +459,7 @@
         .sesi-info-alert {
             flex-direction: column;
             text-align: center;
-            padding: var(--spacing-lg);
+            padding: var(--space-3);
         }
 
         .cross-day-info-dates {
@@ -495,24 +467,21 @@
         }
 
         .btn-action, .btn-delete {
-            padding: 0.15rem 0.4rem;
-            font-size: 0.6rem;
+            padding: 0 var(--space-2);
+            height: 24px;
+            font-size: 10px;
         }
 
         .table thead th,
         .table tbody td {
-            padding: var(--spacing-sm) !important;
-            font-size: 0.6rem;
+            padding: var(--space-2) !important;
+            font-size: var(--text-xs);
         }
     }
 
     @media (max-width: 576px) {
         .sesi-info-alert h6 {
-            font-size: 0.65rem;
-        }
-
-        .sesi-info-alert p {
-            font-size: var(--font-xs);
+            font-size: var(--text-xs);
         }
     }
 </style>
@@ -564,13 +533,13 @@
                     <i class="fas fa-calendar"></i>
                     Range Tanggal
                 </label>
-                <div style="display: flex; gap: var(--spacing-sm); align-items: center;">
+                <div style="display: flex; gap: var(--space-2); align-items: center;">
                     <input type="date" 
                            name="tanggal_mulai" 
                            class="form-control" 
                            value="{{ tanggal_mulai|date:'Y-m-d' }}" 
                            style="flex: 1;">
-                    <span style="color: var(--gray-600); font-weight: 600; font-size: var(--font-xs);">s/d</span>
+                    <span style="color: var(--gray-600); font-weight: 600; font-size: var(--text-sm);">s/d</span>
                     <input type="date" 
                            name="tanggal_akhir" 
                            class="form-control" 
@@ -597,17 +566,17 @@
             <table class="table table-hover" id="sesiTable">
                 <thead>
                     <tr>
-                        <th class="text-center" style="width: 5%;">No</th>
-                        <th class="text-center" style="width: 10%;">User ID</th>
-                        <th style="width: 18%;">Nama</th>
-                        <th class="text-center" style="width: 10%;">Departemen</th>
-                        <th class="text-center" style="width: 12%;">Tanggal</th>
-                        <th class="text-center" style="width: 8%;">Sesi</th>
-                        <th class="text-center" style="width: 7%;">Tap Masuk</th>
-                        <th class="text-center" style="width: 7%;">Tap Pulang</th>
-                        <th class="text-center" style="width: 8%;">Durasi</th>
-                        <th class="text-center" style="width: 7%;">Status</th>
-                        <th class="text-center" style="width: 8%;">Aksi</th>
+                        <th class="text-center">No</th>
+                        <th class="text-center">User ID</th>
+                        <th>Nama</th>
+                        <th class="text-center">Departemen</th>
+                        <th class="text-center">Tanggal</th>
+                        <th class="text-center">Sesi</th>
+                        <th class="text-center">Tap Masuk</th>
+                        <th class="text-center">Tap Pulang</th>
+                        <th class="text-center">Durasi</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -644,7 +613,7 @@
                             </td>
                             <td class="text-center">
                                 {% if sesi.tap_masuk_pertama %}
-                                    <strong style="color: var(--success); font-size: 0.7rem;">
+                                    <strong style="color: var(--success); font-size: var(--text-sm);">
                                         {{ sesi.tap_masuk_pertama|date:"H:i" }}
                                     </strong>
                                 {% else %}
@@ -653,7 +622,7 @@
                             </td>
                             <td class="text-center">
                                 {% if sesi.tap_pulang_terakhir %}
-                                    <strong style="color: var(--danger); font-size: 0.7rem;">
+                                    <strong style="color: var(--danger); font-size: var(--text-sm);">
                                         {{ sesi.tap_pulang_terakhir|date:"H:i" }}
                                     </strong>
                                 {% else %}
@@ -662,7 +631,7 @@
                             </td>
                             <td class="text-center">
                                 {% if sesi.durasi_kerja_menit %}
-                                    <strong style="color: var(--primary); font-size: 0.7rem;">
+                                    <strong style="color: var(--primary); font-size: var(--text-sm);">
                                         {{ sesi.get_durasi_formatted }}
                                     </strong>
                                 {% else %}
@@ -722,7 +691,7 @@
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p class="mt-3" style="color: var(--gray-600); font-size: var(--font-sm);">Loading...</p>
+                    <p class="mt-3" style="color: var(--gray-600); font-size: var(--text-sm);">Loading...</p>
                 </div>
             </div>
         </div>

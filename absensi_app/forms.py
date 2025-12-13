@@ -1,4 +1,3 @@
-import re
 from django import forms
 from django.core.exceptions import ValidationError
 
@@ -15,8 +14,7 @@ from .models import (
 
 
 # ==============================================================================
-# FORMS - PEGAWAI
-# Form untuk registrasi dan edit data pegawai
+# FORMS PEGAWAI
 # ==============================================================================
 
 class PegawaiForm(forms.ModelForm):
@@ -117,7 +115,6 @@ class PegawaiForm(forms.ModelForm):
         if not userid.isdigit():
             raise forms.ValidationError("User ID hanya boleh berisi angka (0-9)")
 
-        # Cek keunikan hanya saat membuat baru
         if not self.instance.pk and Pegawai.objects.filter(userid=userid).exists():
             raise forms.ValidationError(f"User ID {userid} sudah terdaftar")
 
@@ -203,8 +200,7 @@ class PegawaiEditForm(forms.ModelForm):
 
 
 # ==============================================================================
-# FORMS - ABSENSI & LAPORAN
-# Form untuk input absensi manual dan filter laporan
+# FORMS ABSENSI & LAPORAN
 # ==============================================================================
 
 class AbsensiAdminForm(forms.ModelForm):
@@ -317,8 +313,7 @@ class PegawaiSearchForm(forms.Form):
 
 
 # ==============================================================================
-# FORMS - MASTER DATA
-# Form untuk kelola master data: departemen, jabatan, cabang, mesin
+# FORMS MASTER DATA
 # ==============================================================================
 
 class MasterDepartemenForm(forms.ModelForm):
@@ -362,7 +357,6 @@ class MasterDepartemenForm(forms.ModelForm):
                 'ID departemen hanya boleh berisi angka (0-9). Contoh: 01, 1234, 99'
             )
 
-        # Cek duplikat (kecuali untuk update)
         qs = MasterDepartemen.objects.filter(id_departemen=id_dept)
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
@@ -422,7 +416,8 @@ class MasterCabangForm(forms.ModelForm):
             }),
             'ip_mesin_fingerprint': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 2
+                'rows': 2,
+                'placeholder': 'Pisahkan dengan koma untuk multiple IP'
             }),
             'port_mesin': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -451,6 +446,7 @@ class MasterMesinForm(forms.ModelForm):
             }),
             'ip_address': forms.TextInput(attrs={
                 'class': 'form-control',
+                'placeholder': 'Contoh: 192.168.1.100',
                 'required': 'required'
             }),
             'port': forms.NumberInput(attrs={
@@ -462,7 +458,8 @@ class MasterMesinForm(forms.ModelForm):
                 'required': 'required'
             }),
             'lokasi': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Contoh: Lantai 2, Ruang HR'
             }),
             'keterangan': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -471,4 +468,135 @@ class MasterMesinForm(forms.ModelForm):
             'is_active': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
+        }
+
+
+# ==============================================================================
+# FORMS MODE JAM KERJA
+# ==============================================================================
+
+class MasterModeJamKerjaForm(forms.ModelForm):
+    """Form untuk master mode jam kerja"""
+
+    class Meta:
+        model = MasterModeJamKerja
+        fields = [
+            'nama', 'kode', 'warna', 'icon', 'priority', 
+            'is_default', 'cabang', 'is_active'
+        ]
+        widgets = {
+            'nama': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Contoh: Shift Pagi, Normal',
+                'required': 'required'
+            }),
+            'kode': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Contoh: PAGI, NORMAL',
+                'required': 'required'
+            }),
+            'warna': forms.TextInput(attrs={
+                'class': 'form-control',
+                'type': 'color',
+                'value': '#3B82F6'
+            }),
+            'icon': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Contoh: fas fa-clock, fas fa-sun'
+            }),
+            'priority': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'is_default': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'cabang': forms.Select(attrs={
+                'class': 'form-control select2',
+                'data-placeholder': 'Pilih cabang (kosongkan untuk GLOBAL)'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            })
+        }
+        labels = {
+            'nama': 'Nama Mode',
+            'kode': 'Kode Mode',
+            'warna': 'Warna',
+            'icon': 'Icon (Font Awesome)',
+            'priority': 'Prioritas',
+            'is_default': 'Mode Default',
+            'cabang': 'Cabang (opsional)',
+            'is_active': 'Status Aktif'
+        }
+
+
+class ModeJamKerjaJadwalForm(forms.ModelForm):
+    """Form untuk jadwal mode jam kerja"""
+
+    class Meta:
+        model = ModeJamKerjaJadwal
+        fields = [
+            'mode', 'group_name', 'hari',
+            'jam_masuk', 'jam_keluar',
+            'jam_istirahat_keluar', 'jam_istirahat_masuk',
+            'toleransi_terlambat', 'toleransi_pulang_cepat',
+            'urutan'
+        ]
+        widgets = {
+            'mode': forms.Select(attrs={
+                'class': 'form-control select2',
+                'required': 'required'
+            }),
+            'group_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Contoh: Grup A, Shift 1',
+                'required': 'required'
+            }),
+            'hari': forms.Select(attrs={
+                'class': 'form-control',
+                'required': 'required'
+            }),
+            'jam_masuk': forms.TimeInput(attrs={
+                'class': 'form-control',
+                'type': 'time'
+            }),
+            'jam_keluar': forms.TimeInput(attrs={
+                'class': 'form-control',
+                'type': 'time'
+            }),
+            'jam_istirahat_keluar': forms.TimeInput(attrs={
+                'class': 'form-control',
+                'type': 'time'
+            }),
+            'jam_istirahat_masuk': forms.TimeInput(attrs={
+                'class': 'form-control',
+                'type': 'time'
+            }),
+            'toleransi_terlambat': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'value': '15'
+            }),
+            'toleransi_pulang_cepat': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'value': '15'
+            }),
+            'urutan': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'value': '1'
+            })
+        }
+        labels = {
+            'mode': 'Mode Jam Kerja',
+            'group_name': 'Nama Grup/Shift',
+            'hari': 'Hari',
+            'jam_masuk': 'Jam Masuk',
+            'jam_keluar': 'Jam Keluar',
+            'jam_istirahat_keluar': 'Istirahat Keluar',
+            'jam_istirahat_masuk': 'Istirahat Masuk',
+            'toleransi_terlambat': 'Toleransi Terlambat (menit)',
+            'toleransi_pulang_cepat': 'Toleransi Pulang Cepat (menit)',
+            'urutan': 'Urutan Shift'
         }

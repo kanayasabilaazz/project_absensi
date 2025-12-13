@@ -1,20 +1,17 @@
 from django import template
 from django.utils.safestring import mark_safe
-from django.utils.html import escape
 
 register = template.Library()
 
 
 # ==============================================================================
 # FILTER - PEGAWAI
-# Filter untuk data pegawai
 # ==============================================================================
 
 @register.filter
 def get_pegawai_name(pegawai):
     """
-    Ambil nama lengkap pegawai
-    Fallback ke first_name + last_name atau username
+    Ambil nama lengkap pegawai dengan fallback
     
     Usage: {{ pegawai|get_pegawai_name }}
     """
@@ -32,33 +29,25 @@ def get_pegawai_name(pegawai):
 
 
 # ==============================================================================
-# FILTER - DICTIONARY
-# Filter untuk operasi dictionary di template
+# FILTER - DICTIONARY OPERATIONS
 # ==============================================================================
 
 @register.filter
 def get_dict_item(dictionary, key):
     """
-    Ambil value dari dictionary berdasarkan key
-    Support integer dan string key
+    Ambil value dari dictionary berdasarkan key (support string & integer key)
     
     Usage: {{ my_dict|get_dict_item:some_key }}
     """
-    if dictionary is None:
-        return None
-    
-    if not isinstance(dictionary, dict):
+    if dictionary is None or not isinstance(dictionary, dict):
         return None
     
     try:
-        # Convert key to string untuk consistency
         key_str = str(key)
         
-        # Try to get with string key first
         if key_str in dictionary:
             return dictionary.get(key_str)
         
-        # Try to get with integer key
         try:
             key_int = int(key)
             if key_int in dictionary:
@@ -66,7 +55,6 @@ def get_dict_item(dictionary, key):
         except (ValueError, TypeError):
             pass
         
-        # Return None if not found
         return None
     except Exception:
         return None
@@ -75,10 +63,7 @@ def get_dict_item(dictionary, key):
 @register.filter
 def get_item(dictionary, key):
     """
-    Alias untuk get_dict_item - untuk backward compatibility
-    
-    ⚠️ DEPRECATED: Tidak digunakan di detail pegawai yang baru
-    Filter ini tetap ada untuk backward compatibility dengan template lain
+    Alias untuk get_dict_item (backward compatibility)
     
     Usage: {{ my_dict|get_item:some_key }}
     """
@@ -86,17 +71,16 @@ def get_item(dictionary, key):
 
 
 # ==============================================================================
-# FILTER - JADWAL (OPTIMIZED)
-# Filter untuk operasi jadwal - HANYA yang masih digunakan
+# FILTER - JADWAL & SCHEDULE
 # ==============================================================================
 
 @register.filter
 def jadwal_display(jadwal_id):
     """
-    Display jadwal dengan format: jam_masuk - jam_keluar
-    Jika jadwal_id kosong, tampilkan "🏠 LIBUR"
+    Display jadwal: jam_masuk - jam_keluar
     
     Usage: {{ jadwal_id|jadwal_display }}
+    Returns: "08:00 - 17:00" atau "🏠 LIBUR"
     """
     if not jadwal_id:
         return "🏠 LIBUR"
@@ -116,10 +100,10 @@ def jadwal_display(jadwal_id):
 @register.filter
 def jadwal_full_display(jadwal_id):
     """
-    Display jadwal dengan format lengkap: group_name (jam_masuk-jam_keluar)
-    Jika jadwal_id kosong, tampilkan "🏠 LIBUR"
+    Display jadwal lengkap: group_name (jam_masuk-jam_keluar)
     
     Usage: {{ jadwal_id|jadwal_full_display }}
+    Returns: "Shift A (08:00-17:00)" atau "🏠 LIBUR"
     """
     if not jadwal_id:
         return "🏠 LIBUR"
@@ -139,14 +123,9 @@ def jadwal_full_display(jadwal_id):
 @register.filter
 def has_schedule(jadwal_obj):
     """
-    ✅ MASIH DIGUNAKAN: Cek apakah jadwal valid
+    Cek apakah jadwal valid (punya jam masuk & keluar)
     
-    Usage dalam template detail pegawai:
-    {% if day_item.jadwal|has_schedule %}
-        <div class="day-time">...</div>
-    {% else %}
-        <div class="day-time">Libur</div>
-    {% endif %}
+    Usage: {% if jadwal|has_schedule %}...{% endif %}
     """
     if not jadwal_obj:
         return False
@@ -160,19 +139,12 @@ def has_schedule(jadwal_obj):
         return False
 
 
-# ==============================================================================
-# FILTER - DAY NAME (DEPRECATED - Tidak digunakan di detail pegawai baru)
-# ==============================================================================
-
 @register.filter
 def get_day_name(hari_index):
     """
-    ⚠️ DEPRECATED: Tidak digunakan di detail pegawai yang baru
+    Convert hari index (0-6) ke nama hari
     
-    Filter ini tetap ada untuk backward compatibility dengan template lain
-    (misalnya: detail mode jam kerja, assign mode, dll.)
-    
-    Usage: {{ 0|get_day_name }}  => Senin
+    Usage: {{ 0|get_day_name }} => "Senin"
     """
     hari_names = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
     try:
@@ -185,8 +157,7 @@ def get_day_name(hari_index):
 
 
 # ==============================================================================
-# FILTER - TIME & DATE
-# Filter untuk operasi waktu dan tanggal
+# FILTER - TIME & DATE FORMATTING
 # ==============================================================================
 
 @register.filter
@@ -195,7 +166,7 @@ def format_time(time_obj, format_string="%H:%M"):
     Format time object ke string
     
     Usage: {{ time_obj|format_time }}
-    atau: {{ time_obj|format_time:"%H:%M:%S" }}
+    Custom: {{ time_obj|format_time:"%H:%M:%S" }}
     """
     if not time_obj:
         return "-"
@@ -212,7 +183,7 @@ def format_date(date_obj, format_string="%d %b %Y"):
     Format date object ke string
     
     Usage: {{ date_obj|format_date }}
-    atau: {{ date_obj|format_date:"%d/%m/%Y" }}
+    Custom: {{ date_obj|format_date:"%d/%m/%Y" }}
     """
     if not date_obj:
         return "-"
@@ -225,7 +196,6 @@ def format_date(date_obj, format_string="%d %b %Y"):
 
 # ==============================================================================
 # FILTER - UTILITY
-# Filter utility umum
 # ==============================================================================
 
 @register.filter
@@ -234,7 +204,7 @@ def default_if_none(value, default_text="-"):
     Tampilkan default text jika value None atau kosong
     
     Usage: {{ value|default_if_none }}
-    atau: {{ value|default_if_none:"N/A" }}
+    Custom: {{ value|default_if_none:"N/A" }}
     """
     if value is None or value == "":
         return default_text
@@ -259,7 +229,7 @@ def yes_no_badge(value, yes_text="Ya"):
     Convert boolean ke badge HTML
     
     Usage: {{ is_active|yes_no_badge }}
-    atau: {{ is_active|yes_no_badge:"Active:Inactive" }}
+    Custom: {{ is_active|yes_no_badge:"Active:Inactive" }}
     """
     try:
         no_text = "Tidak"
@@ -320,8 +290,7 @@ def truncate_chars(value, num_chars=50):
 
 
 # ==============================================================================
-# FILTER - STRING
-# Filter untuk manipulasi string
+# FILTER - STRING MANIPULATION
 # ==============================================================================
 
 @register.filter
@@ -357,7 +326,7 @@ def join_list(value, separator=", "):
     Join list items dengan separator
     
     Usage: {{ list|join_list }}
-    atau: {{ list|join_list:" | " }}
+    Custom: {{ list|join_list:" | " }}
     """
     if not value:
         return ""
@@ -367,3 +336,89 @@ def join_list(value, separator=", "):
     except Exception:
         return str(value)
 
+
+# ==============================================================================
+# FILTER - STATUS & BADGES
+# ==============================================================================
+
+@register.filter
+def status_badge(status):
+    """
+    Convert status string ke badge dengan warna sesuai
+    
+    Usage: {{ status|status_badge }}
+    """
+    status_colors = {
+        'Hadir': 'success',
+        'Sakit': 'warning',
+        'Izin': 'info',
+        'Absen': 'danger',
+        'Incomplete': 'secondary',
+    }
+    
+    color = status_colors.get(status, 'secondary')
+    return mark_safe(f'<span class="badge badge-{color}">{status}</span>')
+
+
+@register.filter
+def active_badge(is_active):
+    """
+    Convert boolean active status ke badge
+    
+    Usage: {{ is_active|active_badge }}
+    """
+    if is_active:
+        return mark_safe('<span class="badge badge-success">Aktif</span>')
+    return mark_safe('<span class="badge badge-secondary">Non-Aktif</span>')
+
+
+# ==============================================================================
+# FILTER - NUMERIC
+# ==============================================================================
+
+@register.filter
+def format_duration(minutes):
+    """
+    Format menit ke format jam dan menit
+    
+    Usage: {{ 135|format_duration }} => "2j 15m"
+    """
+    if not minutes:
+        return "-"
+    
+    try:
+        minutes = int(minutes)
+        hours = minutes // 60
+        mins = minutes % 60
+        
+        if hours > 0:
+            return f"{hours}j {mins}m"
+        return f"{mins}m"
+    except Exception:
+        return str(minutes)
+
+
+@register.filter
+def add_value(value, arg):
+    """
+    Tambah nilai dengan angka
+    
+    Usage: {{ number|add_value:5 }}
+    """
+    try:
+        return int(value) + int(arg)
+    except (ValueError, TypeError):
+        return value
+
+
+@register.filter
+def subtract(value, arg):
+    """
+    Kurangi nilai dengan angka
+    
+    Usage: {{ number|subtract:5 }}
+    """
+    try:
+        return int(value) - int(arg)
+    except (ValueError, TypeError):
+        return value

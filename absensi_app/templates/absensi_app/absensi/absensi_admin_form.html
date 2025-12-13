@@ -1,6 +1,5 @@
 {% extends 'absensi_app/base.html' %}
 {% load widget_tweaks %}
-{% load static %}
 
 {% block title %}Catat Absensi{% endblock %}
 
@@ -9,45 +8,48 @@
     /* ==================== FORM CARD ==================== */
     .form-card {
         background: white;
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-sm);
+        border-radius: var(--radius);
         border: 1px solid var(--gray-200);
+        box-shadow: var(--shadow);
         overflow: hidden;
-        margin-bottom: var(--spacing-xl);
+        margin-bottom: var(--space-6);
     }
 
     .form-card-header {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        background: var(--primary);
         color: white;
-        padding: var(--spacing-lg) var(--spacing-xl);
-        border: none;
+        padding: var(--space-5);
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
     }
 
     .form-card-header h5 {
         margin: 0;
-        font-size: var(--font-lg);
+        font-size: var(--text-lg);
         font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
+    }
+
+    .form-card-header i {
+        font-size: var(--text-xl);
     }
 
     .form-card-body {
-        padding: var(--spacing-xl);
+        padding: var(--space-6);
     }
 
     /* ==================== FORM CONTROLS ==================== */
     .form-label {
         font-weight: 600;
-        font-size: var(--font-sm);
-        margin-bottom: var(--spacing-sm);
+        font-size: var(--text-sm);
+        margin-bottom: var(--space-3);
         color: var(--gray-700);
         display: block;
     }
 
     .form-label .text-danger {
         color: var(--danger);
-        margin-left: var(--spacing-xs);
+        margin-left: var(--space-1);
     }
 
     .form-label .text-muted {
@@ -59,10 +61,9 @@
     .form-select {
         border: 1px solid var(--gray-300);
         border-radius: var(--radius-sm);
-        padding: 0.5rem var(--spacing-lg);
-        font-size: var(--font-sm);
-        transition: all var(--transition-base);
-        font-family: 'Inter', system-ui, sans-serif;
+        padding: 0.5rem var(--space-3);
+        font-size: var(--text-sm);
+        transition: all 0.2s;
         width: 100%;
         background: white;
     }
@@ -70,7 +71,7 @@
     .form-control:focus,
     .form-select:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 2px var(--primary-light);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
         outline: none;
     }
 
@@ -81,46 +82,40 @@
 
     /* ==================== FORM SECTIONS ==================== */
     .form-section {
-        margin-bottom: var(--spacing-xl);
+        margin-bottom: var(--space-6);
     }
 
-    .section-divider {
-        border-top: 2px solid var(--gray-100);
-        margin: var(--spacing-xl) 0;
-        position: relative;
-    }
-
-    .section-divider::after {
-        content: attr(data-label);
-        position: absolute;
-        top: -0.5rem;
-        left: 50%;
-        transform: translateX(-50%);
-        background: white;
-        padding: 0 var(--spacing-md);
-        font-size: var(--font-xs);
-        color: var(--gray-500);
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+    .form-section:last-child {
+        margin-bottom: 0;
     }
 
     .hidden {
         display: none !important;
     }
 
+    /* ==================== DIVIDER ==================== */
+    .section-divider {
+        border-top: 1px solid var(--gray-200);
+        margin: var(--space-6) 0;
+    }
+
     /* ==================== RADIO BUTTONS ==================== */
     .form-check {
         padding-left: 0;
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--space-3);
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
     }
 
     .form-check-input {
         width: 1rem;
         height: 1rem;
-        margin-right: var(--spacing-sm);
         border: 2px solid var(--gray-300);
+        border-radius: 50%;
         cursor: pointer;
+        margin: 0;
+        transition: all 0.2s;
     }
 
     .form-check-input:checked {
@@ -128,33 +123,49 @@
         border-color: var(--primary);
     }
 
-    .form-check-input:focus {
-        box-shadow: 0 0 0 2px var(--primary-light);
-    }
-
     .form-check-label {
         cursor: pointer;
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         font-weight: 500;
         color: var(--gray-700);
+        margin: 0;
     }
 
     .radio-group {
         display: flex;
-        gap: var(--spacing-xl);
+        gap: var(--space-4);
+    }
+
+    .badge {
+        display: inline-block;
+        padding: var(--space-1) var(--space-3);
+        border-radius: 12px;
+        font-size: var(--text-xs);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .badge-info {
+        background: var(--primary-light);
+        color: #1e40af;
     }
 
     /* ==================== ALERTS ==================== */
     .alert {
         border-radius: var(--radius-sm);
-        padding: var(--spacing-lg) var(--spacing-xl);
-        margin-bottom: var(--spacing-lg);
+        padding: var(--space-4);
+        margin-bottom: var(--space-5);
         display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        font-size: var(--font-sm);
+        align-items: flex-start;
+        gap: var(--space-3);
+        font-size: var(--text-sm);
         border: 1px solid transparent;
-        font-weight: 500;
+    }
+
+    .alert i {
+        font-size: var(--text-base);
+        margin-top: 2px;
+        flex-shrink: 0;
     }
 
     .alert-danger {
@@ -170,19 +181,15 @@
     }
 
     .alert-info {
-        background: var(--info-light);
+        background: var(--primary-light);
         color: #1e40af;
-        border-color: var(--info);
-    }
-
-    .alert i {
-        font-size: var(--font-base);
+        border-color: var(--primary);
     }
 
     /* ==================== ERROR MESSAGES ==================== */
     .text-danger.small {
-        font-size: var(--font-xs);
-        margin-top: var(--spacing-xs);
+        font-size: var(--text-xs);
+        margin-top: var(--space-1);
         display: block;
         color: var(--danger);
     }
@@ -190,32 +197,65 @@
     /* ==================== BUTTONS ==================== */
     .btn-group-actions {
         display: flex;
-        gap: var(--spacing-md);
-        padding-top: var(--spacing-lg);
-        border-top: 2px solid var(--gray-100);
-        margin-top: var(--spacing-xl);
+        gap: var(--space-3);
+        padding-top: var(--space-5);
+        border-top: 1px solid var(--gray-200);
+        margin-top: var(--space-6);
     }
 
-    .btn-secondary {
-        background: var(--gray-500);
+    .btn {
+        height: 40px;
+        padding: 0 var(--space-4);
+        font-size: var(--text-sm);
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        transition: all 0.2s;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-primary {
+        background: var(--primary);
         color: white;
     }
 
+    .btn-primary:hover:not(:disabled) {
+        background: #2563eb;
+    }
+
+    .btn-secondary {
+        background: var(--gray-300);
+        color: var(--gray-900);
+    }
+
     .btn-secondary:hover:not(:disabled) {
-        background: var(--gray-600);
-        transform: translateY(-1px);
-        box-shadow: 0 3px 10px rgba(107, 114, 128, 0.25);
+        background: var(--gray-400);
     }
 
     /* ==================== RESPONSIVE ==================== */
     @media (max-width: 768px) {
         .form-card-body {
-            padding: var(--spacing-lg);
+            padding: var(--space-4);
+        }
+
+        .form-card-header {
+            padding: var(--space-4);
         }
 
         .radio-group {
             flex-direction: column;
-            gap: var(--spacing-md);
+            gap: var(--space-3);
         }
 
         .btn-group-actions {
@@ -228,16 +268,8 @@
     }
 
     @media (max-width: 576px) {
-        .form-card-header {
-            padding: var(--spacing-md) var(--spacing-lg);
-        }
-
-        .form-card-body {
-            padding: var(--spacing-md);
-        }
-
         .form-card-header h5 {
-            font-size: var(--font-base);
+            font-size: var(--text-base);
         }
     }
 </style>
@@ -249,10 +281,8 @@
         <div class="col-12">
             <div class="form-card">
                 <div class="form-card-header">
-                    <h5>
-                        <i class="fas fa-clipboard-check"></i>
-                        Catat Absensi Pegawai
-                    </h5>
+                    <i class="fas fa-clipboard-check"></i>
+                    <h5>Catat Absensi Pegawai</h5>
                 </div>
 
                 <div class="form-card-body">
@@ -261,55 +291,46 @@
 
                         <!-- ERROR MESSAGES -->
                         {% if form.non_field_errors %}
-                            <div class="alert alert-danger" role="alert">
+                            <div class="alert alert-danger">
                                 <i class="fas fa-exclamation-circle"></i>
-                                <span>{{ form.non_field_errors }}</span>
+                                <div>{{ form.non_field_errors }}</div>
                             </div>
                         {% endif %}
 
                         <!-- PEGAWAI -->
                         <div class="form-section">
-                            <div class="row">
-                                <div class="col-12">
-                                    <label for="{{ form.pegawai.id_for_label }}" class="form-label">
-                                        Pilih Pegawai <span class="text-danger">*</span>
-                                    </label>
-                                    {% render_field form.pegawai class="form-select" %}
-                                    {% if form.pegawai.errors %}
-                                        <span class="text-danger small">{{ form.pegawai.errors }}</span>
-                                    {% endif %}
-                                </div>
-                            </div>
+                            <label for="{{ form.pegawai.id_for_label }}" class="form-label">
+                                Pilih Pegawai <span class="text-danger">*</span>
+                            </label>
+                            {% render_field form.pegawai class="form-select" %}
+                            {% if form.pegawai.errors %}
+                                <span class="text-danger small">{{ form.pegawai.errors }}</span>
+                            {% endif %}
                         </div>
 
                         <!-- STATUS ABSENSI -->
                         <div class="form-section">
-                            <div class="row">
-                                <div class="col-12">
-                                    <label for="id_status" class="form-label">
-                                        Status Absensi <span class="text-danger">*</span>
-                                    </label>
-                                    <select name="status" id="id_status" class="form-select" required>
-                                        <option value="Hadir">Hadir</option>
-                                        <option value="Izin">Izin</option>
-                                        <option value="Sakit">Sakit</option>
-                                        <option value="Absen">Absen</option>
-                                    </select>
-                                </div>
-                            </div>
+                            <label for="id_status" class="form-label">
+                                Status Absensi <span class="text-danger">*</span>
+                            </label>
+                            <select name="status" id="id_status" class="form-select" required>
+                                <option value="">-- Pilih Status --</option>
+                                <option value="Hadir">Hadir</option>
+                                <option value="Izin">Izin</option>
+                                <option value="Sakit">Sakit</option>
+                                <option value="Absen">Absen</option>
+                            </select>
                         </div>
 
                         <!-- SECTION HADIR -->
-                        <div id="hadirSection">
+                        <div id="hadirSection" class="hidden">
+                            <div class="section-divider"></div>
+
                             <div class="form-section">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <label for="id_tanggal_single" class="form-label">
-                                            Tanggal Absen <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="date" name="tanggal" id="id_tanggal_single" class="form-control">
-                                    </div>
-                                </div>
+                                <label for="id_tanggal_single" class="form-label">
+                                    Tanggal Absensi <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" name="tanggal" id="id_tanggal_single" class="form-control">
                             </div>
 
                             <div class="form-section">
@@ -330,19 +351,18 @@
                             </div>
 
                             <!-- WAKTU ISTIRAHAT -->
-                            <div class="section-divider" data-label="Waktu Istirahat"></div>
-
                             <div class="form-section">
+                                <label class="form-label">Waktu Istirahat <span class="text-muted">(Opsional)</span></label>
                                 <div class="row">
                                     <div class="col-md-6 mb-3 mb-md-0">
-                                        <label for="id_tap_istirahat_keluar" class="form-label">
-                                            Istirahat Keluar <span class="text-muted">(Opsional)</span>
+                                        <label for="id_tap_istirahat_keluar" class="form-label" style="margin-bottom: var(--space-2); font-weight: 500;">
+                                            Keluar Istirahat
                                         </label>
                                         <input type="time" name="tap_istirahat_keluar" id="id_tap_istirahat_keluar" class="form-control">
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="id_tap_istirahat_masuk" class="form-label">
-                                            Istirahat Masuk <span class="text-muted">(Opsional)</span>
+                                        <label for="id_tap_istirahat_masuk" class="form-label" style="margin-bottom: var(--space-2); font-weight: 500;">
+                                            Masuk Istirahat
                                         </label>
                                         <input type="time" name="tap_istirahat_masuk" id="id_tap_istirahat_masuk" class="form-control">
                                     </div>
@@ -352,25 +372,25 @@
 
                         <!-- SECTION ABSEN -->
                         <div id="absenSection" class="hidden">
+                            <div class="section-divider"></div>
+
                             <div class="form-section">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <label for="id_tanggal_absen" class="form-label">
-                                            Tanggal Absen <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="date" name="tanggal" id="id_tanggal_absen" class="form-control">
-                                    </div>
-                                </div>
+                                <label for="id_tanggal_absen" class="form-label">
+                                    Tanggal Absensi <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" name="tanggal" id="id_tanggal_absen" class="form-control">
                             </div>
 
-                            <div class="alert alert-warning" role="alert">
+                            <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                <span><strong>Status Absen:</strong> Tidak perlu mengisi waktu masuk dan keluar.</span>
+                                <div><strong>Status Absen:</strong> Tidak perlu mengisi waktu masuk dan keluar.</div>
                             </div>
                         </div>
 
                         <!-- SECTION IZIN/SAKIT -->
                         <div id="rangeDateSection" class="hidden">
+                            <div class="section-divider"></div>
+
                             <div class="form-section">
                                 <div class="row">
                                     <div class="col-md-6 mb-3 mb-md-0">
@@ -389,34 +409,30 @@
                             </div>
 
                             <div class="form-section">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <label class="form-label">
-                                            Tipe <span class="text-danger">*</span>
+                                <label class="form-label">
+                                    Tipe <span class="text-danger">*</span>
+                                </label>
+                                <div class="radio-group">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="tipe_izin" id="fullDay" value="full" checked>
+                                        <label class="form-check-label" for="fullDay">
+                                            <span class="badge badge-info">Full Day</span>
                                         </label>
-                                        <div class="radio-group">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="tipe_izin" id="fullDay" value="full" checked>
-                                                <label class="form-check-label" for="fullDay">
-                                                    <span class="badge badge-info">Full Day</span>
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="tipe_izin" id="halfDay" value="half">
-                                                <label class="form-check-label" for="halfDay">
-                                                    <span class="badge badge-info">Half Day</span>
-                                                </label>
-                                            </div>
-                                        </div>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="tipe_izin" id="halfDay" value="half">
+                                        <label class="form-check-label" for="halfDay">
+                                            <span class="badge badge-info">Half Day</span>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Half day time fields -->
                             <div id="halfDayTimeSection" class="hidden">
-                                <div class="alert alert-info" role="alert">
+                                <div class="alert alert-info">
                                     <i class="fas fa-info-circle"></i>
-                                    <span><strong>Half Day:</strong> Masukkan waktu izin/sakit.</span>
+                                    <div><strong>Half Day:</strong> Masukkan waktu izin/sakit.</div>
                                 </div>
 
                                 <div class="form-section">
@@ -441,14 +457,10 @@
                         <!-- KETERANGAN -->
                         <div id="keteranganSection">
                             <div class="form-section">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <label for="id_keterangan" class="form-label">
-                                            Keterangan <span class="text-muted">(Opsional)</span>
-                                        </label>
-                                        <textarea name="keterangan" id="id_keterangan" class="form-control" placeholder="Catatan tambahan..."></textarea>
-                                    </div>
-                                </div>
+                                <label for="id_keterangan" class="form-label">
+                                    Keterangan <span class="text-muted">(Opsional)</span>
+                                </label>
+                                <textarea name="keterangan" id="id_keterangan" class="form-control" placeholder="Catatan tambahan..."></textarea>
                             </div>
                         </div>
 

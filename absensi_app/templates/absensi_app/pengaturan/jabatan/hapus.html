@@ -4,61 +4,65 @@
 
 {% block extra_css %}
 <style>
-    .delete-container { 
-        max-width: 600px; 
-        margin: 0 auto; 
-    }
-    
-    .delete-card { 
-        background: white; 
-        border-radius: var(--radius-lg); 
-        box-shadow: var(--shadow-sm); 
-        border: 1px solid var(--gray-200);
-        overflow: hidden;
-    }
-    
-    .delete-header { 
-        background: linear-gradient(135deg, var(--danger-dark) 0%, var(--danger) 100%); 
-        color: white; 
-        padding: var(--spacing-xl); 
-    }
-    
-    .delete-header h4 { 
-        font-size: var(--font-lg); 
-        font-weight: 600; 
-        margin: 0; 
-        display: flex; 
-        align-items: center; 
-        gap: var(--spacing-sm); 
-    }
-    
-    .delete-body { 
-        padding: var(--spacing-2xl); 
-    }
-    
-    .alert-danger {
-        background: var(--danger-light);
-        border: 1px solid var(--danger);
-        color: #991b1b;
-        padding: var(--spacing-lg);
-        border-radius: var(--radius-sm);
-        margin-bottom: var(--spacing-xl);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-        font-size: var(--font-sm);
+    .delete-container {
+        max-width: 500px;
+        margin: 0 auto;
     }
 
-    .alert-danger i {
-        font-size: var(--font-lg);
-    }
-    
-    .info-table { 
-        width: 100%;
-        margin: var(--spacing-xl) 0;
+    .delete-card {
+        background: white;
+        border-radius: var(--radius);
         border: 1px solid var(--gray-200);
-        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow);
         overflow: hidden;
+    }
+
+    .delete-header {
+        background: var(--danger);
+        color: white;
+        padding: var(--space-5);
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+    }
+
+    .delete-header h4 {
+        margin: 0;
+        font-size: var(--text-lg);
+        font-weight: 600;
+    }
+
+    .delete-header i {
+        font-size: var(--text-xl);
+    }
+
+    .delete-body {
+        padding: var(--space-6);
+    }
+
+    .alert-warning {
+        background: var(--warning-light);
+        border: 1px solid var(--warning);
+        color: #92400e;
+        padding: var(--space-4);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--space-5);
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-3);
+        font-size: var(--text-sm);
+    }
+
+    .alert-warning i {
+        font-size: var(--text-base);
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .info-table {
+        width: 100%;
+        margin: var(--space-6) 0;
+        border-collapse: collapse;
     }
 
     .info-table tr {
@@ -68,108 +72,111 @@
     .info-table tr:last-child {
         border-bottom: none;
     }
-    
-    .info-table th { 
+
+    .info-table th {
         background: var(--gray-50);
-        font-weight: 600; 
-        font-size: var(--font-sm); 
-        color: var(--gray-700); 
-        padding: var(--spacing-md) var(--spacing-lg);
-        width: 150px;
+        font-weight: 600;
+        font-size: var(--text-sm);
+        color: var(--gray-700);
+        padding: var(--space-3) var(--space-4);
         text-align: left;
+        width: 120px;
     }
-    
-    .info-table td { 
-        padding: var(--spacing-md) var(--spacing-lg);
-        font-size: var(--font-sm);
+
+    .info-table td {
+        padding: var(--space-3) var(--space-4);
+        font-size: var(--text-sm);
         color: var(--gray-900);
     }
 
     .badge {
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: var(--font-xs);
         display: inline-block;
+        padding: var(--space-1) var(--space-3);
+        border-radius: 12px;
+        font-size: var(--text-xs);
+        font-weight: 600;
+        white-space: nowrap;
     }
 
-    .badge.bg-success {
+    .badge-aktif {
         background: var(--success-light);
         color: #065f46;
     }
 
-    .badge.bg-secondary {
+    .badge-nonaktif {
         background: var(--gray-200);
         color: var(--gray-700);
     }
-    
-    .btn-group { 
-        display: flex; 
-        gap: var(--spacing-md); 
+
+    .delete-text {
+        font-size: var(--text-sm);
+        color: var(--gray-700);
+        margin-bottom: var(--space-4);
+        line-height: 1.5;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: var(--space-3);
         justify-content: flex-end;
-        margin-top: var(--spacing-xl);
+        margin-top: var(--space-6);
     }
-    
-    .btn { 
-        padding: var(--spacing-sm) var(--spacing-xl); 
-        font-size: var(--font-sm); 
-        font-weight: 600; 
-        border-radius: var(--radius-sm); 
-        border: none; 
-        cursor: pointer; 
-        display: inline-flex; 
-        align-items: center; 
-        gap: var(--spacing-sm); 
-        transition: all var(--transition-base); 
-        text-decoration: none; 
+
+    .btn {
+        height: 40px;
+        padding: 0 var(--space-4);
+        font-size: var(--text-sm);
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        transition: all 0.2s;
+        text-decoration: none;
+        white-space: nowrap;
     }
-    
-    .btn:hover { 
-        transform: translateY(-1px); 
-        box-shadow: var(--shadow-md); 
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
-    
-    .btn-danger { 
-        background: var(--danger-dark); 
-        color: white; 
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
     }
-    
-    .btn-danger:hover { 
-        background: #b91c1c; 
-        color: white; 
+
+    .btn-danger:hover:not(:disabled) {
+        background: #dc2626;
     }
-    
-    .btn-secondary { 
-        background: var(--gray-600); 
-        color: white; 
+
+    .btn-secondary {
+        background: var(--gray-300);
+        color: var(--gray-900);
     }
-    
-    .btn-secondary:hover { 
-        background: var(--gray-700); 
-        color: white; 
+
+    .btn-secondary:hover:not(:disabled) {
+        background: var(--gray-400);
     }
-    
+
     @media (max-width: 768px) {
-        .delete-body { 
-            padding: var(--spacing-xl); 
+        .delete-container {
+            padding: var(--space-4);
         }
 
-        .info-table th {
-            width: 120px;
-            padding: var(--spacing-sm) var(--spacing-md);
+        .delete-body {
+            padding: var(--space-4);
         }
 
-        .info-table td {
-            padding: var(--spacing-sm) var(--spacing-md);
+        .btn-group {
+            flex-direction: column;
         }
-        
-        .btn-group { 
-            flex-direction: column; 
-        }
-        
-        .btn { 
-            width: 100%; 
-            justify-content: center; 
+
+        .btn {
+            width: 100%;
         }
     }
 </style>
@@ -179,20 +186,17 @@
 <div class="delete-container">
     <div class="delete-card">
         <div class="delete-header">
-            <h4><i class="fas fa-trash-alt"></i> Hapus Jabatan</h4>
+            <i class="fas fa-exclamation-circle"></i>
+            <h4>Hapus Jabatan</h4>
         </div>
 
         <div class="delete-body">
-            <div class="alert-danger">
+            <div class="alert-warning">
                 <i class="fas fa-exclamation-triangle"></i>
-                <div>
-                    <strong>PERINGATAN!</strong> Jabatan akan dihapus permanen dan tidak dapat dikembalikan.
-                </div>
+                <div>Data jabatan akan dihapus permanen dan tidak dapat dikembalikan.</div>
             </div>
 
-            <p style="font-size: var(--font-sm); color: var(--gray-700); margin-bottom: var(--spacing-lg);">
-                Anda yakin ingin menghapus jabatan berikut?
-            </p>
+            <p class="delete-text">Anda yakin ingin menghapus data jabatan berikut?</p>
 
             <table class="info-table">
                 <tr>
@@ -213,9 +217,9 @@
                     <th>Status</th>
                     <td>
                         {% if jabatan.is_active %}
-                            <span class="badge bg-success">Aktif</span>
+                            <span class="badge badge-aktif">Aktif</span>
                         {% else %}
-                            <span class="badge bg-secondary">Nonaktif</span>
+                            <span class="badge badge-nonaktif">Nonaktif</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -239,10 +243,13 @@
 
 {% block extra_js %}
 <script>
-$('#deleteForm').submit(function(e) {
+document.getElementById('deleteForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    if (confirm('Yakin hapus jabatan "{{ jabatan.nama }}"?\n\nData tidak dapat dikembalikan!')) {
-        $('#deleteBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Menghapus...');
+    const btn = document.getElementById('deleteBtn');
+    
+    if (confirm('Yakin hapus jabatan {{ jabatan.nama }}?\n\nData tidak dapat dikembalikan!')) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
         this.submit();
     }
 });

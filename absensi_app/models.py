@@ -8,11 +8,11 @@ from datetime import date, datetime, timedelta
 # ==============================================================================
 
 class MasterDepartemen(models.Model):
-    """Departemen/Divisi perusahaan"""
+    """Master data departemen/divisi perusahaan"""
     
     nama = models.CharField(max_length=100, unique=True)
     id_departemen = models.CharField(max_length=5, unique=True, null=True, blank=True)
-    keterangan = models.TextField(blank=True, default='')  # ✅ TAMBAH default=''
+    keterangan = models.TextField(blank=True, default='')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -50,11 +50,11 @@ class MasterDepartemen(models.Model):
 
 
 class MasterJabatan(models.Model):
-    """Jabatan pegawai"""
+    """Master data jabatan pegawai"""
     
     nama = models.CharField(max_length=100, unique=True)
     kode = models.CharField(max_length=20, unique=True)
-    keterangan = models.TextField(blank=True, default='')  # ✅ TAMBAH default=''
+    keterangan = models.TextField(blank=True, default='')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -70,12 +70,16 @@ class MasterJabatan(models.Model):
 
 
 class MasterCabang(models.Model):
-    """Cabang/Lokasi kerja"""
+    """Master data cabang/lokasi kerja"""
     
     nama = models.CharField(max_length=100, unique=True)
     kode = models.CharField(max_length=20, unique=True)
     alamat = models.TextField()
-    ip_mesin_fingerprint = models.TextField(blank=True, default='', help_text="...")  # ✅
+    ip_mesin_fingerprint = models.TextField(
+        blank=True, 
+        default='', 
+        help_text="Daftar IP mesin fingerprint (pisahkan dengan koma)"
+    )
     port_mesin = models.IntegerField(default=4370)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -96,20 +100,25 @@ class MasterCabang(models.Model):
             return []
         return [ip.strip() for ip in self.ip_mesin_fingerprint.split(',') if ip.strip()]
 
+
 # ==============================================================================
 # MASTER DATA MESIN ABSENSI
 # ==============================================================================
 
 class MasterMesin(models.Model):
-    """Mesin absensi fingerprint/face recognition"""
+    """Master data mesin absensi fingerprint/face recognition"""
     
     nama = models.CharField(max_length=100)
     kode = models.CharField(max_length=20, unique=True)
     ip_address = models.GenericIPAddressField()
     port = models.IntegerField(default=4370)
-    lokasi = models.CharField(max_length=200, blank=True, default='')  # ✅
-    keterangan = models.TextField(blank=True, default='')  # ✅
-    cabang = models.ForeignKey(MasterCabang, on_delete=models.CASCADE, related_name='mesin')
+    lokasi = models.CharField(max_length=200, blank=True, default='')
+    keterangan = models.TextField(blank=True, default='')
+    cabang = models.ForeignKey(
+        MasterCabang, 
+        on_delete=models.CASCADE, 
+        related_name='mesin'
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -130,7 +139,7 @@ class MasterMesin(models.Model):
 # ==============================================================================
 
 class MasterModeJamKerja(models.Model):
-    """Mode jam kerja dengan prioritas, periode, dan support per-cabang"""
+    """Master mode jam kerja dengan prioritas dan support per-cabang"""
     
     PRIORITY_CHOICES = [(1, 'Low'), (2, 'Medium'), (3, 'High')]
     
@@ -140,8 +149,6 @@ class MasterModeJamKerja(models.Model):
     icon = models.CharField(max_length=50, default='fas fa-clock')
     priority = models.IntegerField(choices=PRIORITY_CHOICES, default=1)
     is_default = models.BooleanField(default=False)
-    
-    # ✅ NEW: Support per-cabang
     cabang = models.ForeignKey(
         'MasterCabang',
         on_delete=models.CASCADE,
@@ -150,7 +157,6 @@ class MasterModeJamKerja(models.Model):
         related_name='mode_jam_kerja_list',
         help_text='Cabang yang menggunakan mode ini. Kosongkan untuk GLOBAL.'
     )
-    
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -216,7 +222,8 @@ class MasterModeJamKerja(models.Model):
     def is_applicable_today(self):
         periode_aktif = self.get_active_periode()
         return periode_aktif is not None or self.is_default
-    
+
+
 class ModeJamKerjaJadwal(models.Model):
     """Jadwal jam kerja per grup shift"""
     
@@ -227,7 +234,7 @@ class ModeJamKerjaJadwal(models.Model):
     
     mode = models.ForeignKey(
         MasterModeJamKerja, 
-        on_delete=models.CASCADE,  # ✅ CASCADE: Hapus jadwal jika mode dihapus
+        on_delete=models.CASCADE,
         related_name='jadwal_list'
     )
     group_name = models.CharField(max_length=100, verbose_name="Nama Grup")
@@ -236,15 +243,21 @@ class ModeJamKerjaJadwal(models.Model):
     jam_keluar = models.TimeField(null=True, blank=True)
     jam_istirahat_keluar = models.TimeField(null=True, blank=True)
     jam_istirahat_masuk = models.TimeField(null=True, blank=True)
-    toleransi_terlambat = models.IntegerField(default=15, verbose_name="Toleransi Terlambat (menit)")
-    toleransi_pulang_cepat = models.IntegerField(default=15, verbose_name="Toleransi Pulang Cepat (menit)")
+    toleransi_terlambat = models.IntegerField(
+        default=15, 
+        verbose_name="Toleransi Terlambat (menit)"
+    )
+    toleransi_pulang_cepat = models.IntegerField(
+        default=15, 
+        verbose_name="Toleransi Pulang Cepat (menit)"
+    )
     urutan = models.IntegerField(default=1, verbose_name="Urutan Shift")
     
     class Meta:
         db_table = 'mode_jam_kerja_jadwal'
         verbose_name = 'Jadwal Mode'
         verbose_name_plural = 'Jadwal Mode'
-        unique_together = ['mode', 'group_name', 'hari', 'urutan']  # ✅ Tambah urutan
+        unique_together = ['mode', 'group_name', 'hari', 'urutan']
         ordering = ['mode', 'group_name', 'hari', 'urutan']
         indexes = [
             models.Index(fields=['mode', 'hari']),
@@ -255,17 +268,29 @@ class ModeJamKerjaJadwal(models.Model):
         hari_nama = dict(self.HARI_CHOICES)[self.hari]
         return f"{self.mode.nama} - {self.group_name} ({hari_nama})"
 
+
 class ModeJamKerjaPeriode(models.Model):
     """Periode aktif untuk mode tertentu"""
     
-    mode = models.ForeignKey(MasterModeJamKerja, on_delete=models.CASCADE, related_name='periode_list')
+    mode = models.ForeignKey(
+        MasterModeJamKerja, 
+        on_delete=models.CASCADE, 
+        related_name='periode_list'
+    )
     nama = models.CharField(max_length=100, verbose_name="Nama Periode")
     tanggal_mulai = models.DateField()
     tanggal_selesai = models.DateField()
     tahun = models.IntegerField()
     catatan = models.TextField(blank=True)
-    warna_periode = models.CharField(max_length=7, blank=True, help_text='Warna untuk laporan (opsional)')
-    is_periode_khusus = models.BooleanField(default=False, help_text='Periode khusus')
+    warna_periode = models.CharField(
+        max_length=7, 
+        blank=True, 
+        help_text='Warna untuk laporan (opsional)'
+    )
+    is_periode_khusus = models.BooleanField(
+        default=False, 
+        help_text='Periode khusus'
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -298,35 +323,67 @@ class ModeJamKerjaPeriode(models.Model):
 # ==============================================================================
 
 class Pegawai(models.Model):
-    """Data karyawan dalam sistem absensi"""
+    """Master data pegawai/karyawan dalam sistem absensi"""
     
-    userid = models.CharField(max_length=20, unique=True, db_index=True, verbose_name="User ID")
+    userid = models.CharField(
+        max_length=20, 
+        unique=True, 
+        db_index=True, 
+        verbose_name="User ID"
+    )
     nama_lengkap = models.CharField(max_length=100, db_index=True)
     email = models.EmailField(blank=True, null=True)
     nomor_hp = models.CharField(max_length=15, blank=True, null=True)
     alamat = models.TextField(blank=True, null=True)
     tanggal_lahir = models.DateField(null=True, blank=True)
     
-    # Relasi Organisasi
-    departemen = models.ForeignKey(MasterDepartemen, on_delete=models.SET_NULL, null=True, blank=True, related_name='pegawai_list')
-    jabatan = models.ForeignKey(MasterJabatan, on_delete=models.SET_NULL, null=True, blank=True, related_name='pegawai_list')
-    cabang = models.ForeignKey(MasterCabang, on_delete=models.SET_NULL, null=True, blank=True, related_name='pegawai_list')
-    
-    # Jam Kerja
-    mode_jam_kerja = models.ForeignKey(MasterModeJamKerja, on_delete=models.SET_NULL, null=True, blank=True, related_name='pegawai_list')
+    departemen = models.ForeignKey(
+        MasterDepartemen, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='pegawai_list'
+    )
+    jabatan = models.ForeignKey(
+        MasterJabatan, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='pegawai_list'
+    )
+    cabang = models.ForeignKey(
+        MasterCabang, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='pegawai_list'
+    )
+    mode_jam_kerja = models.ForeignKey(
+        MasterModeJamKerja, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='pegawai_list'
+    )
     jam_kerja_assignment = models.JSONField(default=dict, blank=True)
-    
-    # Mesin & UID
-    mesin = models.ForeignKey(MasterMesin, on_delete=models.SET_NULL, null=True, blank=True, related_name='pegawai_list')
-    uid_mesin = models.IntegerField(null=True, blank=True, db_index=True, verbose_name="UID di Mesin")
-    
-    # Status & Tanggal
+    mesin = models.ForeignKey(
+        MasterMesin, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='pegawai_list'
+    )
+    uid_mesin = models.IntegerField(
+        null=True, 
+        blank=True, 
+        db_index=True, 
+        verbose_name="UID di Mesin"
+    )
     shift_per_hari = models.JSONField(default=dict, blank=True)
     tanggal_bergabung = models.DateField(null=True, blank=True)
     tanggal_nonaktif = models.DateField(null=True, blank=True)
     is_shift_worker = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -357,7 +414,11 @@ class Pegawai(models.Model):
 class FingerprintTemplate(models.Model):
     """Template sidik jari dari mesin absensi"""
     
-    pegawai = models.ForeignKey(Pegawai, on_delete=models.CASCADE, related_name='fingerprint_templates')
+    pegawai = models.ForeignKey(
+        Pegawai, 
+        on_delete=models.CASCADE, 
+        related_name='fingerprint_templates'
+    )
     uid = models.IntegerField()
     fid = models.IntegerField()
     size = models.IntegerField()
@@ -379,12 +440,12 @@ class PegawaiModeAssignment(models.Model):
     
     pegawai = models.ForeignKey(
         Pegawai, 
-        on_delete=models.CASCADE,  # ✅ Sudah benar
+        on_delete=models.CASCADE,
         related_name='mode_assignments'
     )
     mode = models.ForeignKey(
         MasterModeJamKerja, 
-        on_delete=models.CASCADE,  # ✅ CASCADE: Hapus assignment jika mode dihapus
+        on_delete=models.CASCADE,
         related_name='pegawai_assignments'
     )
     jadwal_per_hari = models.JSONField(
@@ -417,21 +478,14 @@ class PegawaiModeAssignment(models.Model):
         return None
     
     def save(self, *args, **kwargs):
-        """
-        ✅ VALIDASI OTOMATIS: Pastikan jadwal_per_hari selalu valid
-        
-        Jika ada jadwal_id yang tidak valid (jadwal sudah dihapus),
-        assignment akan menggunakan jadwal pertama yang tersedia.
-        """
+        """Validasi dan auto-fix jadwal yang tidak valid"""
         if self.jadwal_per_hari and self.mode_id:
-            # Ambil semua jadwal yang valid untuk mode ini
             valid_jadwal_ids = set(
                 ModeJamKerjaJadwal.objects.filter(mode=self.mode)
                 .values_list('id', flat=True)
             )
             
             if valid_jadwal_ids:
-                # Cek apakah ada jadwal_id yang tidak valid
                 cleaned_jadwal = {}
                 needs_fix = False
                 
@@ -441,33 +495,37 @@ class PegawaiModeAssignment(models.Model):
                     else:
                         needs_fix = True
                 
-                # Jika ada yang invalid dan tidak ada valid jadwal sama sekali
                 if needs_fix and not cleaned_jadwal:
-                    # Pakai jadwal pertama sebagai default untuk semua hari kerja
                     default_id = list(valid_jadwal_ids)[0]
                     self.jadwal_per_hari = {
-                        '0': default_id,  # Senin
-                        '1': default_id,  # Selasa
-                        '2': default_id,  # Rabu
-                        '3': default_id,  # Kamis
-                        '4': default_id,  # Jumat
+                        '0': default_id, '1': default_id, '2': default_id,
+                        '3': default_id, '4': default_id
                     }
                 elif needs_fix:
-                    # Hanya update yang invalid
                     self.jadwal_per_hari = cleaned_jadwal
         
         super().save(*args, **kwargs)
 
+
 # ==============================================================================
-# DATA ABSENSI (LEGACY)
+# DATA ABSENSI (LEGACY SYSTEM)
 # ==============================================================================
 
 class Absensi(models.Model):
-    """Model catatan absensi harian pegawai (LEGACY)"""
+    """Model catatan absensi harian pegawai (Legacy System)"""
     
-    STATUS_CHOICES = [('Hadir', 'Hadir'), ('Sakit', 'Sakit'), ('Izin', 'Izin'), ('Absen', 'Absen')]
+    STATUS_CHOICES = [
+        ('Hadir', 'Hadir'), 
+        ('Sakit', 'Sakit'), 
+        ('Izin', 'Izin'), 
+        ('Absen', 'Absen')
+    ]
 
-    pegawai = models.ForeignKey(Pegawai, on_delete=models.CASCADE, related_name='absensi')
+    pegawai = models.ForeignKey(
+        Pegawai, 
+        on_delete=models.CASCADE, 
+        related_name='absensi'
+    )
     tanggal = models.DateField()
     tap_masuk = models.TimeField(null=True, blank=True)
     tap_pulang = models.TimeField(null=True, blank=True)
@@ -504,25 +562,26 @@ class Absensi(models.Model):
             return
         
         from .services import WorkModeService
-        jam_kerja_info = WorkModeService.get_jam_kerja_for_pegawai(self.pegawai, self.tanggal)
+        jam_kerja_info = WorkModeService.get_jam_kerja_for_pegawai(
+            self.pegawai, 
+            self.tanggal
+        )
         
         if not jam_kerja_info or not jam_kerja_info.get('jadwal'):
             return
         
         jadwal = jam_kerja_info['jadwal']
-        is_hari_kerja = jadwal.jam_masuk is not None and jadwal.jam_keluar is not None
+        is_hari_kerja = jadwal.jam_masuk and jadwal.jam_keluar
         
         if not is_hari_kerja:
             return
         
-        # Cek keterlambatan
         if jadwal.jam_masuk:
             tap_masuk_standar = datetime.combine(self.tanggal, jadwal.jam_masuk)
             tap_masuk_actual = datetime.combine(self.tanggal, self.tap_masuk)
             toleransi = timedelta(minutes=jadwal.toleransi_terlambat)
             self.is_late = tap_masuk_actual > tap_masuk_standar + toleransi
         
-        # Cek pulang cepat
         if self.tap_pulang and jadwal.jam_keluar:
             tap_pulang_standar = datetime.combine(self.tanggal, jadwal.jam_keluar)
             tap_pulang_actual = datetime.combine(self.tanggal, self.tap_pulang)
@@ -551,7 +610,6 @@ class Absensi(models.Model):
         total_minutes = int((dt_keluar - dt_masuk).total_seconds() / 60)
         has_break = False
 
-        # Kurangi waktu istirahat
         if self.tap_istirahat_keluar and self.tap_istirahat_masuk:
             dt_break_out = datetime.combine(self.tanggal, self.tap_istirahat_keluar)
             dt_break_in = datetime.combine(self.tanggal, self.tap_istirahat_masuk)
@@ -561,7 +619,6 @@ class Absensi(models.Model):
             total_minutes -= break_minutes
             has_break = True
         else:
-            # Default istirahat 2 jam jika tidak ada data
             total_minutes -= 120
             has_break = False
 
@@ -578,7 +635,7 @@ class Absensi(models.Model):
         }
     
     def get_tap_masuk_display(self):
-        """Tampilan tap masuk dengan warna dari MODE pegawai"""
+        """Tampilan tap masuk dengan warna dari mode pegawai"""
         if not self.tap_masuk:
             return None
         
@@ -608,7 +665,7 @@ class Absensi(models.Model):
         }
     
     def get_tap_pulang_display(self):
-        """Tampilan tap pulang dengan warna dari MODE pegawai"""
+        """Tampilan tap pulang dengan warna dari mode pegawai"""
         if not self.tap_pulang:
             return None
         
@@ -637,7 +694,7 @@ class Absensi(models.Model):
         }
     
     def get_total_jam_kerja_display(self):
-        """Tampilan total jam kerja dengan warna dari MODE"""
+        """Tampilan total jam kerja dengan warna dari mode"""
         total_jam = self.calculate_total_jam_kerja()
         mode = self.pegawai.mode_jam_kerja
         
@@ -678,7 +735,6 @@ class Absensi(models.Model):
         has_masuk = bool(self.tap_istirahat_masuk)
         
         if has_keluar and has_masuk:
-            # Kedua tap ada
             keluar_display = {
                 'value': self.tap_istirahat_keluar.strftime('%H:%M'),
                 'class': 'jam-text',
@@ -696,7 +752,6 @@ class Absensi(models.Model):
                 'mode_color': mode_color
             }
         elif has_keluar and not has_masuk:
-            # Hanya tap keluar
             keluar_display = {
                 'value': self.tap_istirahat_keluar.strftime('%H:%M'),
                 'class': 'jam-text',
@@ -714,7 +769,6 @@ class Absensi(models.Model):
                 'mode_color': None
             }
         elif not has_keluar and has_masuk:
-            # Hanya tap masuk
             keluar_display = {
                 'value': '12:00',
                 'class': 'jam-text violation',
@@ -732,7 +786,6 @@ class Absensi(models.Model):
                 'mode_color': mode_color
             }
         else:
-            # Kedua tap tidak ada
             keluar_display = {
                 'value': '12:00',
                 'class': 'jam-text violation',
@@ -769,7 +822,6 @@ class Absensi(models.Model):
         if hari_index is None:
             return None
         
-        # Cek assignment khusus pegawai
         if self.pegawai.jam_kerja_assignment:
             jadwal_id = self.pegawai.jam_kerja_assignment.get(str(hari_index))
             if jadwal_id:
@@ -783,7 +835,6 @@ class Absensi(models.Model):
                 except ModeJamKerjaJadwal.DoesNotExist:
                     pass
         
-        # Fallback ke jadwal default mode
         jadwal = ModeJamKerjaJadwal.objects.filter(
             mode=mode,
             hari=hari_index
@@ -800,22 +851,34 @@ class Absensi(models.Model):
 
 
 # ==============================================================================
-# TAP LOG & SESI ABSENSI (NEW)
+# TAP LOG & SESI ABSENSI (NEW SYSTEM)
 # ==============================================================================
 
 class TapLog(models.Model):
     """Log setiap tap dari mesin absensi"""
     
     PUNCH_TYPE_CHOICES = [
-        (0, 'Masuk'), (1, 'Keluar'),
-        (2, 'Istirahat Keluar'), (3, 'Istirahat Masuk')
+        (0, 'Masuk'), 
+        (1, 'Keluar'),
+        (2, 'Istirahat Keluar'), 
+        (3, 'Istirahat Masuk')
     ]
     
-    pegawai = models.ForeignKey(Pegawai, on_delete=models.CASCADE, related_name='tap_logs')
+    pegawai = models.ForeignKey(
+        Pegawai, 
+        on_delete=models.CASCADE, 
+        related_name='tap_logs'
+    )
     tanggal = models.DateField(db_index=True)
     waktu_tap = models.TimeField()
     punch_type = models.IntegerField(choices=PUNCH_TYPE_CHOICES, default=0)
-    mesin = models.ForeignKey(MasterMesin, on_delete=models.SET_NULL, null=True, blank=True, related_name='tap_logs')
+    mesin = models.ForeignKey(
+        MasterMesin, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='tap_logs'
+    )
     is_processed = models.BooleanField(default=False, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -841,25 +904,22 @@ class AbsensiSesi(models.Model):
     
     STATUS_CHOICES = [('Hadir', 'Hadir'), ('Incomplete', 'Incomplete')]
     
-    pegawai = models.ForeignKey(Pegawai, on_delete=models.CASCADE, related_name='sesi_kerja')
+    pegawai = models.ForeignKey(
+        Pegawai, 
+        on_delete=models.CASCADE, 
+        related_name='sesi_kerja'
+    )
     tanggal_mulai = models.DateField(db_index=True)
     tanggal_selesai = models.DateField(db_index=True)
-    
-    # Tap Masuk
     tap_masuk_pertama = models.TimeField()
     tap_masuk_terakhir = models.TimeField(null=True, blank=True)
     jumlah_tap_masuk = models.IntegerField(default=0)
-    
-    # Tap Pulang
     tap_pulang_pertama = models.TimeField(null=True, blank=True)
     tap_pulang_terakhir = models.TimeField(null=True, blank=True)
     jumlah_tap_pulang = models.IntegerField(default=0)
-    
-    # Status & Info
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Incomplete')
     is_cross_day = models.BooleanField(default=False, verbose_name="Lintas Hari")
     durasi_kerja_menit = models.IntegerField(null=True, blank=True)
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -916,8 +976,16 @@ class AbsensiSesi(models.Model):
 class TapSesiRelation(models.Model):
     """Relasi antara TapLog dengan AbsensiSesi"""
     
-    tap_log = models.ForeignKey(TapLog, on_delete=models.CASCADE, related_name='sesi_relation')
-    absensi_sesi = models.ForeignKey(AbsensiSesi, on_delete=models.CASCADE, related_name='tap_relation')
+    tap_log = models.ForeignKey(
+        TapLog, 
+        on_delete=models.CASCADE, 
+        related_name='sesi_relation'
+    )
+    absensi_sesi = models.ForeignKey(
+        AbsensiSesi, 
+        on_delete=models.CASCADE, 
+        related_name='tap_relation'
+    )
     urutan_dalam_sesi = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     

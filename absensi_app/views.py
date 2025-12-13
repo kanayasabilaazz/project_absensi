@@ -1,8 +1,16 @@
+# ==================== BAGIAN ATAS views.py ====================
+
+# 1. IMPORT STANDARD LIBRARY
 import json
 import csv
 from datetime import datetime, timedelta, date
 from itertools import groupby
 from operator import attrgetter
+import logging  # ✅ TAMBAHKAN INI
+import concurrent.futures
+import threading
+
+# 2. IMPORT DJANGO
 from django.views.decorators.http import require_http_methods
 from django.db import transaction
 from django.contrib import messages
@@ -15,6 +23,11 @@ from django.db.models import Q, Count, Sum, Avg
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+
+# 3. SETUP LOGGER ✅ PENTING
+logger = logging.getLogger(__name__)
+
+# 4. IMPORT LOKAL
 from .services import WorkModeService
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
@@ -39,7 +52,6 @@ from .forms import (
     MasterCabangForm, MasterMesinForm
 )
 from .services import WorkModeService
-
 
 ## FUNGSI BANTUAN UMUM
 # Kode ini berisi fungsi-fungsi kecil untuk pengecekan user, pengambilan data master, dan pemfilteran.
@@ -82,34 +94,103 @@ def _show_form_errors(request, form):
 # Kode ini untuk mengelola Cabang Aktif dari sesi user.
 
 def get_active_cabang(request):
-    """Ambil data cabang aktif dari sesi atau cabang pertama jika belum ada."""
+    """
+    ✅ FIXED: Ambil data cabang aktif dari session atau set cabang pertama jika belum ada.
+    
+    Key Fixes:
+    1. ✅ Proper session object validation
+    2. ✅ Force save session after write
+    3. ✅ Proper error handling
+    4. ✅ Return None jika tidak ada cabang aktif
+    """
     try:
-        if not request.user.is_authenticated or not request.user.is_staff:
+        # ========================================
+        # 1. VALIDATE REQUEST & USER
+        # ========================================
+        if not request.user.is_authenticated:
             return None
         
+        if not (request.user.is_staff or request.user.is_superuser):
+            return None
+        
+        # ========================================
+        # 2. VALIDATE SESSION OBJECT
+        # ========================================
+        if not hasattr(request, 'session'):
+            logger.warning("❌ Request tidak memiliki session")
+            return None
+        
+        # ✅ FIX: Check session is SessionStore, not dict
+        if not hasattr(request.session, 'get'):
+            logger.warning("❌ Session bukan SessionStore object")
+            return None
+        
+        # ========================================
+        # 3. GET CABANG ID DARI SESSION
+        # ========================================
         cabang_id = request.session.get('cabang_aktif_id')
         
         if cabang_id:
             try:
-                return MasterCabang.objects.get(id=cabang_id, is_active=True)
-            except MasterCabang.DoesNotExist:
-                pass
+                # ✅ Try convert ke int
+                cabang_id = int(cabang_id)
+                
+                # ✅ Get cabang
+                cabang_aktif = MasterCabang.objects.get(
+                    id=cabang_id,
+                    is_active=True
+                )
+                
+                logger.info(f"✅ Cabang aktif dari session: {cabang_aktif.nama}")
+                return cabang_aktif
+                
+            except (MasterCabang.DoesNotExist, ValueError, TypeError) as e:
+                # ========================================
+                # 4. CLEANUP INVALID CABANG
+                # ========================================
+                logger.warning(f"⚠️ Cabang ID {cabang_id} tidak valid: {str(e)}")
+                
+                try:
+                    request.session.pop('cabang_aktif_id', None)
+                    request.session.pop('cabang_aktif_nama', None)
+                    request.session.modified = True
+                    request.session.save()  # ✅ FORCE SAVE
+                    
+                    logger.info("✅ Cleaned invalid cabang session")
+                except Exception as cleanup_error:
+                    logger.error(f"❌ Error cleaning session: {str(cleanup_error)}")
         
+        # ========================================
+        # 5. SET CABANG PERTAMA JIKA BELUM ADA
+        # ========================================
         first_cabang = MasterCabang.objects.filter(is_active=True).first()
-        if first_cabang:
-            request.session['cabang_aktif_id'] = first_cabang.id
-            request.session['cabang_aktif_nama'] = first_cabang.nama
-            request.session.modified = True
-            return first_cabang
         
+        if first_cabang:
+            try:
+                request.session['cabang_aktif_id'] = first_cabang.id
+                request.session['cabang_aktif_nama'] = first_cabang.nama
+                request.session.modified = True
+                request.session.save()  # ✅ FORCE SAVE
+                
+                logger.info(f"✅ Set cabang pertama sebagai aktif: {first_cabang.nama}")
+                return first_cabang
+                
+            except Exception as e:
+                logger.error(f"❌ Error setting first cabang: {str(e)}")
+                return None
+        
+        # ========================================
+        # 6. TIDAK ADA CABANG AKTIF
+        # ========================================
+        logger.warning("⚠️ Tidak ada cabang aktif")
         return None
     
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning(f"Error in get_active_cabang: {str(e)}")
+        logger.error(f"❌ Critical error in get_active_cabang: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
         return None
-
+    
 def filter_by_cabang(queryset, cabang, field='cabang'):
     """
     Memfilter queryset berdasarkan objek cabang yang aktif.
@@ -132,21 +213,36 @@ def filter_by_cabang(queryset, cabang, field='cabang'):
 @login_required
 def switch_cabang(request):
     """
-    Endpoint API untuk mengganti cabang aktif pada sesi user.
+    ✅ FIXED: Endpoint API untuk mengganti cabang aktif pada sesi user.
     
-     FINAL: 
-    - Cabang tersimpan PERMANEN di session (30 hari)
-    - Tidak reset saat pindah halaman
-    - Tidak hilang saat close browser
+    Key Fixes:
+    1. ✅ Proper session object handling
+    2. ✅ Force save + commit to database
+    3. ✅ Validate cabang exists & is_active
+    4. ✅ Proper error response
+    5. ✅ Return updated cabang data
     """
+    
+    # ========================================
+    # 1. VALIDATE REQUEST
+    # ========================================
     if not request.user.is_staff:
-        return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
+        return JsonResponse({
+            "status": "error", 
+            "msg": "Akses ditolak"
+        }, status=403)
     
     if request.method != 'POST':
-        return JsonResponse({"status": "error", "msg": "Method tidak diizinkan"}, status=405)
+        return JsonResponse({
+            "status": "error", 
+            "msg": "Method tidak diizinkan"
+        }, status=405)
     
     try:
-        cabang_id = request.POST.get('cabang_id')
+        # ========================================
+        # 2. GET CABANG ID
+        # ========================================
+        cabang_id = request.POST.get('cabang_id', '').strip()
         
         if not cabang_id:
             return JsonResponse({
@@ -154,56 +250,114 @@ def switch_cabang(request):
                 "msg": "Cabang ID wajib diisi"
             }, status=400)
         
-        cabang = get_object_or_404(MasterCabang, id=cabang_id, is_active=True)
+        # ========================================
+        # 3. VALIDATE CABANG EXISTS
+        # ========================================
+        try:
+            cabang_id_int = int(cabang_id)
+        except (ValueError, TypeError):
+            return JsonResponse({
+                "status": "error",
+                "msg": "Cabang ID harus berupa angka"
+            }, status=400)
+        
+        cabang = MasterCabang.objects.filter(
+            id=cabang_id_int,
+            is_active=True
+        ).first()
+        
+        if not cabang:
+            return JsonResponse({
+                "status": "error",
+                "msg": f"Cabang ID {cabang_id} tidak ditemukan atau tidak aktif"
+            }, status=404)
         
         # ========================================
-        #  SIMPAN CABANG KE SESSION (PERSISTEN 30 HARI)
+        # 4. VALIDATE SESSION OBJECT
         # ========================================
-        request.session['cabang_aktif_id'] = cabang.id
-        request.session['cabang_aktif_nama'] = cabang.nama
-        request.session.modified = True
+        if not hasattr(request, 'session'):
+            return JsonResponse({
+                "status": "error",
+                "msg": "Session tidak tersedia"
+            }, status=400)
         
-        # Force save session (pastikan tersimpan ke database)
-        request.session.save()
+        if not hasattr(request.session, 'get'):
+            return JsonResponse({
+                "status": "error",
+                "msg": "Session object tidak valid"
+            }, status=400)
         
-        # Hitung statistik cabang
-        total_pegawai = Pegawai.objects.filter(
-            cabang=cabang,
-            is_active=True
-        ).count()
+        # ========================================
+        # 5. SAVE CABANG KE SESSION (PERSISTEN 30 HARI)
+        # ========================================
+        try:
+            request.session['cabang_aktif_id'] = cabang.id
+            request.session['cabang_aktif_nama'] = cabang.nama
+            request.session.modified = True
+            
+            # ✅ CRITICAL: Force save to database
+            request.session.save()
+            
+            logger.info(
+                f"✅ User {request.user.username} switched cabang to {cabang.nama} (ID: {cabang.id})"
+            )
+            
+        except Exception as save_error:
+            logger.error(f"❌ Error saving session: {str(save_error)}")
+            
+            return JsonResponse({
+                "status": "error",
+                "msg": f"Gagal menyimpan ke session: {str(save_error)}"
+            }, status=500)
         
-        total_mesin = MasterMesin.objects.filter(
-            cabang=cabang,
-            is_active=True
-        ).count()
+        # ========================================
+        # 6. HITUNG STATISTIK CABANG
+        # ========================================
+        try:
+            total_pegawai = Pegawai.objects.filter(
+                cabang=cabang,
+                is_active=True
+            ).count()
+            
+            total_mesin = MasterMesin.objects.filter(
+                cabang=cabang,
+                is_active=True
+            ).count()
+            
+        except Exception as stats_error:
+            logger.warning(f"⚠️ Error calculating stats: {str(stats_error)}")
+            total_pegawai = 0
+            total_mesin = 0
         
+        # ========================================
+        # 7. RETURN SUCCESS RESPONSE
+        # ========================================
         return JsonResponse({
             "status": "success",
-            "msg": f" Berhasil beralih ke {cabang.nama}",
+            "msg": f"✅ Berhasil beralih ke {cabang.nama}",
             "cabang": {
                 "id": cabang.id,
                 "nama": cabang.nama,
                 "kode": cabang.kode,
+                "alamat": cabang.alamat or "-",
                 "total_pegawai": total_pegawai,
                 "total_mesin": total_mesin,
+            },
+            "session": {
+                "cabang_aktif_id": request.session.get('cabang_aktif_id'),
+                "cabang_aktif_nama": request.session.get('cabang_aktif_nama'),
             }
         })
     
-    except MasterCabang.DoesNotExist:
-        return JsonResponse({
-            "status": "error",
-            "msg": " Cabang tidak ditemukan"
-        }, status=404)
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Error in switch_cabang: {str(e)}")
+        logger.error(f"❌ Critical error in switch_cabang: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
         
         return JsonResponse({
             "status": "error",
-            "msg": f" Error: {str(e)}"
-        }, status=500)
-    
+            "msg": f"Server error: {str(e)}"
+        }, status=500)    
 
 ## FUNGSI INTEGRASI MESIN FINGERPRINT
 # Kode ini untuk menghubungkan, mengambil data, dan mendaftarkan user ke mesin absensi ZKTeco.
@@ -1378,16 +1532,31 @@ def register_Pegawai_menu(request):
     if not request.user.is_staff:
         messages.error(request, "Akses ditolak.")
         return redirect('dashboard')
+
+    cabang_aktif = get_active_cabang(request)
     
-    return render(request, 'absensi_app/menu/register_Pegawai_menu.html')
+    context = {
+        'cabang_aktif': cabang_aktif,
+    }
+    
+    return render(request, 'absensi_app/menu/register_Pegawai_menu.html', context)
 
 
-# Di views.py, perbaiki fungsi register_Pegawai
 @login_required
 def register_Pegawai(request):
     """Mendaftarkan pegawai secara manual ke database."""
     if not request.user.is_staff:
         messages.error(request, "Akses ditolak.")
+        return redirect('dashboard')
+    
+    # ✅ VALIDASI CABANG AKTIF
+    cabang_aktif = get_active_cabang(request)
+    
+    if not cabang_aktif:
+        messages.warning(
+            request,
+            "⚠️ Silakan pilih cabang terlebih dahulu dari menu di pojok kanan atas!"
+        )
         return redirect('dashboard')
     
     if request.method == 'POST':
@@ -1396,28 +1565,25 @@ def register_Pegawai(request):
         mode_assignments_json = request.POST.get('mode_assignments', '{}')
         
         if not mode_assignments_json or mode_assignments_json == '{}':
-            messages.error(request, 'Minimal pilih 1 grup jam kerja!')
-            return _render_pegawai_form_with_modes(request, form)
+            messages.error(request, '❌ Minimal pilih 1 grup jam kerja!')
+            return _render_pegawai_form_with_modes(request, form, cabang_aktif)
         
         try:
             mode_assignments = json.loads(mode_assignments_json)
         except json.JSONDecodeError as e:
-            messages.error(request, f'Format assignment tidak valid: {str(e)}')
-            return _render_pegawai_form_with_modes(request, form)
+            messages.error(request, f'❌ Format assignment tidak valid: {str(e)}')
+            return _render_pegawai_form_with_modes(request, form, cabang_aktif)
         
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    cabang_aktif = get_active_cabang(request)
-                    
                     new_pegawai = form.save(commit=False)
                     new_pegawai.userid = request.POST.get('userid', '').strip()
-                    
                     new_pegawai.uid_mesin = 0
                     new_pegawai.is_active = True
                     
-                    if not new_pegawai.cabang and cabang_aktif:
-                        new_pegawai.cabang = cabang_aktif
+                    # ✅ FORCE SET CABANG AKTIF
+                    new_pegawai.cabang = cabang_aktif
                     
                     new_pegawai.email = request.POST.get('email', '').strip()
                     
@@ -1429,10 +1595,13 @@ def register_Pegawai(request):
                     else:
                         new_pegawai.tanggal_bergabung = datetime.now().date()
                     
-                    # ✅ TAMBAHKAN INI: Set mode_jam_kerja default jika ada
+                    # Set mode_jam_kerja default
                     default_mode_id = None
                     for mode_id_str, assignment_data in mode_assignments.items():
-                        if assignment_data.get('assigned'):
+                        jadwal_per_hari = assignment_data.get('jadwal_per_hari', {})
+                        group_id = assignment_data.get('group_id')
+                        
+                        if jadwal_per_hari or group_id:
                             default_mode_id = int(mode_id_str)
                             break
                     
@@ -1441,48 +1610,63 @@ def register_Pegawai(request):
                     
                     new_pegawai.save()
                     
-                    # Simpan PegawaiModeAssignment
-                    from .models import PegawaiModeAssignment
-                    
+                    # ✅ SIMPAN MODE ASSIGNMENTS
                     assignment_count = 0
                     for mode_id_str, assignment_data in mode_assignments.items():
                         mode_id = int(mode_id_str)
+                        
+                        jadwal_per_hari = assignment_data.get('jadwal_per_hari', {})
                         group_id = assignment_data.get('group_id')
                         
-                        if not group_id:
-                            continue
+                        if jadwal_per_hari and any(v for v in jadwal_per_hari.values()):
+                            # Format 1: sudah ada jadwal_per_hari lengkap
+                            PegawaiModeAssignment.objects.create(
+                                pegawai=new_pegawai,
+                                mode_id=mode_id,
+                                jadwal_per_hari=jadwal_per_hari,
+                                is_active=True
+                            )
+                            assignment_count += 1
                         
-                        jadwal_list = ModeJamKerjaJadwal.objects.filter(
-                            mode_id=mode_id,
-                            id=group_id
-                        ).values_list('hari', 'id')
-                        
-                        jadwal_per_hari = {str(hari): jid for hari, jid in jadwal_list}
-                        
-                        PegawaiModeAssignment.objects.create(
-                            pegawai=new_pegawai,
-                            mode_id=mode_id,
-                            jadwal_per_hari=jadwal_per_hari,
-                            is_active=True
-                        )
-                        assignment_count += 1
+                        elif group_id:
+                            # Format 2: hanya group_id, build jadwal_per_hari
+                            jadwal_list = ModeJamKerjaJadwal.objects.filter(
+                                mode_id=mode_id,
+                                id=group_id
+                            ).values_list('hari', 'id')
+                            
+                            built_jadwal = {str(hari): jid for hari, jid in jadwal_list}
+                            
+                            if built_jadwal:
+                                PegawaiModeAssignment.objects.create(
+                                    pegawai=new_pegawai,
+                                    mode_id=mode_id,
+                                    jadwal_per_hari=built_jadwal,
+                                    is_active=True
+                                )
+                                assignment_count += 1
+                    
+                    WorkModeService.clear_cache()
                     
                     messages.success(
                         request,
-                        f"✅ Pegawai {new_pegawai.nama_lengkap} berhasil didaftarkan dengan {assignment_count} mode!\n\n"
+                        f"✅ Pegawai {new_pegawai.nama_lengkap} berhasil didaftarkan!\n\n"
                         f"📋 Detail:\n"
                         f"• User ID: {new_pegawai.userid}\n"
+                        f"• Cabang: {cabang_aktif.nama}\n"
                         f"• Departemen: {new_pegawai.departemen.nama if new_pegawai.departemen else '-'}\n"
-                        f"• Mode Jam Kerja: {new_pegawai.mode_jam_kerja.nama if new_pegawai.mode_jam_kerja else '-'}\n"
-                        f"• Status: PENDING (Menunggu Registrasi)\n\n"
+                        f"• Mode Assignments: {assignment_count} mode\n\n"
                         f"⚠️ Langkah Selanjutnya:\n"
-                        f"Silakan lanjutkan ke menu 'Sinkron ke Mesin' untuk registrasi fingerprint agar pegawai bisa mulai absen!"
+                        f"Silakan lanjutkan ke menu 'Sinkron ke Mesin' untuk registrasi fingerprint!"
                     )
                     
                     return redirect('sinkron_ke_mesin')
                 
             except Exception as e:
-                messages.error(request, f'Error: {str(e)}')
+                import traceback
+                error_detail = traceback.format_exc()
+                print(f"\n❌ ERROR SAVE PEGAWAI:\n{error_detail}")
+                messages.error(request, f'❌ Error: {str(e)}')
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -1490,17 +1674,39 @@ def register_Pegawai(request):
     else:
         form = PegawaiForm()
     
-    return _render_pegawai_form_with_modes(request, form)
+    return _render_pegawai_form_with_modes(request, form, cabang_aktif)
 
-def _render_pegawai_form_with_modes(request, form):
-    """Helper untuk me-render form pendaftaran pegawai dengan daftar mode jam kerja."""
-    from .models import MasterModeJamKerja, MasterDepartemen, MasterJabatan
+
+def _render_pegawai_form_with_modes(request, form, cabang_aktif):
+    """Helper untuk render form dengan filtering cabang."""
+    from django.db.models import Q
+    
+    # ✅ FILTER DEPARTEMEN
+    # Ambil departemen yang ada pegawainya di cabang ini + departemen kosong
+    departemen_ids = Pegawai.objects.filter(
+        cabang=cabang_aktif,
+        is_active=True
+    ).values_list('departemen_id', flat=True).distinct()
+    
+    departemen_list = MasterDepartemen.objects.filter(
+        is_active=True
+    ).filter(
+        Q(id__in=departemen_ids) | Q(pegawai_list__isnull=True)
+    ).distinct().order_by('nama')
+    
+    # ✅ FILTER MODE: GLOBAL atau sesuai cabang
+    mode_list = MasterModeJamKerja.objects.filter(
+        is_active=True
+    ).filter(
+        Q(cabang__isnull=True) | Q(cabang=cabang_aktif)
+    ).order_by('-is_default', '-priority', 'nama')
     
     return render(request, 'absensi_app/register/register_pegawai.html', {
         'form': form,
-        'departemen_list': MasterDepartemen.objects.filter(is_active=True).order_by('nama'),
+        'departemen_list': departemen_list,
         'jabatan_list': MasterJabatan.objects.filter(is_active=True).order_by('nama'),
-        'mode_list': MasterModeJamKerja.objects.filter(is_active=True).order_by('-is_default', '-priority', 'nama'),
+        'mode_list': mode_list,
+        'cabang_aktif': cabang_aktif,
     })
 
 
@@ -1511,10 +1717,7 @@ def api_get_mode_jadwal_departemen(request, pk):
 
 @login_required
 def api_get_jam_kerja_groups(request, pk):
-    """
-    API untuk mengambil grup jam kerja per mode.
-    ✅ FIXED: Semua path RETURN response
-    """
+    """API untuk mengambil grup jam kerja per mode dengan validasi cabang."""
     if not request.user.is_staff:
         return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
     
@@ -1522,42 +1725,36 @@ def api_get_jam_kerja_groups(request, pk):
     logger = logging.getLogger(__name__)
     
     try:
-        logger.info(f"=== API START: mode_id={pk} ===")
+        cabang_aktif = get_active_cabang(request)
         
-        # ✅ Query mode dengan select_related
-        mode = MasterModeJamKerja.objects.prefetch_related('jadwal_list').filter(pk=pk).first()
+        logger.info(f"=== API: mode_id={pk}, cabang={cabang_aktif.nama if cabang_aktif else 'None'} ===")
         
-        # ✅ VALIDASI: Mode exist?
+        mode = MasterModeJamKerja.objects.filter(pk=pk).first()
+        
         if not mode:
-            all_modes = MasterModeJamKerja.objects.all().values('id', 'nama')
-            available_ids = [m['id'] for m in all_modes]
-            logger.error(f"Mode ID {pk} NOT FOUND. Available: {available_ids}")
-            
             return JsonResponse({
                 "status": "error",
-                "msg": f"Mode ID {pk} tidak ditemukan",
-                "available_modes": list(all_modes)
+                "msg": f"Mode ID {pk} tidak ditemukan"
             }, status=404)
         
-        # ✅ Ambil semua jadwal (1 query)
-        jadwal_list = mode.jadwal_list.all().order_by('group_name', 'hari')
-        logger.info(f"Mode: {mode.nama}, Total jadwal: {jadwal_list.count()}")
+        # ✅ VALIDASI CABANG
+        if mode.cabang_id is not None and cabang_aktif:
+            if mode.cabang_id != cabang_aktif.id:
+                return JsonResponse({
+                    "status": "error",
+                    "msg": f"Mode '{mode.nama}' untuk cabang '{mode.cabang.nama}', tidak sesuai dengan '{cabang_aktif.nama}'"
+                }, status=403)
         
-        # ✅ VALIDASI: Ada jadwal?
+        jadwal_list = mode.jadwal_list.all().order_by('group_name', 'hari')
+        
         if not jadwal_list.exists():
-            logger.warning(f"Mode {mode.nama} tidak punya jadwal sama sekali")
             return JsonResponse({
                 "status": "error",
-                "msg": f"Mode {mode.nama} belum memiliki jadwal jam kerja",
-                "mode": {
-                    "id": mode.id,
-                    "nama": mode.nama,
-                },
+                "msg": f"Mode {mode.nama} belum memiliki jadwal",
                 "groups": [],
                 "total": 0
             }, status=400)
         
-        # ✅ Group by group_name
         from collections import defaultdict
         groups_dict = defaultdict(list)
         
@@ -1566,19 +1763,13 @@ def api_get_jam_kerja_groups(request, pk):
                 groups_dict[jadwal.group_name].append(jadwal)
         
         if not groups_dict:
-            logger.warning(f"Mode {mode.nama} tidak punya group_name yang valid")
             return JsonResponse({
                 "status": "error",
-                "msg": f"Jadwal mode {mode.nama} tidak memiliki nama grup",
-                "mode": {
-                    "id": mode.id,
-                    "nama": mode.nama,
-                },
+                "msg": f"Jadwal tidak memiliki nama grup",
                 "groups": [],
                 "total": 0
             }, status=400)
         
-        # ✅ Build response groups
         groups = []
         hari_names = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu']
         
@@ -1592,7 +1783,6 @@ def api_get_jam_kerja_groups(request, pk):
             if sample.jam_istirahat_keluar and sample.jam_istirahat_masuk:
                 jam_istirahat = f"{sample.jam_istirahat_keluar.strftime('%H:%M')} - {sample.jam_istirahat_masuk.strftime('%H:%M')}"
             
-            # ✅ Hitung hari kerja & build lists
             hari_kerja_count = 0
             hari_kerja_list = []
             jadwal_per_hari = {}
@@ -1603,7 +1793,7 @@ def api_get_jam_kerja_groups(request, pk):
                     hari_kerja_list.append(hari_names[jadwal.hari])
                     jadwal_per_hari[str(jadwal.hari)] = jadwal.id
             
-            group_data = {
+            groups.append({
                 'id': sample.id,
                 'nama': group_name,
                 'jam_masuk': jam_masuk,
@@ -1612,41 +1802,26 @@ def api_get_jam_kerja_groups(request, pk):
                 'hari_kerja': hari_kerja_count,
                 'hari_kerja_list': hari_kerja_list,
                 'jadwal_per_hari': jadwal_per_hari
-            }
-            
-            groups.append(group_data)
-            logger.info(f"✅ Group: {group_name}, Hari kerja: {hari_kerja_count}")
+            })
         
-        logger.info(f"=== API SUCCESS: {len(groups)} groups found ===")
-        
-        # ✅ RETURN SUCCESS
         return JsonResponse({
             "status": "success",
-            "mode": {
-                "id": mode.id,
-                "nama": mode.nama,
-            },
+            "mode": {"id": mode.id, "nama": mode.nama},
             "groups": groups,
             "total": len(groups)
         })
     
-    except MasterModeJamKerja.DoesNotExist:
-        logger.error(f"Mode ID {pk} tidak ditemukan (DoesNotExist)")
-        return JsonResponse({
-            "status": "error",
-            "msg": f"Mode dengan ID {pk} tidak ditemukan"
-        }, status=404)
-    
     except Exception as e:
         import traceback
         error_detail = traceback.format_exc()
-        logger.error(f"❌ ERROR api_get_jam_kerja_groups:\n{error_detail}")
+        logger.error(f"❌ ERROR:\n{error_detail}")
         
         return JsonResponse({
             "status": "error",
-            "msg": f"Terjadi error: {str(e)}"
+            "msg": f"Error: {str(e)}"
         }, status=500)
-            
+
+
 @login_required
 def api_get_applicable_modes(request):
     """API untuk mendapatkan semua mode jam kerja yang aktif."""
@@ -1689,17 +1864,49 @@ def register_Pegawai_dari_mesin(request):
         messages.error(request, "Akses ditolak.")
         return redirect('dashboard')
     
+    # ✅ VALIDASI CABANG AKTIF
+    cabang_aktif = get_active_cabang(request)
+    
+    if not cabang_aktif:
+        messages.warning(
+            request,
+            "⚠️ Silakan pilih cabang terlebih dahulu dari menu di pojok kanan atas!"
+        )
+        return redirect('dashboard')
+    
+    # ✅ FILTER DATA BERDASARKAN CABANG
+    departemen_ids = Pegawai.objects.filter(
+        cabang=cabang_aktif,
+        is_active=True
+    ).values_list('departemen_id', flat=True).distinct()
+    
+    departemen_list = MasterDepartemen.objects.filter(
+        Q(id__in=departemen_ids) | Q(pegawai_list__isnull=True),
+        is_active=True
+    ).distinct().order_by('id_departemen')
+    
+    mode_list = MasterModeJamKerja.objects.filter(
+        Q(cabang__isnull=True) | Q(cabang=cabang_aktif),
+        is_active=True
+    ).order_by('nama')
+    
+    mesin_list = MasterMesin.objects.filter(
+        cabang=cabang_aktif,
+        is_active=True
+    ).select_related('cabang').order_by('nama')
+    
     context = {
-        'departemen_list': MasterDepartemen.objects.filter(is_active=True).order_by('id_departemen'),
+        'departemen_list': departemen_list,
         'jabatan_list': MasterJabatan.objects.filter(is_active=True).order_by('nama'),
-        'mode_jam_kerja_list': MasterModeJamKerja.objects.filter(is_active=True).order_by('nama'),
-        'mesin_list': MasterMesin.objects.filter(is_active=True).select_related('cabang').order_by('nama'),
+        'mode_jam_kerja_list': mode_list,
+        'mesin_list': mesin_list,
         'page_title': 'Ambil Data dari Mesin Sidik Jari',
+        'cabang_aktif': cabang_aktif,
     }
     
     return render(request, 'absensi_app/register/register_dari_mesin.html', context)
 
-# Di views.py, perbaiki fungsi simpan_Pegawai_dari_mesin
+
 @login_required
 def simpan_Pegawai_dari_mesin(request):
     """Menyimpan data pegawai yang diambil dari mesin ke database."""
@@ -1709,19 +1916,33 @@ def simpan_Pegawai_dari_mesin(request):
     if request.headers.get("X-Requested-With") != "XMLHttpRequest":
         return JsonResponse({"status": "error", "msg": "Permintaan tidak valid"}, status=400)
     
+    # ✅ VALIDASI CABANG AKTIF
+    cabang_aktif = get_active_cabang(request)
+    
+    if not cabang_aktif:
+        return JsonResponse({
+            "status": "error",
+            "msg": "⚠️ Silakan pilih cabang terlebih dahulu!"
+        }, status=400)
+    
     with transaction.atomic():
         try:
-            # Validasi mesin
             mesin_id = request.POST.get("mesin_id")
             if not mesin_id:
-                return JsonResponse(
-                    {"status": "error", "msg": "Pilih mesin terlebih dahulu"},
-                    status=400
-                )
+                return JsonResponse({
+                    "status": "error",
+                    "msg": "Pilih mesin terlebih dahulu"
+                }, status=400)
             
             mesin = get_object_or_404(MasterMesin, id=mesin_id, is_active=True)
             
-            # Validasi mode assignments
+            # ✅ VALIDASI MESIN SESUAI CABANG
+            if mesin.cabang != cabang_aktif:
+                return JsonResponse({
+                    "status": "error",
+                    "msg": f"Mesin '{mesin.nama}' tidak terdaftar di cabang {cabang_aktif.nama}"
+                }, status=403)
+            
             mode_assignments_json = request.POST.get('mode_assignments', '{}')
             if not mode_assignments_json or mode_assignments_json == '{}':
                 return JsonResponse({
@@ -1737,7 +1958,6 @@ def simpan_Pegawai_dari_mesin(request):
                     "msg": f"Format assignment tidak valid: {str(e)}"
                 }, status=400)
             
-            # Validasi UID
             uid = request.POST.get("uid")
             if not uid:
                 return JsonResponse({
@@ -1745,20 +1965,21 @@ def simpan_Pegawai_dari_mesin(request):
                     "msg": "UID dari mesin tidak ditemukan!"
                 }, status=400)
             
-            # Validasi data pegawai
             validation_result = _validate_pegawai_data(request.POST)
             if validation_result:
                 return validation_result
             
-            # Buat pegawai baru dan set UID
             new_pegawai = _create_pegawai_from_machine(request.POST, mesin)
             new_pegawai.uid_mesin = int(uid)
             
-            # ✅ TAMBAHKAN INI: Set mode_jam_kerja default
+            # ✅ FORCE SET CABANG AKTIF
+            new_pegawai.cabang = cabang_aktif
+            
             default_mode_id = None
             for mode_id_str, assignment_data in mode_assignments.items():
+                jadwal_per_hari = assignment_data.get('jadwal_per_hari', {})
                 group_id = assignment_data.get('group_id')
-                if group_id:
+                if jadwal_per_hari or group_id:
                     default_mode_id = int(mode_id_str)
                     break
             
@@ -1768,30 +1989,36 @@ def simpan_Pegawai_dari_mesin(request):
             new_pegawai.save()
             
             # Simpan mode assignments
-            from .models import PegawaiModeAssignment
-            
             assignment_count = 0
             for mode_id_str, assignment_data in mode_assignments.items():
                 mode_id = int(mode_id_str)
+                jadwal_per_hari = assignment_data.get('jadwal_per_hari', {})
                 group_id = assignment_data.get('group_id')
                 
-                if not group_id:
-                    continue
-                
-                jadwal_list = ModeJamKerjaJadwal.objects.filter(
-                    mode_id=mode_id,
-                    id=group_id
-                ).values_list('hari', 'id')
-                
-                jadwal_per_hari = {str(hari): jid for hari, jid in jadwal_list}
-                
-                PegawaiModeAssignment.objects.create(
-                    pegawai=new_pegawai,
-                    mode_id=mode_id,
-                    jadwal_per_hari=jadwal_per_hari,
-                    is_active=True
-                )
-                assignment_count += 1
+                if jadwal_per_hari and any(v for v in jadwal_per_hari.values()):
+                    PegawaiModeAssignment.objects.create(
+                        pegawai=new_pegawai,
+                        mode_id=mode_id,
+                        jadwal_per_hari=jadwal_per_hari,
+                        is_active=True
+                    )
+                    assignment_count += 1
+                elif group_id:
+                    jadwal_list = ModeJamKerjaJadwal.objects.filter(
+                        mode_id=mode_id,
+                        id=group_id
+                    ).values_list('hari', 'id')
+                    
+                    built_jadwal = {str(hari): jid for hari, jid in jadwal_list}
+                    
+                    if built_jadwal:
+                        PegawaiModeAssignment.objects.create(
+                            pegawai=new_pegawai,
+                            mode_id=mode_id,
+                            jadwal_per_hari=built_jadwal,
+                            is_active=True
+                        )
+                        assignment_count += 1
             
             # Sync fingerprint dari mesin
             fingers_count = 0
@@ -1802,17 +2029,14 @@ def simpan_Pegawai_dari_mesin(request):
                 all_templates = conn.get_templates()
                 all_users = conn.get_users()
                 
-                # Cari user berdasarkan userid
                 target_user = next(
                     (u for u in all_users if str(getattr(u, 'user_id', u.uid)) == str(new_pegawai.userid)),
                     None
                 )
                 
                 if target_user:
-                    # Filter template yang sesuai dengan UID user
                     user_templates = [t for t in all_templates if t.uid == target_user.uid]
                     
-                    # Simpan template ke database
                     for template in user_templates:
                         FingerprintTemplate.objects.create(
                             pegawai=new_pegawai,
@@ -1832,41 +2056,31 @@ def simpan_Pegawai_dari_mesin(request):
                     
                     return JsonResponse({
                         "status": "error",
-                        "msg": f"User {new_pegawai.userid} tidak ditemukan di mesin! "
-                               f"Pastikan pegawai sudah scan sidik jari di mesin terlebih dahulu."
+                        "msg": f"User {new_pegawai.userid} tidak ditemukan di mesin!"
                     }, status=400)
                 
             except Exception as e:
                 transaction.set_rollback(True)
                 return JsonResponse({
                     "status": "error",
-                    "msg": f"Gagal sync fingerprint dari mesin: {str(e)}"
+                    "msg": f"Gagal sync fingerprint: {str(e)}"
                 }, status=500)
             
-            # Validasi: Harus ada fingerprint
             if fingers_count == 0:
                 transaction.set_rollback(True)
                 return JsonResponse({
                     "status": "error",
-                    "msg": f"❌ Tidak ada data fingerprint untuk user {new_pegawai.userid}!\n\n"
-                           f"Pastikan pegawai sudah scan sidik jari di mesin terlebih dahulu.\n\n"
-                           f"Langkah:\n"
-                           f"1. Pegawai scan sidik jari di mesin fisik\n"
-                           f"2. Tunggu sampai mesin bilang 'Success'\n"
-                           f"3. Baru daftarkan via menu 'Ambil dari Mesin'"
+                    "msg": "❌ Tidak ada data fingerprint!"
                 }, status=400)
             
-            # Success response
             msg = f"✅ Pegawai berhasil didaftarkan!\n\n"
             msg += f"Detail:\n"
             msg += f"• Nama: {new_pegawai.nama_lengkap}\n"
             msg += f"• User ID: {new_pegawai.userid}\n"
+            msg += f"• Cabang: {cabang_aktif.nama}\n"
             msg += f"• Machine UID: {new_pegawai.uid_mesin}\n"
             msg += f"• Fingerprint: {fingers_count} templates\n"
             msg += f"• Mode Assignments: {assignment_count} mode\n"
-            msg += f"• Mode Default: {new_pegawai.mode_jam_kerja.nama if new_pegawai.mode_jam_kerja else '-'}\n"
-            msg += f"• Cabang: {new_pegawai.cabang.nama if new_pegawai.cabang else '-'}\n\n"
-            msg += f"Status: AKTIF - Pegawai sudah bisa TAP absen!"
             
             return JsonResponse({
                 "status": "success",
@@ -1877,10 +2091,10 @@ def simpan_Pegawai_dari_mesin(request):
             })
             
         except MasterMesin.DoesNotExist:
-            return JsonResponse(
-                {"status": "error", "msg": "Mesin tidak ditemukan"},
-                status=404
-            )
+            return JsonResponse({
+                "status": "error",
+                "msg": "Mesin tidak ditemukan"
+            }, status=404)
         except Exception as e:
             transaction.set_rollback(True)
             return JsonResponse({
