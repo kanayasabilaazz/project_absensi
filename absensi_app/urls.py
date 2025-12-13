@@ -1,8 +1,3 @@
-"""
-URL Configuration - Project Absensi
-Routing untuk sistem absensi dengan integrasi fingerprint
-"""
-
 from django.urls import path
 from . import views
 

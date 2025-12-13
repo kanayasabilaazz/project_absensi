@@ -7,12 +7,7 @@ logger = logging.getLogger(__name__)
 def cabang_context(request):
     """
     Context processor untuk menampilkan cabang aktif dan daftar cabang.
-    
-    Returns:
-        dict: {
-            'cabang_aktif': MasterCabang object atau None,
-            'cabang_list': List of cabang dicts
-        }
+    Menyediakan 'cabang_aktif' dan 'cabang_list' dalam konteks template
     """
     
     context = {

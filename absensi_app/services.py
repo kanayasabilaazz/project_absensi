@@ -1,8 +1,3 @@
-"""
-Services Layer - Project Absensi
-Business logic untuk mode jam kerja dan pemrosesan tap log
-"""
-
 from datetime import date, timedelta, datetime
 from django.core.cache import cache
 from django.db import transaction
@@ -430,7 +425,7 @@ class TapStackProcessor:
         sesi_list = []
         
         for tap in tap_list:
-            if tap.punch_type == 0:  # TAP MASUK
+            if tap.punch_type == 0:  
                 stack_masuk.append({
                     'tap_masuk': tap,
                     'tap_pulang': None,
@@ -448,7 +443,7 @@ class TapStackProcessor:
                 else:
                     print(f"⚠️ SKIP: Tap PULANG tanpa MASUK ({tap.waktu_tap})")
             
-            elif tap.punch_type in [2, 3]:  # TAP ISTIRAHAT
+            elif tap.punch_type in [2, 3]: 
                 if stack_masuk:
                     stack_masuk[-1]['all_taps'].append(tap)
         

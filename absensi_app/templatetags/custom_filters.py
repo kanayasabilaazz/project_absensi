@@ -12,8 +12,8 @@ register = template.Library()
 def get_pegawai_name(pegawai):
     """
     Ambil nama lengkap pegawai dengan fallback
-    
     Usage: {{ pegawai|get_pegawai_name }}
+    Returns: nama_lengkap atau "First Last" atau username atau "Unknown"
     """
     if not pegawai:
         return "Unknown"
@@ -36,8 +36,8 @@ def get_pegawai_name(pegawai):
 def get_dict_item(dictionary, key):
     """
     Ambil value dari dictionary berdasarkan key (support string & integer key)
-    
     Usage: {{ my_dict|get_dict_item:some_key }}
+    Returns: value atau None jika key tidak ditemukan
     """
     if dictionary is None or not isinstance(dictionary, dict):
         return None
@@ -64,8 +64,8 @@ def get_dict_item(dictionary, key):
 def get_item(dictionary, key):
     """
     Alias untuk get_dict_item (backward compatibility)
-    
     Usage: {{ my_dict|get_item:some_key }}
+    ️Returns: value atau None jika key tidak ditemukan
     """
     return get_dict_item(dictionary, key)
 
@@ -78,9 +78,6 @@ def get_item(dictionary, key):
 def jadwal_display(jadwal_id):
     """
     Display jadwal: jam_masuk - jam_keluar
-    
-    Usage: {{ jadwal_id|jadwal_display }}
-    Returns: "08:00 - 17:00" atau "🏠 LIBUR"
     """
     if not jadwal_id:
         return "🏠 LIBUR"
@@ -101,9 +98,6 @@ def jadwal_display(jadwal_id):
 def jadwal_full_display(jadwal_id):
     """
     Display jadwal lengkap: group_name (jam_masuk-jam_keluar)
-    
-    Usage: {{ jadwal_id|jadwal_full_display }}
-    Returns: "Shift A (08:00-17:00)" atau "🏠 LIBUR"
     """
     if not jadwal_id:
         return "🏠 LIBUR"
@@ -124,8 +118,7 @@ def jadwal_full_display(jadwal_id):
 def has_schedule(jadwal_obj):
     """
     Cek apakah jadwal valid (punya jam masuk & keluar)
-    
-    Usage: {% if jadwal|has_schedule %}...{% endif %}
+    Usage: {{ jadwal_obj|has_schedule }}    
     """
     if not jadwal_obj:
         return False
@@ -143,8 +136,8 @@ def has_schedule(jadwal_obj):
 def get_day_name(hari_index):
     """
     Convert hari index (0-6) ke nama hari
-    
-    Usage: {{ 0|get_day_name }} => "Senin"
+    Usage: {{ hari_index|get_day_name }}
+    Returns: Nama hari atau "Unknown"
     """
     hari_names = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
     try:
@@ -164,9 +157,8 @@ def get_day_name(hari_index):
 def format_time(time_obj, format_string="%H:%M"):
     """
     Format time object ke string
-    
     Usage: {{ time_obj|format_time }}
-    Custom: {{ time_obj|format_time:"%H:%M:%S" }}
+    Custom: {{ time_obj|format_time:"%I:%M %p" }}
     """
     if not time_obj:
         return "-"
@@ -181,9 +173,8 @@ def format_time(time_obj, format_string="%H:%M"):
 def format_date(date_obj, format_string="%d %b %Y"):
     """
     Format date object ke string
-    
     Usage: {{ date_obj|format_date }}
-    Custom: {{ date_obj|format_date:"%d/%m/%Y" }}
+    Custom: {{ date_obj|format_date:"%Y-%m-%d" }}
     """
     if not date_obj:
         return "-"
@@ -202,9 +193,8 @@ def format_date(date_obj, format_string="%d %b %Y"):
 def default_if_none(value, default_text="-"):
     """
     Tampilkan default text jika value None atau kosong
-    
-    Usage: {{ value|default_if_none }}
-    Custom: {{ value|default_if_none:"N/A" }}
+    Usage: {{ value|default_if_none:"N/A" }}
+    ️Returns: value atau default_text
     """
     if value is None or value == "":
         return default_text
@@ -215,8 +205,8 @@ def default_if_none(value, default_text="-"):
 def yes_no_icon(value):
     """
     Convert boolean ke icon (✓/✗)
-    
     Usage: {{ is_active|yes_no_icon }}
+    ️Returns: '✓' jika True, '✗' jika False
     """
     if value:
         return mark_safe('✓')
@@ -227,9 +217,8 @@ def yes_no_icon(value):
 def yes_no_badge(value, yes_text="Ya"):
     """
     Convert boolean ke badge HTML
-    
-    Usage: {{ is_active|yes_no_badge }}
-    Custom: {{ is_active|yes_no_badge:"Active:Inactive" }}
+    Usage: {{ is_active|yes_no_badge:"Yes:No" }}
+    ️Returns: badge dengan teks sesuai nilai boolean
     """
     try:
         no_text = "Tidak"
@@ -253,8 +242,8 @@ def yes_no_badge(value, yes_text="Ya"):
 def truncate_words(value, num_words=10):
     """
     Potong text setelah N kata
-    
-    Usage: {{ text|truncate_words:5 }}
+    Usage: {{ text|truncate_words:20 }}
+    ️Returns: truncated text dengan "..." jika lebih dari N kata
     """
     if not value:
         return ""
@@ -273,8 +262,8 @@ def truncate_words(value, num_words=10):
 def truncate_chars(value, num_chars=50):
     """
     Potong text setelah N karakter
-    
-    Usage: {{ text|truncate_chars:20 }}
+    Usage: {{ text|truncate_chars:100 }}
+    ️Returns: truncated text dengan "..." jika lebih dari N karakter
     """
     if not value:
         return ""
@@ -297,8 +286,8 @@ def truncate_chars(value, num_chars=50):
 def upper_first(value):
     """
     Capitalize first character
-    
     Usage: {{ text|upper_first }}
+    ️Returns: Text dengan karakter pertama kapitalized
     """
     if not value:
         return ""
@@ -311,8 +300,8 @@ def upper_first(value):
 def remove_spaces(value):
     """
     Hapus semua spasi dari string
-    
     Usage: {{ text|remove_spaces }}
+    ️Returns: Text tanpa spasi
     """
     if not value:
         return ""
@@ -324,9 +313,8 @@ def remove_spaces(value):
 def join_list(value, separator=", "):
     """
     Join list items dengan separator
-    
-    Usage: {{ list|join_list }}
-    Custom: {{ list|join_list:" | " }}
+    Usage: {{ my_list|join_list:", " }}
+    ️Returns: String gabungan dari list items
     """
     if not value:
         return ""
@@ -345,8 +333,8 @@ def join_list(value, separator=", "):
 def status_badge(status):
     """
     Convert status string ke badge dengan warna sesuai
-    
     Usage: {{ status|status_badge }}
+    ️Returns: badge HTML dengan warna sesuai status
     """
     status_colors = {
         'Hadir': 'success',
@@ -364,8 +352,8 @@ def status_badge(status):
 def active_badge(is_active):
     """
     Convert boolean active status ke badge
-    
     Usage: {{ is_active|active_badge }}
+    ️Returns: badge "Aktif" atau "Non-Aktif"
     """
     if is_active:
         return mark_safe('<span class="badge badge-success">Aktif</span>')
@@ -380,8 +368,8 @@ def active_badge(is_active):
 def format_duration(minutes):
     """
     Format menit ke format jam dan menit
-    
-    Usage: {{ 135|format_duration }} => "2j 15m"
+    Usage: {{ total_minutes|format_duration }}
+    ️Returns: "Xj Ym" atau "-" jika menit kosong
     """
     if not minutes:
         return "-"
@@ -402,8 +390,8 @@ def format_duration(minutes):
 def add_value(value, arg):
     """
     Tambah nilai dengan angka
-    
-    Usage: {{ number|add_value:5 }}
+    Usage: {{ number|add_value:10 }}
+    ️Returns: penjumlahan value dan arg
     """
     try:
         return int(value) + int(arg)
@@ -415,8 +403,8 @@ def add_value(value, arg):
 def subtract(value, arg):
     """
     Kurangi nilai dengan angka
-    
     Usage: {{ number|subtract:5 }}
+    ️Returns: pengurangan value dan arg
     """
     try:
         return int(value) - int(arg)

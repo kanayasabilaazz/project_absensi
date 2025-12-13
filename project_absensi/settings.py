@@ -1,8 +1,3 @@
-"""
-Django Settings - Project Absensi
-Konfigurasi untuk sistem absensi dengan integrasi fingerprint
-"""
-
 from pathlib import Path
 from django.contrib.messages import constants as messages
 
