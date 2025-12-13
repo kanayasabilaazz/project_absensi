@@ -4,78 +4,46 @@
 {% block title %}Daftar Mesin Fingerprint{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <style>
-    /* ==================== KONSISTEN DENGAN BASE & DASHBOARD ==================== */
-    :root {
-        --card-radius: var(--radius-md);
-        --card-shadow: var(--shadow-sm);
-        --card-shadow-hover: var(--shadow-md);
+    /* HEADER CARD - TERPISAH DI ATAS */
+    .header-card {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+        border-radius: var(--radius);
+        padding: var(--space-5);
+        margin-bottom: var(--space-4);
+        box-shadow: var(--shadow);
+        color: white;
     }
 
-    /* ==================== SECTION CARD ==================== */
-    .section-card {
-        background: white;
-        border-radius: var(--card-radius);
-        box-shadow: var(--card-shadow);
-        margin-bottom: var(--spacing-xl);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-        transition: var(--transition-base);
-    }
-
-    .section-card:hover {
-        box-shadow: var(--card-shadow-hover);
-    }
-
-    .section-header {
+    .header-top {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        padding: var(--spacing-lg) var(--spacing-xl);
-        border-bottom: 1px solid var(--gray-200);
+        align-items: flex-start;
+        gap: var(--space-3);
         flex-wrap: wrap;
-        gap: var(--spacing-lg);
-        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-        color: white;
     }
 
-    .section-title {
-        font-size: var(--font-lg);
+    .header-info h5 {
+        margin: 0 0 var(--space-1) 0;
+        font-size: var(--text-xl);
         font-weight: 700;
-        color: white;
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
-        margin: 0;
+        gap: var(--space-2);
     }
 
-    .section-title i {
-        font-size: var(--font-lg);
+    .header-subtitle {
+        font-size: var(--text-sm);
+        margin: 0 0 var(--space-2) 0;
+        opacity: 0.9;
     }
 
-    .section-body {
-        padding: var(--spacing-xl);
-    }
-
-    .section-footer {
-        padding: var(--spacing-md) var(--spacing-xl);
-        background: var(--gray-50);
-        border-top: 1px solid var(--gray-200);
-        font-size: var(--font-sm);
-        color: var(--gray-600);
-    }
-
-    .section-footer strong {
-        color: var(--gray-900);
-    }
-
-    /* ==================== BREADCRUMB ==================== */
+    /* BREADCRUMB */
     .breadcrumb {
         background: transparent;
         padding: 0;
-        margin-bottom: var(--spacing-lg);
-        font-size: var(--font-sm);
+        margin: 0;
+        font-size: var(--text-sm);
     }
 
     .breadcrumb-item {
@@ -85,11 +53,6 @@
     .breadcrumb-item a {
         color: rgba(255, 255, 255, 0.9);
         text-decoration: none;
-        transition: var(--transition-fast);
-    }
-
-    .breadcrumb-item a:hover {
-        color: white;
     }
 
     .breadcrumb-item.active {
@@ -100,35 +63,17 @@
         color: rgba(255, 255, 255, 0.6);
     }
 
-    /* ==================== BUTTONS (KONSISTEN) ==================== */
-    .btn {
-        padding: var(--spacing-md) var(--spacing-xl);
-        font-size: var(--font-sm);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        border: none;
-        transition: var(--transition-base);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        cursor: pointer;
-        text-decoration: none;
-    }
-
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-primary {
+    /* BUTTONS */
+    .btn-primary-light {
         background: rgba(255, 255, 255, 0.95);
-        color: var(--primary-dark);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: var(--primary-hover);
+        border: 1px solid rgba(255, 255, 255, 0.5);
     }
 
-    .btn-primary:hover {
+    .btn-primary-light:hover {
         background: white;
-        color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
     }
 
     .btn-outline-light {
@@ -139,169 +84,172 @@
 
     .btn-outline-light:hover {
         background: rgba(255, 255, 255, 0.25);
-        color: white;
     }
 
-    .btn-action {
-        padding: 0.5rem 0.875rem;
-        font-size: var(--font-xs);
+    /* CONTENT CARD - HANYA ISI */
+    .content-card {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
     }
 
-    .btn-info {
-        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-        color: white;
-        box-shadow: 0 2px 4px rgba(14, 165, 233, 0.3);
+    .content-body {
+        padding: var(--space-5);
     }
 
-    .btn-warning {
-        background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
-        color: white;
-        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
-    }
-
-    .btn-danger {
-        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
-        color: white;
-        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
-    }
-
-    /* ==================== TABLE (SAMA PERSIS DASHBOARD) ==================== */
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .table {
-        margin-bottom: 0;
-        font-size: var(--font-sm);
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .table thead th {
-        background: var(--gray-800);
-        color: white;
-        font-weight: 600;
-        padding: var(--spacing-md);
-        font-size: var(--font-xs);
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        border: none;
-        white-space: nowrap;
-        text-align: left;
-    }
-
-    .table thead th:first-child {
-        border-top-left-radius: var(--radius-md);
-    }
-
-    .table thead th:last-child {
-        border-top-right-radius: var(--radius-md);
-    }
-
-    .table tbody td {
-        padding: var(--spacing-md);
-        vertical-align: middle;
-        border-bottom: 1px solid var(--gray-200);
-        color: var(--gray-700);
-    }
-
-    .table tbody tr {
-        transition: var(--transition-fast);
-    }
-
-    .table tbody tr:hover {
+    .content-footer {
+        padding: var(--space-3) var(--space-5);
         background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+        font-size: var(--text-sm);
+        color: var(--gray-600);
     }
 
-    .table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    /* ==================== BADGES ==================== */
-    .badge {
-        padding: var(--spacing-sm) var(--spacing-md);
+    /* BADGES */
+    .badge-kode {
+        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+        color: white;
+        padding: var(--space-1) var(--space-3);
         border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: var(--text-sm);
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        letter-spacing: 0.5px;
+    }
+
+    .badge {
+        padding: var(--space-1) var(--space-3);
+        border-radius: 12px;
         font-weight: 600;
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         display: inline-flex;
         align-items: center;
-        gap: var(--spacing-xs);
-        white-space: nowrap;
+        gap: var(--space-1);
     }
 
-    .badge.bg-success {
-        background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+    .badge-success {
+        background: linear-gradient(135deg, var(--success), #059669);
         color: white;
         box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
     }
 
-    .badge.bg-danger {
-        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+    .badge-danger {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
         color: white;
         box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
     }
 
-    /* ==================== SPECIAL STYLES ==================== */
+    /* MESIN NAME & INFO */
     .mesin-name {
         font-weight: 600;
         color: var(--gray-900);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
+        margin-bottom: var(--space-1);
     }
 
     .mesin-name i {
         color: var(--primary);
+        font-size: var(--text-base);
     }
 
-    .ip-address-cell code {
+    .mesin-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .mesin-info small {
+        color: var(--gray-600);
+        font-size: var(--text-xs);
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+    }
+
+    .mesin-info small i {
+        font-size: 10px;
+    }
+
+    /* IP & PORT */
+    .ip-port-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-1);
+    }
+
+    .ip-address code {
         font-family: 'Courier New', monospace;
-        font-size: var(--font-sm);
+        font-size: var(--text-xs);
         background: var(--gray-100);
-        padding: var(--spacing-xs) var(--spacing-sm);
+        padding: 4px 8px;
         border-radius: var(--radius-sm);
         color: var(--gray-800);
+        font-weight: 600;
+        display: inline-block;
     }
 
-    /* ==================== EMPTY STATE ==================== */
+    .port-number {
+        font-size: var(--text-xs);
+        color: var(--gray-600);
+        font-weight: 600;
+    }
+
+    /* LOKASI */
+    .lokasi-text {
+        font-size: var(--text-xs);
+        color: var(--gray-600);
+        max-width: 150px;
+        line-height: 1.4;
+    }
+
+    .lokasi-text i {
+        color: var(--danger);
+        margin-right: 4px;
+    }
+
+    /* EMPTY STATE */
     .empty-state {
         text-align: center;
-        padding: 48px var(--spacing-xl);
+        padding: var(--space-8);
     }
 
     .empty-state i {
         font-size: 3rem;
         color: var(--gray-300);
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: var(--space-4);
     }
 
     .empty-state h6 {
-        font-size: var(--font-base);
-        color: var(--gray-700);
-        margin-bottom: var(--spacing-sm);
+        font-size: var(--text-base);
         font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: var(--space-2);
     }
 
     .empty-state p {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         color: var(--gray-600);
         margin: 0;
     }
 
-    /* ==================== MODAL ==================== */
+    /* MODAL */
     .modal-content {
         border: none;
-        border-radius: var(--radius-lg);
+        border-radius: var(--radius);
         box-shadow: var(--shadow-lg);
     }
 
     .modal-header {
         background: var(--gray-800);
         color: white;
-        padding: var(--spacing-lg) var(--spacing-xl);
+        padding: var(--space-4) var(--space-5);
         border: none;
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        border-radius: var(--radius) var(--radius) 0 0;
     }
 
     .modal-header .btn-close {
@@ -311,25 +259,25 @@
 
     .modal-title {
         font-weight: 600;
-        font-size: var(--font-base);
+        font-size: var(--text-base);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
     }
 
     .modal-body {
-        padding: var(--spacing-xl);
+        padding: var(--space-5);
     }
 
     .alert {
         border-radius: var(--radius-sm);
-        padding: var(--spacing-lg);
-        font-size: var(--font-sm);
+        padding: var(--space-4);
+        font-size: var(--text-sm);
         margin-bottom: 0;
     }
 
     .alert-success {
-        background: var(--success-light);
+        background: #d1fae5;
         color: #065f46;
         border: 1px solid var(--success);
     }
@@ -341,35 +289,56 @@
     }
 
     .alert h5 {
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--space-3);
     }
 
-    /* ==================== DATATABLE CUSTOMIZATION ==================== */
-    .dataTables_wrapper {
-        padding: 0 !important;
+    /* ACTION BUTTONS */
+    .action-buttons {
+        display: flex;
+        gap: var(--space-1);
+        justify-content: center;
+        flex-wrap: nowrap;
     }
 
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-        display: none !important;
+    .btn-info {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        color: white;
+        box-shadow: 0 2px 4px rgba(14, 165, 233, 0.3);
     }
 
-    /* ==================== RESPONSIVE ==================== */
+    .btn-info:hover {
+        background: linear-gradient(135deg, #0284c7, #0369a1);
+    }
+
+    /* TABLE OPTIMIZATION */
+    .table {
+        font-size: var(--text-sm);
+    }
+
+    .table thead th {
+        font-size: 11px;
+        padding: var(--space-3);
+        vertical-align: middle;
+    }
+
+    .table tbody td {
+        padding: var(--space-3);
+        vertical-align: middle;
+    }
+
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-        .section-header {
+        .header-top {
             flex-direction: column;
             align-items: flex-start;
         }
 
-        .btn-action {
-            padding: var(--spacing-sm);
-            font-size: 0.65rem;
+        .table {
+            min-width: 900px;
         }
 
-        .table {
-            min-width: 1200px;
+        .mesin-name {
+            font-size: var(--text-sm);
         }
     }
 </style>
@@ -377,13 +346,15 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="section-card">
-        <div class="section-header">
-            <div>
-                <h5 class="section-title">
+    <!-- Header Card - Semua Info di Sini -->
+    <div class="header-card">
+        <div class="header-top">
+            <div class="header-info" style="flex: 1;">
+                <h5>
                     <i class="fas fa-fingerprint"></i>
-                    Master Mesin Fingerprint
+                    Daftar Mesin Fingerprint
                 </h5>
+                <p class="header-subtitle">Kelola perangkat fingerprint untuk absensi pegawai</p>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
@@ -393,7 +364,7 @@
                 </nav>
             </div>
             <div class="d-flex gap-2">
-                <a href="{% url 'tambah_mesin' %}" class="btn btn-primary">
+                <a href="{% url 'tambah_mesin' %}" class="btn btn-primary-light">
                     <i class="fas fa-plus"></i> Tambah Mesin
                 </a>
                 <a href="{% url 'menu_pengaturan' %}" class="btn btn-outline-light">
@@ -401,104 +372,113 @@
                 </a>
             </div>
         </div>
+    </div>
 
-        <div class="section-body">
+    <!-- Content Card - Hanya Table -->
+    <div class="content-card">
+        <div class="content-body">
             <div class="table-responsive">
-                <table class="table table-hover" id="mesinTable">
-                        <thead>
-                            <tr>
-                                <th class="text-center" style="width: 50px;">No</th>
-                                <th style="width: 100px;">Kode</th>
-                                <th>Nama Mesin</th>
-                                <th class="text-center">IP Address</th>
-                                <th class="text-center" style="width: 70px;">Port</th>
-                                <th>Cabang</th>
-                                <th>Lokasi</th>
-                                <th class="text-center" style="width: 100px;">Status</th>
-                                <th class="text-center" style="width: 220px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for mesin in mesin_list %}
-                            <tr>
-                                <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
-                                <td><strong>{{ mesin.kode }}</strong></td>
-                                <td>
-                                    <div class="mesin-name">
-                                        <i class="fas fa-fingerprint"></i>
-                                        {{ mesin.nama }}
-                                    </div>
-                                </td>
-                                <td class="text-center ip-address-cell">
-                                    <code>{{ mesin.ip_address }}</code>
-                                </td>
-                                <td class="text-center"><code>{{ mesin.port }}</code></td>
-                                <td>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width: 40px;">No</th>
+                            <th style="width: 90px;">Kode</th>
+                            <th style="width: 200px;">Nama Mesin</th>
+                            <th class="text-center" style="width: 140px;">IP & Port</th>
+                            <th style="width: 150px;">Lokasi</th>
+                            <th class="text-center" style="width: 90px;">Status</th>
+                            <th class="text-center" style="width: 150px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mesin in mesin_list %}
+                        <tr>
+                            <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
+                            <td>
+                                <span class="badge-kode">{{ mesin.kode }}</span>
+                            </td>
+                            <td>
+                                <div class="mesin-name">
+                                    <i class="fas fa-fingerprint"></i>
+                                    {{ mesin.nama }}
+                                </div>
+                                <div class="mesin-info">
                                     <small>
                                         <i class="fas fa-building" style="color: #0ea5e9;"></i>
                                         {{ mesin.cabang.nama }}
                                     </small>
-                                </td>
-                                <td>
-                                    {% if mesin.lokasi %}
-                                        <small style="color: var(--gray-600);">
-                                            <i class="fas fa-map-marker-alt" style="color: var(--danger);"></i>
-                                            {{ mesin.lokasi|truncatewords:5 }}
-                                        </small>
-                                    {% else %}
-                                        <span style="color: var(--gray-400);">-</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    {% if mesin.is_active %}
-                                        <span class="badge bg-success">
-                                            <i class="fas fa-check-circle"></i> Aktif
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-danger">
-                                            <i class="fas fa-times-circle"></i> Nonaktif
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    <div class="d-flex gap-2 justify-content-center flex-wrap">
-                                        <button class="btn btn-info btn-action test-mesin-btn" 
-                                                data-id="{{ mesin.id }}" 
-                                                data-ip="{{ mesin.ip_address }}"
-                                                title="Test Koneksi">
-                                            <i class="fas fa-plug"></i>
-                                        </button>
-                                        <a href="{% url 'edit_mesin' mesin.pk %}" 
-                                           class="btn btn-warning btn-action"
-                                           title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{% url 'hapus_mesin' mesin.pk %}" 
-                                           class="btn btn-danger btn-action"
-                                           title="Hapus"
-                                           onclick="return confirm('⚠️ Yakin ingin menghapus mesin {{ mesin.nama }}?\n\nData yang dihapus tidak dapat dikembalikan!')">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="ip-port-wrapper">
+                                    <div class="ip-address">
+                                        <code>{{ mesin.ip_address }}</code>
                                     </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="9">
-                                    <div class="empty-state">
-                                        <i class="fas fa-inbox"></i>
-                                        <h6>Tidak Ada Data Mesin</h6>
-                                        <p>Silakan tambah mesin fingerprint baru untuk memulai</p>
+                                    <div class="port-number">
+                                        Port: {{ mesin.port }}
                                     </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if mesin.lokasi %}
+                                    <div class="lokasi-text">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        {{ mesin.lokasi|truncatewords:6 }}
+                                    </div>
+                                {% else %}
+                                    <span style="color: var(--gray-400);">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if mesin.is_active %}
+                                    <span class="badge badge-success">
+                                        <i class="fas fa-check-circle"></i> Aktif
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-danger">
+                                        <i class="fas fa-times-circle"></i> Nonaktif
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="action-buttons">
+                                    <button class="btn btn-info btn-sm test-mesin-btn" 
+                                            data-id="{{ mesin.id }}" 
+                                            data-ip="{{ mesin.ip_address }}"
+                                            title="Test Koneksi">
+                                        <i class="fas fa-plug"></i>
+                                    </button>
+                                    <a href="{% url 'edit_mesin' mesin.pk %}" 
+                                       class="btn btn-warning btn-sm"
+                                       title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'hapus_mesin' mesin.pk %}" 
+                                       class="btn btn-danger btn-sm"
+                                       title="Hapus"
+                                       onclick="return confirm('Yakin hapus mesin {{ mesin.nama }}?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <h6>Tidak Ada Data</h6>
+                                    <p>Belum ada mesin fingerprint terdaftar</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+        </div>
 
-        <div class="section-footer">
+        <div class="content-footer">
             Total: <strong>{{ mesin_list|length }}</strong> Mesin
         </div>
     </div>
@@ -529,24 +509,8 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-
 <script>
 $(document).ready(function() {
-    // Initialize DataTable without pagination
-    $('#mesinTable').DataTable({
-        paging: false,
-        searching: false,
-        info: false,
-        ordering: true,
-        order: [[1, 'asc']],
-        columnDefs: [
-            { orderable: false, targets: [8] },
-            { className: "text-center", targets: [0, 3, 4, 7, 8] }
-        ]
-    });
-
     $('.test-mesin-btn').click(function() {
         const mesinId = $(this).data('id');
         const mesinIp = $(this).data('ip');
@@ -567,16 +531,16 @@ $(document).ready(function() {
                     $('#test-result').html(`
                         <div class="alert alert-success">
                             <i class="fas fa-check-circle fa-3x mb-3"></i>
-                            <h5 style="font-weight: 600; margin-bottom: var(--spacing-md);">Koneksi Berhasil!</h5>
+                            <h5 style="font-weight: 600; margin-bottom: var(--space-3);">Koneksi Berhasil!</h5>
                             <p class="mb-0">${response.msg}</p>
-                            <p style="margin-top: var(--spacing-sm);"><strong>Total User:</strong> ${response.total_users}</p>
+                            <p style="margin-top: var(--space-2);"><strong>Total User:</strong> ${response.total_users}</p>
                         </div>
                     `);
                 } else {
                     $('#test-result').html(`
                         <div class="alert alert-danger">
                             <i class="fas fa-times-circle fa-3x mb-3"></i>
-                            <h5 style="font-weight: 600; margin-bottom: var(--spacing-md);">Koneksi Gagal</h5>
+                            <h5 style="font-weight: 600; margin-bottom: var(--space-3);">Koneksi Gagal</h5>
                             <p class="mb-0">${response.msg}</p>
                         </div>
                     `);
@@ -586,7 +550,7 @@ $(document).ready(function() {
                 $('#test-result').html(`
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                        <h5 style="font-weight: 600; margin-bottom: var(--spacing-md);">Error</h5>
+                        <h5 style="font-weight: 600; margin-bottom: var(--space-3);">Error</h5>
                         <p class="mb-0">Gagal melakukan test koneksi</p>
                     </div>
                 `);

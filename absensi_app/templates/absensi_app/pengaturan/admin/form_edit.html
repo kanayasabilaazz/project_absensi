@@ -1,46 +1,83 @@
 {% extends 'absensi_app/base.html' %}
-
-{% block title %}{{ judul }}{% endblock %}
+{% block title %}Edit Admin{% endblock %}
 
 {% block extra_css %}
 <style>
-    .form-card {
-        background: white;
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--gray-200);
-        overflow: hidden;
+    /* === FORM SECTIONS === */
+    .form-section {
+        margin-bottom: var(--space-6);
+        padding-bottom: var(--space-6);
+        border-bottom: 1px solid var(--gray-200);
     }
 
-    .form-card-header {
-        background: linear-gradient(135deg, var(--warning-dark) 0%, var(--warning) 100%);
-        color: white;
-        padding: var(--spacing-lg) var(--spacing-xl);
+    .form-section:last-child {
+        border-bottom: none;
     }
 
-    .form-card-header h5 {
-        margin: 0;
-        font-size: var(--font-lg);
+    .section-title {
+        font-size: var(--text-base);
         font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: var(--space-4);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
     }
 
-    .form-card-body {
-        padding: var(--spacing-xl);
+    .section-title i {
+        color: var(--primary);
     }
 
-    .form-section {
-        margin-bottom: var(--spacing-xl);
+    /* === FORM SWITCH === */
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-3);
+        background: var(--gray-50);
+        border-radius: var(--radius-sm);
     }
 
+    .form-check-input {
+        width: 44px;
+        height: 24px;
+        margin: 0;
+        cursor: pointer;
+        border: 2px solid var(--gray-300);
+        background-color: var(--gray-300);
+        background-image: none;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--gray-700);
+        margin: 0;
+    }
+
+    .form-check-label small {
+        display: block;
+        color: var(--gray-500);
+        font-weight: 400;
+        margin-top: var(--space-1);
+    }
+
+    /* === BUTTONS === */
     .btn-group-actions {
         display: flex;
-        gap: var(--spacing-md);
-        padding-top: var(--spacing-lg);
-        border-top: 2px solid var(--gray-100);
-        margin-top: var(--spacing-xl);
+        gap: var(--space-3);
+        padding-top: var(--space-6);
+        border-top: 1px solid var(--gray-200);
     }
 
     .btn-secondary {
@@ -49,15 +86,11 @@
     }
 
     .btn-secondary:hover:not(:disabled) {
-        background: var(--gray-600);
-        transform: translateY(-1px);
+        background: var(--gray-700);
     }
 
+    /* === RESPONSIVE === */
     @media (max-width: 768px) {
-        .form-card-body {
-            padding: var(--spacing-lg);
-        }
-
         .btn-group-actions {
             flex-direction: column;
         }
@@ -70,120 +103,101 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="form-card">
-                <div class="form-card-header">
-                    <h5>
-                        <i class="fas fa-edit"></i>
-                        {{ judul }}
-                    </h5>
+<div class="card">
+    <div class="card-header">
+        <h5>
+            <i class="fas fa-user-shield"></i>
+            Edit Admin
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- INFO AKUN -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-user"></i>
+                    Informasi Akun
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Username:</strong> {{ user.username }} (tidak dapat diubah)
                 </div>
 
-                <div class="form-card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Username:</strong> {{ user.username }} (tidak dapat diubah)
-                        </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nama Depan</label>
+                        <input type="text" name="first_name" value="{{ user.first_name }}" 
+                               class="form-control" placeholder="John">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nama Belakang</label>
+                        <input type="text" name="last_name" value="{{ user.last_name }}" 
+                               class="form-control" placeholder="Doe">
+                    </div>
+                </div>
 
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Email</label>
-                                    <input 
-                                        type="email" 
-                                        class="form-control" 
-                                        name="email"
-                                        value="{{ user.email }}"
-                                        placeholder="admin@perusahaan.com"
-                                    >
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Status Akun</label>
-                                    <div class="form-check form-switch mt-2">
-                                        <input 
-                                            class="form-check-input" 
-                                            type="checkbox" 
-                                            name="is_active" 
-                                            id="is_active"
-                                            {% if user.is_active %}checked{% endif %}
-                                        >
-                                        <label class="form-check-label" for="is_active">
-                                            Akun Aktif
-                                        </label>
-                                    </div>
-                                    <small class="text-muted d-block mt-1">
-                                        Nonaktifkan untuk melarang admin login.
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Nama Depan</label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        name="first_name"
-                                        value="{{ user.first_name }}"
-                                        placeholder="John"
-                                    >
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Nama Belakang</label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        name="last_name"
-                                        value="{{ user.last_name }}"
-                                        placeholder="Doe"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="form-check">
-                                <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    name="is_superuser" 
-                                    id="is_superuser"
-                                    {% if user.is_superuser %}checked{% endif %}
-                                >
-                                <label class="form-check-label" for="is_superuser">
-                                    <strong>Super Admin</strong>
-                                    <br>
-                                    <small class="text-muted">
-                                        Super Admin memiliki akses penuh ke seluruh sistem.
-                                    </small>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            Perhatian: Untuk mengubah password, gunakan tombol "Reset Password" di halaman daftar admin.
-                        </div>
-
-                        <div class="btn-group-actions">
-                            <button type="submit" class="btn btn-warning text-white">
-                                <i class="fas fa-save"></i> Update Admin
-                            </button>
-                            <a href="{% url 'daftar_admin' %}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Batal
-                            </a>
-                        </div>
-                    </form>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" value="{{ user.email }}" 
+                               class="form-control" placeholder="admin@perusahaan.com">
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- STATUS & HAK AKSES -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Status & Hak Akses
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_active" 
+                                   id="is_active" {% if user.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="is_active">
+                                <strong>Akun Aktif</strong>
+                                <small>Nonaktifkan untuk melarang admin login</small>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_superuser" 
+                                   id="is_superuser" {% if user.is_superuser %}checked{% endif %}>
+                            <label class="form-check-label" for="is_superuser">
+                                <strong>Super Admin</strong>
+                                <small>Akses penuh ke seluruh sistem</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INFO PASSWORD -->
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                Untuk mengubah password, gunakan tombol "Reset Password" di halaman daftar admin.
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="btn-group-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Simpan Perubahan
+                </button>
+                <a href="{% url 'daftar_admin' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

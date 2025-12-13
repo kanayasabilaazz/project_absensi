@@ -5,134 +5,164 @@
 
 {% block extra_css %}
 <style>
-    .dashboard-card {
-        background: white;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-        margin-bottom: var(--spacing-xl);
-    }
-
-    .dashboard-card-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* HEADER CARD - TERPISAH DI ATAS */
+    .header-card {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+        border-radius: var(--radius);
+        padding: var(--space-5);
+        margin-bottom: var(--space-4);
+        box-shadow: var(--shadow);
         color: white;
-        padding: var(--spacing-lg) var(--spacing-xl);
-        border: none;
     }
 
-    .dashboard-card-header h4 {
-        font-size: var(--font-lg);
-        font-weight: 600;
-        margin: 0 0 var(--spacing-xs) 0;
+    .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: var(--space-3);
+        margin-bottom: var(--space-4);
+        flex-wrap: wrap;
+    }
+
+    .header-info h5 {
+        margin: 0 0 var(--space-1) 0;
+        font-size: var(--text-xl);
+        font-weight: 700;
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
     }
 
-    .dashboard-card-header h4 i {
-        font-size: var(--font-base);
-    }
-
-    .dashboard-card-header p {
-        font-size: var(--font-xs);
-        margin: 0;
+    .header-subtitle {
+        font-size: var(--text-sm);
+        margin: 0 0 var(--space-2) 0;
         opacity: 0.9;
     }
 
-    .dashboard-card-body {
-        padding: var(--spacing-xl);
-    }
-
-    /* Header Actions */
-    .header-actions {
+    .mode-info-section {
         display: flex;
-        gap: var(--spacing-sm);
-        margin-top: var(--spacing-md);
-    }
-
-    .btn-header {
-        background: rgba(255, 255, 255, 0.95);
-        color: #667eea;
-        padding: var(--spacing-sm) var(--spacing-lg);
-        border-radius: var(--radius-sm);
-        font-size: var(--font-xs);
-        font-weight: 600;
-        border: none;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: all var(--transition-base);
-        display: inline-flex;
         align-items: center;
-        gap: var(--spacing-xs);
-        text-decoration: none;
-    }
-
-    .btn-header:hover {
-        background: white;
-        color: #667eea;
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-        text-decoration: none;
-    }
-
-    /* Today Banner */
-    .today-banner {
+        gap: var(--space-3);
+        padding: var(--space-3);
         background: rgba(255, 255, 255, 0.15);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-lg);
-        margin-top: var(--spacing-lg);
+        border-radius: var(--radius-sm);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
-    .today-banner small {
-        opacity: 0.85;
-        text-transform: uppercase;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        font-size: 0.65rem;
-        display: block;
-        margin-bottom: var(--spacing-xs);
-    }
-
-    .today-banner h5 {
-        font-size: var(--font-base);
-        font-weight: 700;
-        margin: 0;
+    .mode-info-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        justify-content: center;
+        font-size: var(--text-lg);
+        flex-shrink: 0;
     }
 
-    .badge.bg-info {
-        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
-        color: white;
-        padding: 4px var(--spacing-sm);
-        border-radius: var(--radius-sm);
+    .mode-info-content h6 {
+        margin: 0 0 4px 0;
         font-size: 0.65rem;
         font-weight: 600;
-        box-shadow: 0 2px 4px rgba(0, 210, 255, 0.25);
+        opacity: 0.85;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    /* Mode Cards Grid */
+    .mode-info-content p {
+        margin: 0;
+        font-size: var(--text-sm);
+        font-weight: 600;
+    }
+
+    .mode-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px var(--space-2);
+        border-radius: 12px;
+        font-size: var(--text-xs);
+        font-weight: 600;
+        margin-left: var(--space-2);
+    }
+
+    /* CONTENT CARD - HANYA ISI */
+    .content-card {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--gray-200);
+        padding: var(--space-5);
+    }
+
+    /* BREADCRUMB */
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin-bottom: var(--space-3);
+        font-size: var(--text-sm);
+    }
+
+    .breadcrumb-item {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .breadcrumb-item a {
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+    }
+
+    .breadcrumb-item.active {
+        color: white;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* BUTTONS */
+    .btn-primary-light {
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--primary-hover);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-primary-light:hover {
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-outline-light {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-outline-light:hover {
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* MODE CARDS GRID */
     .cards-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-md);
-        margin-top: var(--spacing-lg);
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: var(--space-4);
+        margin-top: 0;
     }
 
     .mode-card {
         background: white;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--gray-200);
-        padding: var(--spacing-md);
+        border-radius: var(--radius);
+        border: 2px solid var(--gray-200);
+        padding: var(--space-4);
         display: flex;
         flex-direction: column;
-        transition: all var(--transition-base);
-        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow);
         height: 100%;
-        min-height: 220px;
+        min-height: 280px;
     }
 
     .mode-card:hover {
@@ -144,64 +174,64 @@
     .mode-card.active {
         border-color: var(--success);
         background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
     }
 
-    /* Mode Icon */
+    /* MODE ICON */
     .mode-icon {
-        width: 40px;
-        height: 40px;
+        width: 56px;
+        height: 56px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto var(--spacing-sm);
-        font-size: var(--font-base);
-        box-shadow: var(--shadow-md);
-        transition: transform var(--transition-base);
+        margin: 0 auto var(--space-3);
+        font-size: var(--text-xl);
+        transition: transform 0.3s ease;
     }
 
     .mode-card:hover .mode-icon {
         transform: scale(1.1);
     }
 
-    /* Mode Body */
+    /* MODE BODY */
     .mode-body {
         flex: 1;
         text-align: center;
         display: flex;
         flex-direction: column;
+        gap: var(--space-2);
     }
 
     .mode-title {
-        font-size: var(--font-sm);
-        font-weight: 600;
-        margin-bottom: var(--spacing-xs);
+        font-size: var(--text-lg);
+        font-weight: 700;
         color: var(--gray-900);
         line-height: 1.3;
+        margin-bottom: var(--space-2);
     }
 
-    /* Mode Badges */
+    /* MODE BADGES */
     .mode-badges {
         display: flex;
-        gap: 4px;
+        gap: var(--space-1);
         justify-content: center;
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--space-3);
         flex-wrap: wrap;
     }
 
-    .mode-badge {
+    .mode-badge-status {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        padding: 4px var(--spacing-xs);
+        padding: 4px var(--space-2);
         border-radius: var(--radius-sm);
-        font-size: 0.6rem;
+        font-size: 0.65rem;
         font-weight: 600;
     }
 
     .badge-active {
-        background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+        background: linear-gradient(135deg, var(--success), #059669);
         color: white;
         box-shadow: 0 2px 4px rgba(16, 185, 129, 0.25);
     }
@@ -212,20 +242,21 @@
     }
 
     .badge-default {
-        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
         color: white;
         box-shadow: 0 2px 4px rgba(251, 191, 36, 0.25);
     }
 
-    /* Periode Info */
+    /* PERIODE INFO */
     .periode-info {
         text-align: left;
-        padding: var(--spacing-xs);
+        padding: var(--space-3);
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
         border-radius: var(--radius-sm);
-        font-size: 0.6rem;
-        margin-bottom: var(--spacing-sm);
+        font-size: var(--text-xs);
+        margin-bottom: var(--space-3);
         border: 1px solid #fbbf24;
+        line-height: 1.5;
     }
 
     .periode-info i {
@@ -236,91 +267,87 @@
     .periode-info strong {
         color: var(--gray-900);
         font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
     }
 
-    /* Stats */
+    .periode-info span {
+        color: #6b7280;
+        font-size: 0.65rem;
+    }
+
+    /* STATS */
     .mode-stats {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: var(--spacing-xs);
-        margin: var(--spacing-sm) 0;
-        flex: 1;
+        gap: var(--space-2);
+        margin: var(--space-3) 0;
     }
 
     .stat-item {
         text-align: center;
-        padding: var(--spacing-xs);
-        background: linear-gradient(135deg, var(--gray-50) 0%, #ffffff 100%);
+        padding: var(--space-3);
+        background: var(--gray-50);
         border-radius: var(--radius-sm);
         border: 1px solid var(--gray-200);
     }
 
     .stat-value {
-        font-size: var(--font-lg);
+        font-size: var(--text-2xl);
         font-weight: 700;
         color: var(--primary);
         line-height: 1;
-        margin-bottom: 2px;
+        margin-bottom: 4px;
     }
 
     .stat-label {
-        font-size: 0.6rem;
+        font-size: 0.65rem;
         color: var(--gray-600);
         text-transform: uppercase;
         letter-spacing: 0.5px;
         font-weight: 600;
     }
 
-    /* Action Buttons */
-    .btn-choose {
+    /* ACTION BUTTON */
+    .btn-detail {
         width: 100%;
-        padding: var(--spacing-sm) var(--spacing-md);
-        font-size: 0.65rem;
+        padding: var(--space-3);
+        font-size: var(--text-sm);
         font-weight: 600;
         border-radius: var(--radius-sm);
-        transition: all var(--transition-base);
+        transition: all 0.3s ease;
         border: none;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: var(--spacing-xs);
+        gap: var(--space-2);
         margin-top: auto;
         color: white;
         text-decoration: none;
+        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
     }
 
-    .btn-choose i {
-        font-size: 0.6rem;
-    }
-
-    .btn-choose:hover {
+    .btn-detail:hover {
         transform: translateY(-2px);
         box-shadow: var(--shadow-md);
         color: white;
         text-decoration: none;
+        background: linear-gradient(135deg, var(--primary-hover), var(--primary-dark));
     }
 
-    .btn-primary.btn-choose {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .btn-primary.btn-choose:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #5a4a8f 100%);
-    }
-
-    /* Empty State */
+    /* EMPTY STATE */
     .empty-state {
         text-align: center;
-        padding: 60px var(--spacing-xl);
-        background: linear-gradient(135deg, var(--gray-50) 0%, #ffffff 100%);
-        border-radius: var(--radius-lg);
+        padding: var(--space-8);
+        background: var(--gray-50);
+        border-radius: var(--radius);
         border: 2px dashed var(--gray-300);
     }
 
-    .empty-state-icon {
+    .empty-state i {
         font-size: 4rem;
         color: var(--gray-300);
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: var(--space-4);
         animation: pulse 2s infinite;
     }
 
@@ -329,72 +356,73 @@
         50% { opacity: 0.5; }
     }
 
-    .empty-state h5 {
-        font-size: var(--font-lg);
-        color: var(--gray-700);
-        margin-bottom: var(--spacing-sm);
+    .empty-state h6 {
+        font-size: var(--text-lg);
         font-weight: 700;
+        color: var(--gray-700);
+        margin-bottom: var(--space-2);
     }
 
     .empty-state p {
-        font-size: var(--font-xs);
+        font-size: var(--text-sm);
         color: var(--gray-600);
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: var(--space-4);
     }
 
     .btn-empty {
-        padding: var(--spacing-md) var(--spacing-xl);
-        font-size: var(--font-sm);
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: var(--space-3) var(--space-5);
+        font-size: var(--text-sm);
+        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
         color: white;
         border: none;
         border-radius: var(--radius-sm);
         font-weight: 600;
-        transition: all var(--transition-base);
+        transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
         text-decoration: none;
     }
 
     .btn-empty:hover {
         transform: translateY(-2px);
         box-shadow: var(--shadow-md);
-        background: linear-gradient(135deg, #764ba2 0%, #5a4a8f 100%);
+        background: linear-gradient(135deg, var(--primary-hover), var(--primary-dark));
         color: white;
         text-decoration: none;
     }
 
-    /* Responsive */
+    /* RESPONSIVE */
+    @media (max-width: 992px) {
+        .cards-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+    }
+
     @media (max-width: 768px) {
-        .dashboard-card-header,
-        .dashboard-card-body {
-            padding: var(--spacing-lg);
+        .header-top {
+            flex-direction: column;
+            align-items: flex-start;
         }
 
         .cards-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: var(--spacing-sm);
+            gap: var(--space-3);
         }
 
         .mode-card {
-            padding: var(--spacing-sm);
-            min-height: 200px;
+            padding: var(--space-3);
+            min-height: 260px;
         }
 
         .mode-icon {
-            width: 36px;
-            height: 36px;
-            font-size: var(--font-sm);
+            width: 48px;
+            height: 48px;
+            font-size: var(--text-lg);
         }
 
-        .header-actions {
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .btn-header {
-            width: 100%;
+        .mode-title {
+            font-size: var(--text-base);
         }
     }
 
@@ -404,7 +432,7 @@
         }
 
         .mode-card {
-            min-height: 200px;
+            min-height: 240px;
         }
     }
 </style>
@@ -412,48 +440,57 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="dashboard-card">
-        <div class="dashboard-card-header">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                <div>
-                    <h4>
-                        <i class="fas fa-business-time"></i>
-                        Mode Jam Kerja
-                    </h4>
-                    <p>Kelola jadwal kerja dengan sistem yang fleksibel</p>
-                </div>
-                <div class="header-actions">
-                    <a href="{% url 'tambah_mode_jam_kerja' %}" class="btn-header">
-                        <i class="fas fa-plus"></i> Tambah Mode
-                    </a>
-                </div>
+    <!-- Header Card - Semua Info di Sini -->
+    <div class="header-card">
+        <!-- Top Section: Title + Buttons -->
+        <div class="header-top">
+            <div class="header-info" style="flex: 1;">
+                <h5>
+                    <i class="fas fa-business-time"></i>
+                    Daftar Mode Jam Kerja
+                </h5>
+                <p class="header-subtitle">Kelola jadwal kerja dengan sistem yang fleksibel</p>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'menu_pengaturan' %}">Pengaturan</a></li>
+                        <li class="breadcrumb-item active">Mode Jam Kerja</li>
+                    </ol>
+                </nav>
             </div>
-            
-            <!-- Today's Active Mode -->
-            {% if mode_today %}
-            <div class="today-banner">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                    <div>
-                        <small>Mode Aktif Hari Ini</small>
-                        <h5>
-                            <i class="{{ mode_today.mode_icon|default:'fas fa-clock' }}"></i>
-                            {{ mode_today.mode_nama }}
-                        </h5>
-                    </div>
-                    {% if mode_today.periode_nama %}
-                    <span class="badge bg-info">
-                        <i class="fas fa-calendar-check"></i>
-                        {{ mode_today.periode_nama }}
-                    </span>
-                    {% endif %}
-                </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'tambah_mode_jam_kerja' %}" class="btn btn-primary-light">
+                    <i class="fas fa-plus"></i> Tambah Mode
+                </a>
+                <a href="{% url 'menu_pengaturan' %}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
             </div>
-            {% endif %}
         </div>
 
-        <div class="dashboard-card-body">
-            {% if mode_data %}
-                <div class="cards-grid">
+        <!-- Mode Aktif Info -->
+        {% if mode_today %}
+        <div class="mode-info-section">
+            <div class="mode-info-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="mode-info-content flex-grow-1">
+                <h6>Mode Aktif Hari Ini</h6>
+                <p>
+                    {{ mode_today.mode_nama }} ({{ mode_today.mode_kode|default:"N/A" }})
+                    {% if mode_today.periode_nama %}
+                        <span class="mode-badge">{{ mode_today.periode_nama }}</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Content Card - Hanya Grid Cards -->
+    <div class="content-card">
+        {% if mode_data %}
+            <div class="cards-grid">
                     {% for item in mode_data %}
                     <div class="mode-card {% if item.is_applicable %}active{% endif %}">
                         <div class="mode-body">
@@ -465,21 +502,21 @@
                             
                             <div class="mode-badges">
                                 {% if item.is_applicable %}
-                                <span class="mode-badge badge-active">
+                                <span class="mode-badge-status badge-active">
                                     <i class="fas fa-check-circle"></i> 
-                                    <span>Aktif</span>
+                                    Aktif
                                 </span>
                                 {% else %}
-                                <span class="mode-badge badge-inactive">
+                                <span class="mode-badge-status badge-inactive">
                                     <i class="fas fa-circle"></i>
-                                    <span>Tidak Aktif</span>
+                                    Nonaktif
                                 </span>
                                 {% endif %}
                                 
                                 {% if item.mode.is_default %}
-                                <span class="mode-badge badge-default">
+                                <span class="mode-badge-status badge-default">
                                     <i class="fas fa-star"></i>
-                                    <span>Default</span>
+                                    Default
                                 </span>
                                 {% endif %}
                             </div>
@@ -487,10 +524,11 @@
                             <!-- Active Period -->
                             {% if item.periode_aktif %}
                             <div class="periode-info">
-                                <i class="fas fa-calendar-alt"></i>
-                                <strong>{{ item.periode_aktif.nama }}</strong>
-                                <br>
-                                <span style="color: #6b7280;">
+                                <strong>
+                                    <i class="fas fa-calendar-alt"></i>
+                                    {{ item.periode_aktif.nama }}
+                                </strong>
+                                <span>
                                     {{ item.periode_aktif.tanggal_mulai|date:"d M" }} - 
                                     {{ item.periode_aktif.tanggal_selesai|date:"d M Y" }}
                                 </span>
@@ -512,7 +550,7 @@
 
                         <!-- Action Button -->
                         <a href="{% url 'detail_mode_jam_kerja' item.mode.id %}" 
-                           class="btn btn-primary btn-choose">
+                           class="btn-detail">
                             <i class="fas fa-eye"></i>
                             Lihat Detail
                         </a>
@@ -522,10 +560,8 @@
             {% else %}
                 <!-- Empty State -->
                 <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <h5>Belum Ada Mode Jam Kerja</h5>
+                    <i class="fas fa-clock"></i>
+                    <h6>Belum Ada Mode Jam Kerja</h6>
                     <p>Buat mode jam kerja pertama untuk mengatur jadwal kerja pegawai</p>
                     <a href="{% url 'tambah_mode_jam_kerja' %}" class="btn-empty">
                         <i class="fas fa-plus"></i> Tambah Mode Pertama
@@ -545,13 +581,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     modeIcons.forEach(function(icon) {
         const color = icon.getAttribute('data-color');
-        icon.style.backgroundColor = color + '20';
-        icon.style.color = color;
-        icon.style.border = '2px solid ' + color + '40';
+        if (color) {
+            icon.style.backgroundColor = color + '20';
+            icon.style.color = color;
+            icon.style.border = '2px solid ' + color + '40';
+        }
     });
     
     // Add loading state to buttons
-    document.querySelectorAll('.btn-choose').forEach(function(btn) {
+    document.querySelectorAll('.btn-detail').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
             const icon = this.querySelector('i');
             if (icon) {

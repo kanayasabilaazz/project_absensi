@@ -5,480 +5,317 @@
 
 {% block extra_css %}
 <style>
-    /* ==================== FORM CARD ==================== */
-    .form-card {
-        background: white;
-        border-radius: var(--radius);
-        border: 1px solid var(--gray-200);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-        margin-bottom: var(--space-6);
-    }
+/* ===== FORM SECTIONS ===== */
+.form-section {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--gray-200);
+}
 
-    .form-card-header {
-        background: var(--primary);
-        color: white;
-        padding: var(--space-5);
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-    }
+.form-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
 
-    .form-card-header h5 {
-        margin: 0;
-        font-size: var(--text-lg);
-        font-weight: 600;
-    }
+.form-section.hidden {
+    display: none;
+}
 
-    .form-card-header i {
-        font-size: var(--text-xl);
-    }
+/* ===== SECTION DIVIDER ===== */
+.section-divider {
+    border-top: 2px solid var(--gray-200);
+    margin: var(--space-6) 0;
+}
 
-    .form-card-body {
-        padding: var(--space-6);
-    }
+/* ===== RADIO GROUP ===== */
+.radio-group {
+    display: flex;
+    gap: var(--space-6);
+    margin-top: var(--space-2);
+}
 
-    /* ==================== FORM CONTROLS ==================== */
-    .form-label {
-        font-weight: 600;
-        font-size: var(--text-sm);
-        margin-bottom: var(--space-3);
-        color: var(--gray-700);
-        display: block;
-    }
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
 
-    .form-label .text-danger {
-        color: var(--danger);
-        margin-left: var(--space-1);
-    }
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+    border: 2px solid var(--gray-300);
+}
 
-    .form-label .text-muted {
-        color: var(--gray-500);
-        font-weight: 500;
-    }
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
 
-    .form-control,
-    .form-select {
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius-sm);
-        padding: 0.5rem var(--space-3);
-        font-size: var(--text-sm);
-        transition: all 0.2s;
-        width: 100%;
-        background: white;
-    }
+.form-check-label {
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--gray-700);
+    margin: 0;
+}
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        outline: none;
-    }
+/* ===== BADGE ===== */
+.badge-info {
+    background: var(--primary-light);
+    color: #1e40af;
+    padding: var(--space-1) var(--space-3);
+    border-radius: 12px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
 
-    textarea.form-control {
-        resize: vertical;
-        min-height: 80px;
-    }
+/* ===== SUB LABELS ===== */
+.sub-label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: var(--space-2);
+}
 
-    /* ==================== FORM SECTIONS ==================== */
-    .form-section {
-        margin-bottom: var(--space-6);
-    }
+/* ===== BUTTONS ===== */
+.btn-group-actions {
+    display: flex;
+    gap: var(--space-3);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--gray-200);
+}
 
-    .form-section:last-child {
-        margin-bottom: 0;
-    }
+.btn-secondary {
+    background: var(--gray-500);
+    color: white;
+}
 
-    .hidden {
-        display: none !important;
-    }
+.btn-secondary:hover:not(:disabled) {
+    background: var(--gray-700);
+}
 
-    /* ==================== DIVIDER ==================== */
-    .section-divider {
-        border-top: 1px solid var(--gray-200);
-        margin: var(--space-6) 0;
-    }
-
-    /* ==================== RADIO BUTTONS ==================== */
-    .form-check {
-        padding-left: 0;
-        margin-bottom: var(--space-3);
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-    }
-
-    .form-check-input {
-        width: 1rem;
-        height: 1rem;
-        border: 2px solid var(--gray-300);
-        border-radius: 50%;
-        cursor: pointer;
-        margin: 0;
-        transition: all 0.2s;
-    }
-
-    .form-check-input:checked {
-        background-color: var(--primary);
-        border-color: var(--primary);
-    }
-
-    .form-check-label {
-        cursor: pointer;
-        font-size: var(--text-sm);
-        font-weight: 500;
-        color: var(--gray-700);
-        margin: 0;
-    }
-
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
     .radio-group {
-        display: flex;
-        gap: var(--space-4);
-    }
-
-    .badge {
-        display: inline-block;
-        padding: var(--space-1) var(--space-3);
-        border-radius: 12px;
-        font-size: var(--text-xs);
-        font-weight: 600;
-        white-space: nowrap;
-    }
-
-    .badge-info {
-        background: var(--primary-light);
-        color: #1e40af;
-    }
-
-    /* ==================== ALERTS ==================== */
-    .alert {
-        border-radius: var(--radius-sm);
-        padding: var(--space-4);
-        margin-bottom: var(--space-5);
-        display: flex;
-        align-items: flex-start;
+        flex-direction: column;
         gap: var(--space-3);
-        font-size: var(--text-sm);
-        border: 1px solid transparent;
     }
 
-    .alert i {
-        font-size: var(--text-base);
-        margin-top: 2px;
-        flex-shrink: 0;
-    }
-
-    .alert-danger {
-        background: var(--danger-light);
-        color: #991b1b;
-        border-color: var(--danger);
-    }
-
-    .alert-warning {
-        background: var(--warning-light);
-        color: #92400e;
-        border-color: var(--warning);
-    }
-
-    .alert-info {
-        background: var(--primary-light);
-        color: #1e40af;
-        border-color: var(--primary);
-    }
-
-    /* ==================== ERROR MESSAGES ==================== */
-    .text-danger.small {
-        font-size: var(--text-xs);
-        margin-top: var(--space-1);
-        display: block;
-        color: var(--danger);
-    }
-
-    /* ==================== BUTTONS ==================== */
     .btn-group-actions {
-        display: flex;
-        gap: var(--space-3);
-        padding-top: var(--space-5);
-        border-top: 1px solid var(--gray-200);
-        margin-top: var(--space-6);
+        flex-direction: column;
     }
 
-    .btn {
-        height: 40px;
-        padding: 0 var(--space-4);
-        font-size: var(--text-sm);
-        font-weight: 600;
-        border-radius: var(--radius-sm);
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-2);
-        transition: all 0.2s;
-        text-decoration: none;
-        white-space: nowrap;
+    .btn-group-actions .btn {
+        width: 100%;
     }
-
-    .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .btn-primary {
-        background: var(--primary);
-        color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-        background: #2563eb;
-    }
-
-    .btn-secondary {
-        background: var(--gray-300);
-        color: var(--gray-900);
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-        background: var(--gray-400);
-    }
-
-    /* ==================== RESPONSIVE ==================== */
-    @media (max-width: 768px) {
-        .form-card-body {
-            padding: var(--space-4);
-        }
-
-        .form-card-header {
-            padding: var(--space-4);
-        }
-
-        .radio-group {
-            flex-direction: column;
-            gap: var(--space-3);
-        }
-
-        .btn-group-actions {
-            flex-direction: column;
-        }
-
-        .btn-group-actions .btn {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .form-card-header h5 {
-            font-size: var(--text-base);
-        }
-    }
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="form-card">
-                <div class="form-card-header">
-                    <i class="fas fa-clipboard-check"></i>
-                    <h5>Catat Absensi Pegawai</h5>
+<div class="card">
+    <div class="card-header">
+        <h5>
+            <i class="fas fa-clipboard-check"></i>
+            Catat Absensi Pegawai
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <form method="post" id="formAbsensi">
+            {% csrf_token %}
+
+            <!-- ERROR MESSAGES -->
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>{{ form.non_field_errors }}</div>
+                </div>
+            {% endif %}
+
+            <!-- PEGAWAI -->
+            <div class="form-section">
+                <label for="{{ form.pegawai.id_for_label }}" class="form-label">
+                    Pilih Pegawai <span style="color: var(--danger);">*</span>
+                </label>
+                {% render_field form.pegawai class="form-select" %}
+                {% if form.pegawai.errors %}
+                    <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                        {{ form.pegawai.errors }}
+                    </small>
+                {% endif %}
+            </div>
+
+            <!-- STATUS ABSENSI -->
+            <div class="form-section">
+                <label for="id_status" class="form-label">
+                    Status Absensi <span style="color: var(--danger);">*</span>
+                </label>
+                <select name="status" id="id_status" class="form-select" required>
+                    <option value="">-- Pilih Status --</option>
+                    <option value="Hadir">Hadir</option>
+                    <option value="Izin">Izin</option>
+                    <option value="Sakit">Sakit</option>
+                    <option value="Absen">Absen</option>
+                </select>
+            </div>
+
+            <!-- SECTION: HADIR -->
+            <div id="hadirSection" class="hidden">
+                <div class="section-divider"></div>
+
+                <div class="form-section">
+                    <label for="id_tanggal_single" class="form-label">
+                        Tanggal Absensi <span style="color: var(--danger);">*</span>
+                    </label>
+                    <input type="date" name="tanggal" id="id_tanggal_single" class="form-control">
                 </div>
 
-                <div class="form-card-body">
-                    <form method="post" id="formAbsensi">
-                        {% csrf_token %}
-
-                        <!-- ERROR MESSAGES -->
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <div>{{ form.non_field_errors }}</div>
-                            </div>
-                        {% endif %}
-
-                        <!-- PEGAWAI -->
-                        <div class="form-section">
-                            <label for="{{ form.pegawai.id_for_label }}" class="form-label">
-                                Pilih Pegawai <span class="text-danger">*</span>
+                <div class="form-section">
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="id_tap_masuk" class="form-label">
+                                Waktu Masuk <span style="color: var(--danger);">*</span>
                             </label>
-                            {% render_field form.pegawai class="form-select" %}
-                            {% if form.pegawai.errors %}
-                                <span class="text-danger small">{{ form.pegawai.errors }}</span>
-                            {% endif %}
+                            <input type="time" name="tap_masuk" id="id_tap_masuk" class="form-control">
                         </div>
-
-                        <!-- STATUS ABSENSI -->
-                        <div class="form-section">
-                            <label for="id_status" class="form-label">
-                                Status Absensi <span class="text-danger">*</span>
+                        <div class="col-md-6">
+                            <label for="id_tap_pulang" class="form-label">
+                                Waktu Pulang <span style="color: var(--gray-500);">(Opsional)</span>
                             </label>
-                            <select name="status" id="id_status" class="form-select" required>
-                                <option value="">-- Pilih Status --</option>
-                                <option value="Hadir">Hadir</option>
-                                <option value="Izin">Izin</option>
-                                <option value="Sakit">Sakit</option>
-                                <option value="Absen">Absen</option>
-                            </select>
+                            <input type="time" name="tap_pulang" id="id_tap_pulang" class="form-control">
                         </div>
+                    </div>
+                </div>
 
-                        <!-- SECTION HADIR -->
-                        <div id="hadirSection" class="hidden">
-                            <div class="section-divider"></div>
-
-                            <div class="form-section">
-                                <label for="id_tanggal_single" class="form-label">
-                                    Tanggal Absensi <span class="text-danger">*</span>
-                                </label>
-                                <input type="date" name="tanggal" id="id_tanggal_single" class="form-control">
-                            </div>
-
-                            <div class="form-section">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <label for="id_tap_masuk" class="form-label">
-                                            Waktu Masuk <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="time" name="tap_masuk" id="id_tap_masuk" class="form-control">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="id_tap_pulang" class="form-label">
-                                            Waktu Pulang <span class="text-muted">(Opsional)</span>
-                                        </label>
-                                        <input type="time" name="tap_pulang" id="id_tap_pulang" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- WAKTU ISTIRAHAT -->
-                            <div class="form-section">
-                                <label class="form-label">Waktu Istirahat <span class="text-muted">(Opsional)</span></label>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <label for="id_tap_istirahat_keluar" class="form-label" style="margin-bottom: var(--space-2); font-weight: 500;">
-                                            Keluar Istirahat
-                                        </label>
-                                        <input type="time" name="tap_istirahat_keluar" id="id_tap_istirahat_keluar" class="form-control">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="id_tap_istirahat_masuk" class="form-label" style="margin-bottom: var(--space-2); font-weight: 500;">
-                                            Masuk Istirahat
-                                        </label>
-                                        <input type="time" name="tap_istirahat_masuk" id="id_tap_istirahat_masuk" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
+                <div class="form-section">
+                    <label class="form-label">
+                        Waktu Istirahat <span style="color: var(--gray-500);">(Opsional)</span>
+                    </label>
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="id_tap_istirahat_keluar" class="sub-label">
+                                Keluar Istirahat
+                            </label>
+                            <input type="time" name="tap_istirahat_keluar" id="id_tap_istirahat_keluar" class="form-control">
                         </div>
-
-                        <!-- SECTION ABSEN -->
-                        <div id="absenSection" class="hidden">
-                            <div class="section-divider"></div>
-
-                            <div class="form-section">
-                                <label for="id_tanggal_absen" class="form-label">
-                                    Tanggal Absensi <span class="text-danger">*</span>
-                                </label>
-                                <input type="date" name="tanggal" id="id_tanggal_absen" class="form-control">
-                            </div>
-
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <div><strong>Status Absen:</strong> Tidak perlu mengisi waktu masuk dan keluar.</div>
-                            </div>
+                        <div class="col-md-6">
+                            <label for="id_tap_istirahat_masuk" class="sub-label">
+                                Masuk Istirahat
+                            </label>
+                            <input type="time" name="tap_istirahat_masuk" id="id_tap_istirahat_masuk" class="form-control">
                         </div>
-
-                        <!-- SECTION IZIN/SAKIT -->
-                        <div id="rangeDateSection" class="hidden">
-                            <div class="section-divider"></div>
-
-                            <div class="form-section">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <label for="id_tanggal_mulai" class="form-label">
-                                            Tanggal Mulai <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="date" name="tanggal_mulai" id="id_tanggal_mulai" class="form-control">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="id_tanggal_selesai" class="form-label">
-                                            Tanggal Selesai <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="date" name="tanggal_selesai" id="id_tanggal_selesai" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-section">
-                                <label class="form-label">
-                                    Tipe <span class="text-danger">*</span>
-                                </label>
-                                <div class="radio-group">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="tipe_izin" id="fullDay" value="full" checked>
-                                        <label class="form-check-label" for="fullDay">
-                                            <span class="badge badge-info">Full Day</span>
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="tipe_izin" id="halfDay" value="half">
-                                        <label class="form-check-label" for="halfDay">
-                                            <span class="badge badge-info">Half Day</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Half day time fields -->
-                            <div id="halfDayTimeSection" class="hidden">
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle"></i>
-                                    <div><strong>Half Day:</strong> Masukkan waktu izin/sakit.</div>
-                                </div>
-
-                                <div class="form-section">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3 mb-md-0">
-                                            <label for="id_tap_masuk_half" class="form-label">
-                                                Waktu Mulai
-                                            </label>
-                                            <input type="time" name="tap_masuk_half" id="id_tap_masuk_half" class="form-control">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="id_tap_pulang_half" class="form-label">
-                                                Waktu Selesai
-                                            </label>
-                                            <input type="time" name="tap_pulang_half" id="id_tap_pulang_half" class="form-control">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- KETERANGAN -->
-                        <div id="keteranganSection">
-                            <div class="form-section">
-                                <label for="id_keterangan" class="form-label">
-                                    Keterangan <span class="text-muted">(Opsional)</span>
-                                </label>
-                                <textarea name="keterangan" id="id_keterangan" class="form-control" placeholder="Catatan tambahan..."></textarea>
-                            </div>
-                        </div>
-
-                        <!-- SUBMIT BUTTONS -->
-                        <div class="btn-group-actions">
-                            <button type="submit" class="btn btn-primary" id="btnSubmit">
-                                <i class="fas fa-save"></i>
-                                Simpan Absensi
-                            </button>
-                            <a href="{% url 'riwayat_absensi' %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i>
-                                Kembali
-                            </a>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- SECTION: ABSEN -->
+            <div id="absenSection" class="hidden">
+                <div class="section-divider"></div>
+
+                <div class="form-section">
+                    <label for="id_tanggal_absen" class="form-label">
+                        Tanggal Absensi <span style="color: var(--danger);">*</span>
+                    </label>
+                    <input type="date" name="tanggal" id="id_tanggal_absen" class="form-control">
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div><strong>Status Absen:</strong> Tidak perlu mengisi waktu masuk dan keluar.</div>
+                </div>
+            </div>
+
+            <!-- SECTION: IZIN/SAKIT -->
+            <div id="rangeDateSection" class="hidden">
+                <div class="section-divider"></div>
+
+                <div class="form-section">
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="id_tanggal_mulai" class="form-label">
+                                Tanggal Mulai <span style="color: var(--danger);">*</span>
+                            </label>
+                            <input type="date" name="tanggal_mulai" id="id_tanggal_mulai" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_tanggal_selesai" class="form-label">
+                                Tanggal Selesai <span style="color: var(--danger);">*</span>
+                            </label>
+                            <input type="date" name="tanggal_selesai" id="id_tanggal_selesai" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <label class="form-label">
+                        Tipe <span style="color: var(--danger);">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipe_izin" id="fullDay" value="full" checked>
+                            <label class="form-check-label" for="fullDay">
+                                <span class="badge-info">Full Day</span>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipe_izin" id="halfDay" value="half">
+                            <label class="form-check-label" for="halfDay">
+                                <span class="badge-info">Half Day</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="halfDayTimeSection" class="hidden">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <div><strong>Half Day:</strong> Masukkan waktu izin/sakit.</div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="row">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="id_tap_masuk_half" class="form-label">
+                                    Waktu Mulai
+                                </label>
+                                <input type="time" name="tap_masuk_half" id="id_tap_masuk_half" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_tap_pulang_half" class="form-label">
+                                    Waktu Selesai
+                                </label>
+                                <input type="time" name="tap_pulang_half" id="id_tap_pulang_half" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KETERANGAN -->
+            <div class="form-section">
+                <label for="id_keterangan" class="form-label">
+                    Keterangan <span style="color: var(--gray-500);">(Opsional)</span>
+                </label>
+                <textarea name="keterangan" id="id_keterangan" class="form-control" rows="3" 
+                          placeholder="Catatan tambahan..."></textarea>
+            </div>
+
+            <!-- SUBMIT BUTTONS -->
+            <div class="btn-group-actions">
+                <button type="submit" class="btn btn-primary" id="btnSubmit">
+                    <i class="fas fa-save"></i>
+                    Simpan Absensi
+                </button>
+                <a href="{% url 'riwayat_absensi' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
@@ -502,7 +339,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnSubmit = document.getElementById('btnSubmit');
     const form = document.getElementById('formAbsensi');
 
-    // Set tanggal hari ini
     const today = new Date().toISOString().split('T')[0];
     tanggalSingle.value = today;
     tanggalAbsen.value = today;
@@ -530,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tapMasuk.required = false;
             tanggalMulai.required = false;
             tanggalSelesai.required = false;
-        } else {
+        } else if (status === 'Izin' || status === 'Sakit') {
             rangeDateSection.classList.remove('hidden');
             halfDayTimeSection.classList.add('hidden');
             fullDay.checked = true;

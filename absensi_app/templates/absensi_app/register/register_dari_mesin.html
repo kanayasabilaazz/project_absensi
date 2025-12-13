@@ -1,409 +1,214 @@
 {% extends 'absensi_app/base.html' %}
 {% load static %}
 
-{% block title %}Registrasi Pegawai dari Mesin{% endblock %}
+{% block title %}Registrasi dari Mesin{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <style>
-    /* ==================== VARIABLES ==================== */
-    :root {
-        --card-radius: var(--radius-md);
-        --card-shadow: var(--shadow-sm);
-        --card-shadow-hover: var(--shadow-md);
-    }
-
-    /* ==================== BREADCRUMB ==================== */
-    .breadcrumb-white {
-        font-size: var(--font-xs);
-    }
-
-    .breadcrumb-white .breadcrumb-item {
-        color: rgba(255, 255, 255, 0.8);
-    }
-
-    .breadcrumb-white .breadcrumb-item + .breadcrumb-item::before {
-        color: rgba(255, 255, 255, 0.6);
-    }
-
-    .breadcrumb-white .breadcrumb-item a {
-        color: rgba(255, 255, 255, 0.9);
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-
-    .breadcrumb-white .breadcrumb-item a:hover {
+    /* PAGE HEADER */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
         color: white;
+        padding: var(--space-5);
+        border-radius: var(--radius);
+        margin-bottom: var(--space-6);
+        box-shadow: var(--shadow-lg);
     }
 
-    .breadcrumb-white .breadcrumb-item.active {
-        color: white;
-        font-weight: 500;
-    }
-
-    /* ==================== DASHBOARD CARD ==================== */
-    .dashboard-card {
-        background: white;
-        border-radius: var(--card-radius);
-        box-shadow: var(--card-shadow);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-        margin-bottom: var(--spacing-xl);
-    }
-
-    .dashboard-card-header {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-        color: white;
-        padding: var(--spacing-xl);
-        border: none;
-    }
-
-    .dashboard-card-header h4 {
-        font-size: var(--font-base);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        margin: 0 0 var(--spacing-sm) 0;
-    }
-
-    .dashboard-card-header h4 i {
-        font-size: var(--font-base);
-    }
-
-    .dashboard-card-header small {
-        font-size: var(--font-xs);
-        opacity: 0.9;
-    }
-
-    .dashboard-card-body {
-        padding: var(--spacing-xl);
-    }
-
-    /* ==================== SECTION CARD ==================== */
-    .section-card {
-        background: white;
-        border-radius: var(--card-radius);
-        box-shadow: var(--card-shadow);
-        margin-bottom: var(--spacing-xl);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-        transition: var(--transition-base);
-    }
-
-    .section-card:hover {
-        box-shadow: var(--card-shadow-hover);
-    }
-
-    .section-card-header {
-        background: var(--gray-800);
-        padding: var(--spacing-lg);
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .section-card-header h6 {
-        margin: 0;
-        font-size: var(--font-sm);
-        font-weight: 600;
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .section-card-body {
-        padding: var(--spacing-xl);
-    }
-
-    /* ==================== FORM CONTROLS ==================== */
-    .form-label {
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: var(--spacing-sm);
-        font-size: var(--font-sm);
-    }
-
-    .form-control, .form-select {
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius-sm);
-        padding: var(--spacing-sm) var(--spacing-md);
-        font-size: var(--font-sm);
-        transition: var(--transition-base);
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        outline: none;
-    }
-
-    small.text-muted {
-        font-size: var(--font-xs);
-        color: var(--gray-500);
-    }
-
-    /* ==================== TABLE ==================== */
-    .table-wrapper {
-        background: white;
-        border-radius: var(--card-radius);
-        overflow: hidden;
-        box-shadow: var(--card-shadow);
-        border: 1px solid var(--gray-200);
-    }
-
-    .table {
-        margin-bottom: 0;
-        font-size: var(--font-sm);
-        width: 100%;
-    }
-
-    .table thead th {
-        background: var(--gray-800);
-        color: white;
-        font-weight: 600;
-        padding: var(--spacing-md);
-        font-size: var(--font-xs);
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        border: none;
-        white-space: nowrap;
-    }
-
-    .table tbody td {
-        padding: var(--spacing-md);
-        vertical-align: middle;
-        border-bottom: 1px solid var(--gray-200);
-        color: var(--gray-700);
-    }
-
-    .table tbody tr:hover {
-        background: var(--gray-50);
-    }
-
-    /* ==================== BADGES ==================== */
-    .badge-userid {
-        background: var(--primary);
-        color: white;
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-sm);
+    .page-header h4 {
+        margin: 0 0 var(--space-2) 0;
+        font-size: var(--text-xl);
         font-weight: 700;
-        font-size: var(--font-xs);
-        font-family: 'Consolas', monospace;
-    }
-
-    .badge {
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: var(--font-xs);
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: var(--spacing-xs);
+        gap: var(--space-2);
     }
 
-    /* ==================== PROGRESS ==================== */
+    .page-header p {
+        margin: 0;
+        font-size: var(--text-sm);
+        opacity: 0.95;
+    }
+
+    /* PROGRESS BAR */
     .progress-wrapper {
         background: white;
-        padding: var(--spacing-lg);
-        border-radius: var(--card-radius);
-        margin-bottom: var(--spacing-xl);
-        border: 2px solid var(--gray-200);
+        padding: var(--space-4);
+        border-radius: var(--radius);
+        margin-bottom: var(--space-4);
+        border: 1px solid var(--gray-200);
     }
 
     .progress-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--space-3);
     }
 
     .progress-title {
         font-weight: 600;
+        font-size: var(--text-sm);
         color: var(--gray-800);
-        font-size: var(--font-sm);
     }
 
     .progress-count {
         background: var(--gray-100);
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: var(--font-xs);
+        padding: var(--space-1) var(--space-3);
+        border-radius: 12px;
+        font-size: var(--text-xs);
         font-weight: 600;
         color: var(--gray-700);
     }
 
     .progress-count.completed {
-        background: rgba(16, 185, 129, 0.1);
-        color: var(--success);
+        background: var(--success-light);
+        color: #065f46;
     }
 
     .progress-bar-custom {
-        height: 12px;
+        height: 8px;
         background: var(--gray-200);
-        border-radius: 20px;
+        border-radius: 12px;
         overflow: hidden;
-        position: relative;
     }
 
     .progress-bar-fill {
         height: 100%;
         background: linear-gradient(90deg, var(--primary) 0%, #60a5fa 100%);
-        border-radius: 20px;
-        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: width 0.5s ease;
     }
 
-    /* ==================== MODE ACCORDION ==================== */
-    .mode-list-container {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-md);
-    }
-
+    /* MODE ACCORDION */
     .mode-card {
         background: white;
         border: 2px solid var(--gray-200);
-        border-radius: var(--card-radius);
+        border-radius: var(--radius);
         overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: var(--space-3);
+        transition: all 0.2s;
     }
 
     .mode-card.completed {
         border-color: var(--success);
-        background: rgba(16, 185, 129, 0.02);
+        background: var(--success-light);
     }
 
     .mode-card.active {
         border-color: var(--primary);
-        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15);
+        box-shadow: var(--shadow-lg);
     }
 
     .mode-header {
-        padding: var(--spacing-lg);
+        padding: var(--space-4);
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: space-between;
         background: var(--gray-50);
         transition: all 0.2s;
-        user-select: none;
     }
 
     .mode-header:hover {
         background: var(--gray-100);
     }
 
-    .mode-card.completed .mode-header {
-        background: rgba(16, 185, 129, 0.05);
-    }
-
     .mode-card.active .mode-header {
-        background: rgba(59, 130, 246, 0.05);
+        background: var(--primary-light);
     }
 
     .mode-header-left {
         display: flex;
         align-items: center;
-        gap: var(--spacing-md);
+        gap: var(--space-3);
         flex: 1;
     }
 
     .mode-icon-wrapper {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
         border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: var(--font-xl);
-        flex-shrink: 0;
+        font-size: var(--text-xl);
     }
 
-    .mode-info {
-        flex: 1;
-    }
-
-    .mode-name {
-        font-size: var(--font-sm);
+    .mode-info h6 {
+        margin: 0 0 var(--space-1) 0;
         font-weight: 600;
-        color: var(--gray-800);
-        margin: 0 0 4px 0;
+        font-size: var(--text-sm);
+        color: var(--gray-900);
     }
 
-    .mode-description {
-        font-size: var(--font-xs);
+    .mode-info small {
         color: var(--gray-600);
-        margin: 0;
-    }
-
-    .mode-header-right {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
+        font-size: var(--text-xs);
     }
 
     .mode-badge {
+        padding: var(--space-1) var(--space-3);
+        border-radius: 12px;
+        font-size: var(--text-xs);
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: var(--font-xs);
-        font-weight: 600;
+        gap: var(--space-1);
     }
 
     .mode-badge.pending {
-        background: rgba(245, 158, 11, 0.1);
-        color: var(--warning);
-        border: 1.5px solid rgba(245, 158, 11, 0.3);
+        background: var(--warning-light);
+        color: #92400e;
     }
 
     .mode-badge.completed {
-        background: rgba(16, 185, 129, 0.1);
-        color: var(--success);
-        border: 1.5px solid rgba(16, 185, 129, 0.3);
+        background: var(--success-light);
+        color: #065f46;
     }
 
     .mode-chevron {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         background: var(--gray-200);
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s;
+        transition: all 0.2s;
+        font-size: var(--text-xs);
     }
 
     .mode-card.active .mode-chevron {
+        transform: rotate(180deg);
         background: var(--primary);
         color: white;
-        transform: rotate(180deg);
     }
 
     .mode-body {
         display: none;
-        padding: var(--spacing-xl);
-        background: white;
-        border-top: 2px solid var(--gray-100);
+        padding: var(--space-4);
+        border-top: 1px solid var(--gray-200);
     }
 
     .mode-card.active .mode-body {
         display: block;
     }
 
-    /* ==================== GROUP CARDS ==================== */
+    /* GROUP CARDS */
     .group-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: var(--spacing-md);
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: var(--space-3);
     }
 
     .group-card {
         background: white;
         border: 2px solid var(--gray-200);
-        border-radius: var(--radius-sm);
-        padding: var(--spacing-lg);
+        border-radius: var(--radius);
+        padding: var(--space-3);
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.2s;
         position: relative;
     }
 
@@ -413,36 +218,36 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
+        height: 3px;
         background: var(--gray-300);
-        transition: all 0.3s;
+        transition: all 0.2s;
     }
 
     .group-card:hover {
         border-color: var(--primary);
-        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15);
-        transform: translateY(-4px);
+        box-shadow: var(--shadow);
+        transform: translateY(-2px);
     }
 
     .group-card.selected {
         border-color: var(--primary);
-        background: rgba(59, 130, 246, 0.05);
+        background: var(--primary-light);
     }
 
     .group-card.selected::before {
         background: var(--primary);
-        height: 5px;
+        height: 4px;
     }
 
     .group-header {
         display: flex;
         justify-content: space-between;
         align-items: start;
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--space-2);
     }
 
     .group-name {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         font-weight: 600;
         color: var(--gray-800);
         margin: 0;
@@ -450,9 +255,9 @@
     }
 
     .group-check {
-        width: 28px;
-        height: 28px;
-        border: 2.5px solid var(--gray-300);
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--gray-300);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -467,7 +272,7 @@
     }
 
     .group-check i {
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         display: none;
     }
 
@@ -478,12 +283,12 @@
     .group-time {
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-1);
         font-family: 'Courier New', monospace;
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         font-weight: 600;
         color: var(--gray-900);
-        padding: 8px 12px;
+        padding: var(--space-1) var(--space-2);
         background: var(--gray-50);
         border-radius: var(--radius-sm);
     }
@@ -493,194 +298,75 @@
         color: var(--primary);
     }
 
-    /* ==================== SUMMARY BOX ==================== */
+    /* SUMMARY BOX */
     .summary-box {
         background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
         border: 2px solid #bae6fd;
-        border-radius: var(--card-radius);
-        padding: var(--spacing-xl);
-        margin-top: var(--spacing-xl);
+        border-radius: var(--radius);
+        padding: var(--space-4);
+        margin-top: var(--space-4);
     }
 
     .summary-header {
         display: flex;
         align-items: center;
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-lg);
-        padding-bottom: var(--spacing-md);
+        gap: var(--space-3);
+        margin-bottom: var(--space-4);
+        padding-bottom: var(--space-3);
         border-bottom: 2px solid rgba(59, 130, 246, 0.2);
     }
 
     .summary-icon {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
         background: var(--primary);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: var(--font-xl);
+        font-size: var(--text-lg);
     }
 
     .summary-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-md);
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--space-3);
     }
 
     .summary-item {
         background: white;
-        padding: var(--spacing-md);
+        padding: var(--space-3);
         border-radius: var(--radius-sm);
-        border: 1px solid rgba(59, 130, 246, 0.1);
     }
 
     .summary-label {
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         color: var(--gray-600);
         font-weight: 500;
         display: block;
-        margin-bottom: 4px;
+        margin-bottom: var(--space-1);
     }
 
     .summary-value {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         font-weight: 600;
         color: var(--gray-900);
-        display: block;
     }
 
-    /* ==================== BUTTONS ==================== */
-    .btn {
-        padding: var(--spacing-sm) var(--spacing-lg);
-        font-size: var(--font-sm);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        border: none;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        cursor: pointer;
-    }
-
-    .btn i {
-        font-size: var(--font-sm);
-    }
-
-    .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-primary {
+    /* BADGE USER ID */
+    .badge-userid {
         background: var(--primary);
         color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--primary-dark);
-        color: white;
-    }
-
-    .btn-light {
-        background: white;
-        color: var(--primary);
-        border: 1px solid white;
-    }
-
-    .btn-light:hover {
-        background: rgba(255, 255, 255, 0.9);
-        color: var(--primary-dark);
-    }
-
-    .btn-secondary {
-        background: var(--gray-600);
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background: var(--gray-700);
-        color: white;
-    }
-
-    /* ==================== ALERT ==================== */
-    .alert {
+        padding: 2px var(--space-2);
         border-radius: var(--radius-sm);
-        padding: var(--spacing-md) var(--spacing-lg);
-        margin-bottom: var(--spacing-md);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        font-size: var(--font-sm);
+        font-weight: 700;
+        font-size: var(--text-xs);
+        font-family: 'Courier New', monospace;
     }
 
-    .alert-info {
-        background: #dbeafe;
-        border: 1px solid #3b82f6;
-        color: #1e3a8a;
-    }
-
-    .alert-warning {
-        background: #fef3c7;
-        border: 1px solid #f59e0b;
-        color: #92400e;
-    }
-
-    /* ==================== STATES ==================== */
-    .loading-spinner, .empty-state {
-        text-align: center;
-        padding: var(--spacing-xl);
-        color: var(--gray-500);
-    }
-
-    .loading-spinner i, .empty-state i {
-        font-size: 3rem;
-        margin-bottom: var(--spacing-md);
-    }
-
-    /* ==================== MODAL ==================== */
-    .modal-header {
-        background: var(--gray-800);
-        color: white;
-        border: none;
-        padding: var(--spacing-lg) var(--spacing-xl);
-    }
-
-    .modal-header .btn-close {
-        filter: brightness(0) invert(1);
-    }
-
-    .modal-title {
-        font-weight: 600;
-        font-size: var(--font-base);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .modal-body {
-        padding: var(--spacing-xl);
-    }
-
-    .modal-footer {
-        padding: var(--spacing-md) var(--spacing-xl);
-        border-top: 1px solid var(--gray-200);
-    }
-
-    /* ==================== RESPONSIVE ==================== */
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-        .dashboard-card-header,
-        .dashboard-card-body,
-        .section-card-body {
-            padding: var(--spacing-lg);
-        }
-
-        .mode-header {
-            padding: var(--spacing-md);
-        }
-
         .group-grid {
             grid-template-columns: 1fr;
         }
@@ -693,126 +379,87 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="dashboard-card">
-        <!-- HEADER -->
-        <div class="dashboard-card-header">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-                <div>
-                    <h4>
-                        <i class="fas fa-fingerprint"></i>
-                        Registrasi Pegawai dari Mesin
-                    </h4>
-                    <small>Daftarkan pegawai baru berdasarkan data dari mesin fingerprint</small>
-                </div>
-                <div>
-                    <button type="button" class="btn btn-light" id="btnAmbilData">
-                        <i class="fas fa-download"></i>
-                        Ambil Data dari Mesin
-                    </button>
-                </div>
-            </div>
-
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-white mb-0">
-                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'register_Pegawai_menu' %}">Registrasi</a></li>
-                    <li class="breadcrumb-item active">Dari Mesin</li>
-                </ol>
-            </nav>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h4>
+                <i class="fas fa-fingerprint"></i>
+                Registrasi Pegawai dari Mesin
+            </h4>
+            <p>Daftarkan pegawai baru berdasarkan data dari mesin fingerprint</p>
         </div>
+        <button type="button" class="btn btn-secondary" id="btnAmbilData">
+            <i class="fas fa-download"></i>
+            Ambil Data dari Mesin
+        </button>
+    </div>
+</div>
 
-        <div class="dashboard-card-body">
-            <!-- STEP 1: PILIH MESIN -->
-            <div class="section-card">
-                <div class="section-card-header">
-                    <h6>
-                        <i class="fas fa-server"></i>
-                        Step 1: Pilih Mesin Fingerprint
-                    </h6>
-                </div>
-                <div class="section-card-body">
-                    <div class="mb-3">
-                        <label for="selectMesin" class="form-label">
-                            Mesin Fingerprint <span class="text-danger">*</span>
-                        </label>
-                        <select class="form-select" id="selectMesin" required>
-                            <option value="">-- Pilih Mesin --</option>
-                            {% for mesin in mesin_list %}
-                            <option value="{{ mesin.id }}" 
-                                    data-ip="{{ mesin.ip_address }}" 
-                                    data-port="{{ mesin.port }}"
-                                    data-nama="{{ mesin.nama }}">
-                                {{ mesin.nama }} - {{ mesin.ip_address }}:{{ mesin.port }} 
-                                {% if mesin.cabang %}({{ mesin.cabang.nama }}){% endif %}
-                            </option>
-                            {% endfor %}
-                        </select>
-                        <small class="text-muted">Pilih mesin yang akan digunakan untuk mengambil data pegawai</small>
-                    </div>
-                </div>
-            </div>
+<!-- Step 1: Pilih Mesin -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-server"></i> Step 1: Pilih Mesin Fingerprint</h5>
+    </div>
+    <div class="card-body">
+        <label for="selectMesin" class="form-label">
+            Mesin Fingerprint <span style="color: var(--danger);">*</span>
+        </label>
+        <select class="form-select" id="selectMesin" required>
+            <option value="">-- Pilih Mesin --</option>
+            {% for mesin in mesin_list %}
+            <option value="{{ mesin.id }}" 
+                    data-ip="{{ mesin.ip_address }}" 
+                    data-port="{{ mesin.port }}"
+                    data-nama="{{ mesin.nama }}">
+                {{ mesin.nama }} - {{ mesin.ip_address }}:{{ mesin.port }} 
+                {% if mesin.cabang %}({{ mesin.cabang.nama }}){% endif %}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
 
-            <!-- LOADING STATE -->
-            <div id="loadingState" style="display: none;">
-                <div class="loading-spinner">
-                    <div class="spinner-border text-primary mb-3" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p>Menghubungi mesin fingerprint...</p>
-                </div>
-            </div>
-
-            <!-- USER LIST -->
-            <div id="userListContainer" style="display: none;">
-                <div class="section-card">
-                    <div class="section-card-header">
-                        <h6>
-                            <i class="fas fa-users"></i>
-                            Step 2: Pilih Pegawai untuk Didaftarkan
-                        </h6>
-                    </div>
-                    <div class="section-card-body">
-                        <div class="mb-3">
-                            <span class="badge bg-primary" style="font-size: var(--font-sm); padding: var(--spacing-sm) var(--spacing-lg);">
-                                <i class="fas fa-users"></i>
-                                Total: <span id="userCount">0</span> user belum terdaftar
-                            </span>
-                        </div>
-
-                        <div class="table-wrapper">
-                            <table class="table table-hover" id="userTable">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center" style="width: 5%;">NO</th>
-                                        <th class="text-center" style="width: 10%;">UID</th>
-                                        <th class="text-center" style="width: 15%;">USER ID</th>
-                                        <th style="width: 40%;">NAMA</th>
-                                        <th class="text-center" style="width: 15%;">PRIVILEGE</th>
-                                        <th class="text-center" style="width: 15%;">AKSI</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="userTableBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- EMPTY MESSAGE -->
-            <div id="emptyMessage" class="alert alert-info" style="display: none;">
-                <i class="fas fa-check-circle"></i>
-                <div>
-                    <strong>Semua user sudah terdaftar!</strong><br>
-                    <small>Tidak ada user baru yang ditemukan di mesin.</small>
-                </div>
+<!-- Step 2: User List -->
+<div id="userListContainer" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-users"></i> Step 2: Pilih Pegawai</h5>
+            <span class="badge badge-success">
+                Total: <span id="userCount">0</span> user
+            </span>
+        </div>
+        <div class="card-body" style="padding: 0; overflow-x: auto;">
+            <div style="min-width: 1000px;">
+                <table class="table" id="userTable" style="margin: 0;">
+                    <thead>
+                        <tr>
+                            <th class="text-center">No</th>
+                            <th class="text-center">UID</th>
+                            <th class="text-center">User ID</th>
+                            <th>Nama</th>
+                            <th class="text-center">Privilege</th>
+                            <th class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody"></tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODAL FORM REGISTRASI -->
-<div class="modal fade" id="modalRegistrasi" tabindex="-1" aria-hidden="true">
+<!-- Empty Message -->
+<div id="emptyMessage" class="alert alert-success" style="display: none;">
+    <i class="fas fa-check-circle"></i>
+    <div>
+        <strong>Semua user sudah terdaftar!</strong>
+        Tidak ada user baru yang ditemukan di mesin.
+    </div>
+</div>
+
+<!-- Modal Form Registrasi -->
+<div class="modal fade" id="modalRegistrasi" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -824,54 +471,48 @@
             </div>
             <form id="formRegistrasi">
                 {% csrf_token %}
-                <div class="modal-body">
-                    <!-- HIDDEN INPUTS -->
+                <div class="modal-body" style="max-height: calc(100vh - 200px); overflow-y: auto;">
                     <input type="hidden" id="inputMesinId" name="mesin_id">
                     <input type="hidden" id="inputIpAddress" name="ip_address">
                     <input type="hidden" id="inputUid" name="uid">
                     <input type="hidden" id="inputUseridMesin" name="userid_mesin">
                     <input type="hidden" id="modeAssignments" name="mode_assignments" value="{}">
 
-                    <!-- DATA DARI MESIN -->
-                    <div class="section-card">
-                        <div class="section-card-header">
-                            <h6><i class="fas fa-fingerprint"></i> Data dari Mesin Fingerprint</h6>
+                    <!-- Data dari Mesin -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-fingerprint"></i> Data dari Mesin</h5>
                         </div>
-                        <div class="section-card-body">
+                        <div class="card-body">
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">UID Mesin:</label>
-                                    <input type="text" class="form-control bg-light" id="displayUid" readonly>
+                                    <label class="form-label">UID Mesin</label>
+                                    <input type="text" class="form-control" id="displayUid" readonly>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">User ID Mesin:</label>
-                                    <input type="text" class="form-control bg-light" id="displayUseridMesin" readonly>
+                                    <label class="form-label">User ID Mesin</label>
+                                    <input type="text" class="form-control" id="displayUseridMesin" readonly>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">Nama di Mesin:</label>
-                                    <input type="text" class="form-control bg-light" id="displayNamaMesin" readonly>
+                                    <label class="form-label">Nama di Mesin</label>
+                                    <input type="text" class="form-control" id="displayNamaMesin" readonly>
                                 </div>
-                            </div>
-                            <div class="alert alert-info mb-0">
-                                <i class="fas fa-info-circle"></i>
-                                <small><strong>Catatan:</strong> User ID dari mesin akan tetap tersimpan di sistem untuk sinkronisasi fingerprint.</small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- DATA PRIBADI -->
-                    <div class="section-card">
-                        <div class="section-card-header">
-                            <h6><i class="fas fa-user"></i> Data Pribadi</h6>
+                    <!-- Data Pribadi -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-user"></i> Data Pribadi</h5>
                         </div>
-                        <div class="section-card-body">
+                        <div class="card-body">
                             <div class="mb-3">
                                 <label for="inputNamaLengkap" class="form-label">
-                                    Nama Lengkap <span class="text-danger">*</span>
+                                    Nama Lengkap <span style="color: var(--danger);">*</span>
                                 </label>
                                 <input type="text" class="form-control" id="inputNamaLengkap" name="nama_lengkap" required>
                             </div>
-
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="inputEmail" class="form-label">Email</label>
@@ -882,7 +523,6 @@
                                     <input type="date" class="form-control" id="inputTanggalLahir" name="tanggal_lahir">
                                 </div>
                             </div>
-
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="inputNomorHp" class="form-label">Nomor HP</label>
@@ -896,29 +536,27 @@
                         </div>
                     </div>
 
-                    <!-- DATA KEPEGAWAIAN -->
-                    <div class="section-card">
-                        <div class="section-card-header">
-                            <h6><i class="fas fa-briefcase"></i> Data Kepegawaian</h6>
+                    <!-- Data Kepegawaian -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-briefcase"></i> Data Kepegawaian</h5>
                         </div>
-                        <div class="section-card-body">
+                        <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="inputDepartemen" class="form-label">
-                                        Departemen <span class="text-danger">*</span>
+                                        Departemen <span style="color: var(--danger);">*</span>
                                     </label>
                                     <select class="form-select" id="inputDepartemen" name="departemen" required>
                                         <option value="">-- Pilih Departemen --</option>
                                         {% for dept in departemen_list %}
-                                        <option value="{{ dept.id }}" data-id-dept="{{ dept.id_departemen }}">
-                                            {{ dept.id_departemen }} - {{ dept.nama }}
-                                        </option>
+                                        <option value="{{ dept.id }}">{{ dept.nama }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="inputJabatan" class="form-label">
-                                        Jabatan <span class="text-danger">*</span>
+                                        Jabatan <span style="color: var(--danger);">*</span>
                                     </label>
                                     <select class="form-select" id="inputJabatan" name="jabatan" required>
                                         <option value="">-- Pilih Jabatan --</option>
@@ -928,7 +566,6 @@
                                     </select>
                                 </div>
                             </div>
-
                             <div class="mb-3">
                                 <label for="inputTanggalBergabung" class="form-label">Tanggal Bergabung</label>
                                 <input type="date" class="form-control" id="inputTanggalBergabung" name="tanggal_bergabung">
@@ -936,19 +573,15 @@
                         </div>
                     </div>
 
-                    <!-- MODE JAM KERJA ASSIGNMENT -->
-                    <div class="section-card">
-                        <div class="section-card-header">
-                            <h6><i class="fas fa-clock"></i> Step 3: Assignment Mode & Jam Kerja</h6>
+                    <!-- Mode & Jam Kerja -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-clock"></i> Step 3: Assignment Mode & Jam Kerja</h5>
                         </div>
-                        <div class="section-card-body">
-                            <!-- PROGRESS -->
+                        <div class="card-body">
                             <div class="progress-wrapper">
                                 <div class="progress-header">
-                                    <span class="progress-title">
-                                        <i class="fas fa-tasks"></i>
-                                        Progress Assignment
-                                    </span>
+                                    <span class="progress-title">Progress Assignment</span>
                                     <span class="progress-count" id="progressCount">0 / 0 Mode</span>
                                 </div>
                                 <div class="progress-bar-custom">
@@ -956,25 +589,19 @@
                                 </div>
                             </div>
 
-                            <!-- MODE LIST -->
-                            <div id="modeListContainer">
-                                <div class="empty-state">
-                                    <i class="fas fa-building"></i>
-                                    <p class="mb-0">Pilih departemen terlebih dahulu</p>
-                                </div>
-                            </div>
+                            <div id="modeListContainer"></div>
                         </div>
                     </div>
 
-                    <!-- SUMMARY BOX -->
+                    <!-- Summary -->
                     <div id="summaryBox" class="summary-box" style="display: none;">
                         <div class="summary-header">
                             <div class="summary-icon">
                                 <i class="fas fa-check-circle"></i>
                             </div>
                             <div>
-                                <h6 style="margin: 0 0 4px 0; font-size: var(--font-sm); font-weight: 600; color: var(--gray-900);">Ringkasan Registrasi</h6>
-                                <p style="margin: 0; font-size: var(--font-xs); color: var(--gray-600);">Pastikan data sudah benar sebelum disimpan</p>
+                                <h6 style="margin: 0 0 var(--space-1) 0; font-size: var(--text-sm); font-weight: 600;">Ringkasan Registrasi</h6>
+                                <p style="margin: 0; font-size: var(--text-xs); color: var(--gray-600);">Pastikan data sudah benar sebelum disimpan</p>
                             </div>
                         </div>
                         <div class="summary-grid">
@@ -1000,24 +627,20 @@
                             </div>
                             <div class="summary-item">
                                 <span class="summary-label">Status</span>
-                                <span class="summary-value text-success" id="summaryStatus">
-                                    <i class="fas fa-check-circle"></i>
-                                    Siap Disimpan
+                                <span class="summary-value" style="color: var(--success);" id="summaryStatus">
+                                    <i class="fas fa-check-circle"></i> Siap Disimpan
                                 </span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- MODAL FOOTER -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i>
-                        Batal
+                        <i class="fas fa-times"></i> Batal
                     </button>
                     <button type="submit" class="btn btn-primary" id="btnSimpanPegawai">
-                        <i class="fas fa-save"></i>
-                        Simpan Pegawai
+                        <i class="fas fa-save"></i> Simpan Pegawai
                     </button>
                 </div>
             </form>
@@ -1042,16 +665,15 @@ $(document).ready(function() {
     let totalModes = 0;
 
     $('#btnAmbilData').on('click', function() {
-        const mesinSelect = $('#selectMesin');
-        const mesinId = mesinSelect.val();
+        const mesinId = $('#selectMesin').val();
         
         if (!mesinId) {
-            alert('❌ Pilih mesin terlebih dahulu!');
-            mesinSelect.focus();
+            alert('Pilih mesin terlebih dahulu!');
+            $('#selectMesin').focus();
             return;
         }
 
-        const selectedOption = mesinSelect.find('option:selected');
+        const selectedOption = $('#selectMesin option:selected');
         selectedMesin = {
             id: mesinId,
             ip: selectedOption.data('ip'),
@@ -1059,20 +681,12 @@ $(document).ready(function() {
             nama: selectedOption.data('nama')
         };
 
-        $('#loadingState').show();
-        $('#userListContainer').hide();
-        $('#emptyMessage').hide();
-
         $.ajax({
             url: "{% url 'ambil_user_dari_mesin' %}",
             type: "POST",
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': csrfToken
-            },
+            headers: { 'X-CSRFToken': csrfToken },
             data: { mesin_id: mesinId },
             success: function(response) {
-                $('#loadingState').hide();
                 if (response.status === 'success') {
                     if (response.data.length > 0) {
                         allUsers = response.data;
@@ -1083,13 +697,8 @@ $(document).ready(function() {
                         $('#emptyMessage').show();
                     }
                 } else {
-                    alert('❌ Error: ' + response.msg);
+                    alert('Error: ' + response.msg);
                 }
-            },
-            error: function(xhr) {
-                $('#loadingState').hide();
-                const errorMsg = xhr.responseJSON?.msg || 'Gagal menghubungi mesin';
-                alert('❌ Error: ' + errorMsg);
             }
         });
     });
@@ -1098,12 +707,9 @@ $(document).ready(function() {
         const tbody = $('#userTableBody');
         tbody.empty();
 
-        if (userDataTable) {
-            userDataTable.destroy();
-        }
+        if (userDataTable) userDataTable.destroy();
 
         users.forEach(function(user, index) {
-            const privilegeClass = user.privilege === 'Admin' ? 'danger' : 'secondary';
             const row = `
                 <tr>
                     <td class="text-center"><strong>${index + 1}</strong></td>
@@ -1111,7 +717,7 @@ $(document).ready(function() {
                     <td class="text-center"><span class="badge-userid">${user.userid}</span></td>
                     <td><strong>${user.name}</strong></td>
                     <td class="text-center">
-                        <span class="badge bg-${privilegeClass}">${user.privilege}</span>
+                        <span class="badge ${user.privilege === 'Admin' ? 'badge-danger' : 'badge-secondary'}">${user.privilege}</span>
                     </td>
                     <td class="text-center">
                         <button type="button" class="btn btn-primary btn-sm btn-register" 
@@ -1127,29 +733,17 @@ $(document).ready(function() {
         });
 
         userDataTable = $('#userTable').DataTable({
-            language: {
-                "sSearch": "Cari:",
-                "sZeroRecords": "Tidak ditemukan data",
-                "oPaginate": {
-                    "sFirst": "Pertama",
-                    "sPrevious": "‹",
-                    "sNext": "›",
-                    "sLast": "Terakhir"
-                }
-            },
             pageLength: 25,
             lengthChange: false,
             info: false,
             order: [[2, 'asc']],
-            columnDefs: [
-                { orderable: false, targets: [5] }
-            ]
+            columnDefs: [{ orderable: false, targets: [5] }]
         });
     }
 
     $(document).on('click', '.btn-register', function() {
         if (!selectedMesin) {
-            alert('❌ Pilih mesin terlebih dahulu!');
+            alert('Pilih mesin terlebih dahulu!');
             return;
         }
 
@@ -1161,21 +755,11 @@ $(document).ready(function() {
         $('#inputIpAddress').val(selectedMesin.ip);
         $('#inputUid').val(uid);
         $('#inputUseridMesin').val(userid);
-        
         $('#displayUid').val(uid);
         $('#displayUseridMesin').val(userid);
         $('#displayNamaMesin').val(name);
         $('#inputNamaLengkap').val(name);
-
-        $('#inputEmail').val('');
-        $('#inputTanggalLahir').val('');
-        $('#inputNomorHp').val('');
-        $('#inputAlamat').val('');
-        $('#inputDepartemen').val('');
-        $('#inputJabatan').val('');
-        
-        const today = new Date().toISOString().split('T')[0];
-        $('#inputTanggalBergabung').val(today);
+        $('#inputTanggalBergabung').val(new Date().toISOString().split('T')[0]);
 
         modeAssignments = {};
         $('#modeAssignments').val('{}');
@@ -1187,38 +771,19 @@ $(document).ready(function() {
 
     $('#inputDepartemen').on('change', function() {
         const departemenId = $(this).val();
-        
         if (!departemenId) {
-            resetModeUI();
+            $('#modeListContainer').html('<p class="text-center text-muted" style="padding: var(--space-8);">Pilih departemen terlebih dahulu</p>');
             return;
         }
-
         loadModes(departemenId);
         updateSummary();
     });
 
-    function resetModeUI() {
-        $('#modeListContainer').html(`
-            <div class="empty-state">
-                <i class="fas fa-building"></i>
-                <p class="mb-0">Pilih departemen terlebih dahulu</p>
-            </div>
-        `);
-        modeAssignments = {};
-        updateProgress();
-    }
-
     function loadModes(departemenId) {
-        $('#modeListContainer').html(`
-            <div class="loading-spinner">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p class="mb-0">Memuat mode...</p>
-            </div>
-        `);
+        $('#modeListContainer').html('<p class="text-center" style="padding: var(--space-8);"><i class="fas fa-spinner fa-spin"></i> Memuat mode...</p>');
 
         $.ajax({
             url: `/api/pegawai/get-modes/?departemen_id=${departemenId}`,
-            type: 'GET',
             success: function(response) {
                 if (response.status === 'success' && response.modes.length > 0) {
                     allModesData = response.modes;
@@ -1226,34 +791,16 @@ $(document).ready(function() {
                     renderModeList(response.modes);
                     updateProgress();
                 } else {
-                    $('#modeListContainer').html(`
-                        <div class="empty-state">
-                            <i class="fas fa-exclamation-triangle text-warning"></i>
-                            <p class="mb-0">Tidak ada mode untuk departemen ini</p>
-                        </div>
-                    `);
+                    $('#modeListContainer').html('<p class="text-center text-muted" style="padding: var(--space-8);">Tidak ada mode</p>');
                 }
-            },
-            error: function() {
-                $('#modeListContainer').html(`
-                    <div class="empty-state">
-                        <i class="fas fa-times-circle text-danger"></i>
-                        <p class="mb-0">Gagal memuat mode</p>
-                    </div>
-                `);
             }
         });
     }
 
     function renderModeList(modes) {
-        let html = '<div class="mode-list-container">';
-
+        let html = '';
         modes.forEach(mode => {
             const isCompleted = modeAssignments[mode.id] !== undefined;
-            const badgeHtml = isCompleted 
-                ? '<span class="mode-badge completed"><i class="fas fa-check-circle"></i> Selesai</span>'
-                : '<span class="mode-badge pending"><i class="fas fa-clock"></i> Belum Diisi</span>';
-
             html += `
                 <div class="mode-card ${isCompleted ? 'completed' : ''}" data-mode-id="${mode.id}">
                     <div class="mode-header" onclick="toggleMode(${mode.id})">
@@ -1262,43 +809,35 @@ $(document).ready(function() {
                                 <i class="${mode.icon}"></i>
                             </div>
                             <div class="mode-info">
-                                <h6 class="mode-name">${mode.nama}</h6>
-                                <p class="mode-description">Kode: ${mode.kode} | Prioritas: ${mode.priority}</p>
+                                <h6>${mode.nama}</h6>
+                                <small>Kode: ${mode.kode}</small>
                             </div>
                         </div>
-                        <div class="mode-header-right">
-                            ${badgeHtml}
-                            <div class="mode-chevron">
-                                <i class="fas fa-chevron-down"></i>
-                            </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="mode-badge ${isCompleted ? 'completed' : 'pending'}">
+                                <i class="fas fa-${isCompleted ? 'check-circle' : 'clock'}"></i>
+                                ${isCompleted ? 'Selesai' : 'Belum'}
+                            </span>
+                            <div class="mode-chevron"><i class="fas fa-chevron-down"></i></div>
                         </div>
                     </div>
                     <div class="mode-body">
-                        <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            <p class="mb-0">Memuat grup jam kerja...</p>
-                        </div>
+                        <p class="text-center"><i class="fas fa-spinner fa-spin"></i></p>
                     </div>
                 </div>
             `;
         });
-
-        html += '</div>';
         $('#modeListContainer').html(html);
     }
 
     window.toggleMode = function(modeId) {
         const modeCard = $(`.mode-card[data-mode-id="${modeId}"]`);
-        const modeBody = modeCard.find('.mode-body');
         const wasActive = modeCard.hasClass('active');
-
         $('.mode-card').removeClass('active');
-
         if (!wasActive) {
             modeCard.addClass('active');
-            
-            if (modeBody.find('.loading-spinner').length > 0) {
-                loadJamKerjaGroups(modeId, modeBody);
+            if (modeCard.find('.fa-spinner').length) {
+                loadJamKerjaGroups(modeId, modeCard.find('.mode-body'));
             }
         }
     };
@@ -1306,74 +845,39 @@ $(document).ready(function() {
     function loadJamKerjaGroups(modeId, container) {
         $.ajax({
             url: `/api/mode/${modeId}/get-jam-kerja-groups/`,
-            type: 'GET',
             success: function(response) {
                 if (response.status === 'success' && response.groups.length > 0) {
-                    renderJamKerjaGroups(response.groups, modeId, container, response.mode);
+                    renderJamKerjaGroups(response.groups, modeId, container);
                 } else {
-                    container.html(`
-                        <div class="alert alert-warning">
-                            <i class="fas fa-info-circle"></i>
-                            Belum ada grup jam kerja untuk mode ini
-                        </div>
-                    `);
+                    container.html('<p class="text-center text-muted" style="padding: var(--space-4);">Belum ada grup</p>');
                 }
-            },
-            error: function() {
-                container.html(`
-                    <div class="alert alert-danger">
-                        <i class="fas fa-times-circle"></i>
-                        Gagal memuat grup jam kerja
-                    </div>
-                `);
             }
         });
     }
 
-    function renderJamKerjaGroups(groups, modeId, container, modeData) {
-        let html = `
-            <div class="mb-3">
-                <h6 style="font-size: var(--font-sm); font-weight: 600; color: var(--gray-900); margin-bottom: var(--spacing-sm);">
-                    <i class="fas fa-clock text-primary"></i>
-                    Pilih Grup Jam Kerja untuk Mode ${modeData.nama}
-                </h6>
-                <p class="text-muted mb-0" style="font-size: var(--font-xs);">Klik salah satu grup jam kerja di bawah ini</p>
-            </div>
-            <div class="group-grid">
-        `;
-
+    function renderJamKerjaGroups(groups, modeId, container) {
+        let html = '<div class="group-grid">';
         groups.forEach(group => {
             const isSelected = modeAssignments[modeId]?.group_id === group.id;
-            
             html += `
-                <div class="group-card ${isSelected ? 'selected' : ''}" 
-                     onclick="selectGroup(${modeId}, ${group.id}, '${group.nama}')">
+                <div class="group-card ${isSelected ? 'selected' : ''}" onclick="selectGroup(${modeId}, ${group.id}, '${group.nama}')">
                     <div class="group-header">
                         <h6 class="group-name">${group.nama}</h6>
-                        <div class="group-check">
-                            <i class="fas fa-check"></i>
-                        </div>
+                        <div class="group-check"><i class="fas fa-check"></i></div>
                     </div>
-                    <div class="group-details">
-                        <div class="group-time">
-                            <i class="fas fa-clock"></i>
-                            <span>${group.jam_masuk} - ${group.jam_keluar}</span>
-                        </div>
+                    <div class="group-time">
+                        <i class="fas fa-clock"></i>
+                        <span>${group.jam_masuk} - ${group.jam_keluar}</span>
                     </div>
                 </div>
             `;
         });
-
         html += '</div>';
         container.html(html);
     }
 
     window.selectGroup = function(modeId, groupId, groupNama) {
-        modeAssignments[modeId] = {
-            group_id: groupId,
-            group_nama: groupNama
-        };
-        
+        modeAssignments[modeId] = { group_id: groupId, group_nama: groupNama };
         $('#modeAssignments').val(JSON.stringify(modeAssignments));
         updateModeStatus(modeId);
         updateProgress();
@@ -1386,112 +890,72 @@ $(document).ready(function() {
 
     function updateModeStatus(modeId) {
         const modeCard = $(`.mode-card[data-mode-id="${modeId}"]`);
-        
         if (modeAssignments[modeId]) {
             modeCard.addClass('completed');
-            const badge = modeCard.find('.mode-badge');
-            badge.removeClass('pending').addClass('completed');
-            badge.html('<i class="fas fa-check-circle"></i> Selesai');
+            modeCard.find('.mode-badge').removeClass('pending').addClass('completed').html('<i class="fas fa-check-circle"></i> Selesai');
         }
     }
 
     function updateProgress() {
         const completed = Object.keys(modeAssignments).length;
         const percentage = totalModes > 0 ? (completed / totalModes) * 100 : 0;
-        
         $('#progressBar').css('width', `${percentage}%`);
         $('#progressCount').text(`${completed} / ${totalModes} Mode`);
-        
         if (completed === totalModes && totalModes > 0) {
             $('#progressCount').addClass('completed');
-        } else {
-            $('#progressCount').removeClass('completed');
         }
     }
 
     function updateSummary() {
-        const namaLengkap = $('#inputNamaLengkap').val();
-        const departemenText = $('#inputDepartemen option:selected').text() || '-';
-        const jabatanText = $('#inputJabatan option:selected').text() || '-';
-        const useridMesin = $('#inputUseridMesin').val();
-        const completedModes = Object.keys(modeAssignments).length;
+        const nama = $('#inputNamaLengkap').val();
+        const dept = $('#inputDepartemen option:selected').text() || '-';
+        const jab = $('#inputJabatan option:selected').text() || '-';
+        const userid = $('#inputUseridMesin').val();
+        const completed = Object.keys(modeAssignments).length;
 
-        if (useridMesin && namaLengkap && $('#inputDepartemen').val()) {
-            $('#summaryUserId').text(useridMesin);
-            $('#summaryNama').text(namaLengkap);
-            $('#summaryDepartemen').text(departemenText);
-            $('#summaryJabatan').text(jabatanText);
-            $('#summaryModeCount').text(`${completedModes} Mode`);
+        if (userid && nama && $('#inputDepartemen').val()) {
+            $('#summaryUserId').text(userid);
+            $('#summaryNama').text(nama);
+            $('#summaryDepartemen').text(dept);
+            $('#summaryJabatan').text(jab);
+            $('#summaryModeCount').text(`${completed} Mode`);
             $('#summaryBox').show();
-        } else {
-            $('#summaryBox').hide();
         }
     }
 
     $('#formRegistrasi').on('submit', function(e) {
         e.preventDefault();
-
-        const departemen = $('#inputDepartemen').val();
-        const jabatan = $('#inputJabatan').val();
-        const namaLengkap = $('#inputNamaLengkap').val().trim();
-        const useridMesin = $('#inputUseridMesin').val();
-        const completedModes = Object.keys(modeAssignments).length;
-
-        if (!departemen || !jabatan || !namaLengkap || !useridMesin) {
-            alert('❌ Semua field wajib harus diisi!');
-            return false;
-        }
-
-        if (completedModes === 0) {
-            alert('❌ Minimal pilih 1 grup jam kerja untuk salah satu mode!');
-            return false;
-        }
-
-        const confirmed = confirm(
-            `Simpan data pegawai?\n\n` +
-            `User ID: ${useridMesin}\n` +
-            `Nama: ${namaLengkap}\n` +
-            `Departemen: ${$('#inputDepartemen option:selected').text()}\n` +
-            `Mesin: ${selectedMesin.nama}\n` +
-            `Mode Selesai: ${completedModes} dari ${totalModes}\n\n` +
-            `Klik OK untuk melanjutkan.`
-        );
         
-        if (!confirmed) return false;
+        if (!confirm(`Simpan data pegawai?\n\nUser ID: ${$('#inputUseridMesin').val()}\nNama: ${$('#inputNamaLengkap').val()}`)) {
+            return;
+        }
 
-        const submitBtn = $('#btnSimpanPegawai');
-        const originalText = submitBtn.html();
-        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...');
+        const btn = $('#btnSimpanPegawai');
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...');
 
         $.ajax({
             url: "{% url 'simpan_Pegawai_dari_mesin' %}",
             type: "POST",
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': csrfToken
-            },
+            headers: { 'X-CSRFToken': csrfToken },
             data: $(this).serialize(),
             success: function(response) {
-                submitBtn.prop('disabled', false).html(originalText);
-                
+                btn.prop('disabled', false).html('<i class="fas fa-save"></i> Simpan Pegawai');
                 if (response.status === 'success') {
                     alert('✅ ' + response.msg);
                     modalRegistrasi.hide();
                     $('#btnAmbilData').trigger('click');
                 } else {
-                    alert('❌ Error: ' + response.msg);
+                    alert('❌ ' + response.msg);
                 }
             },
             error: function(xhr) {
-                submitBtn.prop('disabled', false).html(originalText);
-                const errorMsg = xhr.responseJSON?.msg || 'Terjadi kesalahan';
-                alert('❌ Error: ' + errorMsg);
+                btn.prop('disabled', false).html('<i class="fas fa-save"></i> Simpan Pegawai');
+                alert('❌ ' + (xhr.responseJSON?.msg || 'Terjadi kesalahan'));
             }
         });
     });
 
-    $('#inputNamaLengkap').on('input', updateSummary);
-    $('#inputJabatan').on('change', updateSummary);
+    $('#inputNamaLengkap, #inputJabatan').on('input change', updateSummary);
 });
 </script>
 {% endblock %}

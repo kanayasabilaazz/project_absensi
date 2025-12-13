@@ -5,57 +5,36 @@
 
 {% block extra_css %}
 <style>
-    /* ==================== VARIABLES ==================== */
-    :root {
-        --card-radius: var(--radius-md);
-        --card-shadow: var(--shadow-sm);
-        --card-shadow-hover: var(--shadow-md);
-    }
-
-    /* ==================== DASHBOARD CARD ==================== */
-    .dashboard-card {
-        background: white;
-        border-radius: var(--card-radius);
-        box-shadow: var(--card-shadow);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-        margin-bottom: var(--spacing-xl);
-    }
-
-    .dashboard-card-header {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    /* PAGE HEADER */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
         color: white;
-        padding: var(--spacing-xl);
-        border: none;
+        padding: var(--space-5);
+        border-radius: var(--radius);
+        margin-bottom: var(--space-6);
+        box-shadow: var(--shadow-lg);
     }
 
-    .dashboard-card-header h4 {
-        font-size: var(--font-base);
-        font-weight: 600;
+    .page-header h4 {
+        margin: 0 0 var(--space-2) 0;
+        font-size: var(--text-xl);
+        font-weight: 700;
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
-        margin: 0 0 var(--spacing-sm) 0;
+        gap: var(--space-2);
     }
 
-    .dashboard-card-header h4 i {
-        font-size: var(--font-base);
+    .page-header p {
+        margin: 0;
+        font-size: var(--text-sm);
+        opacity: 0.95;
     }
 
-    .dashboard-card-header small {
-        font-size: var(--font-xs);
-        opacity: 0.9;
-    }
-
-    .dashboard-card-body {
-        padding: var(--spacing-xl);
-    }
-
-    /* ==================== STEP INDICATOR ==================== */
+    /* STEP INDICATOR */
     .step-indicator {
         display: flex;
         justify-content: space-between;
-        margin-bottom: var(--spacing-xl);
+        margin-bottom: var(--space-6);
         position: relative;
     }
 
@@ -87,8 +66,8 @@
         align-items: center;
         justify-content: center;
         font-weight: 600;
-        font-size: var(--font-sm);
-        margin-bottom: var(--spacing-sm);
+        font-size: var(--text-sm);
+        margin-bottom: var(--space-2);
         transition: all 0.3s;
     }
 
@@ -104,7 +83,7 @@
     }
 
     .step-label {
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         color: var(--gray-600);
         font-weight: 500;
     }
@@ -114,94 +93,54 @@
         font-weight: 600;
     }
 
-    /* ==================== SECTION CARD ==================== */
-    .transfer-section {
-        background: white;
-        border-radius: var(--card-radius);
-        box-shadow: var(--card-shadow);
-        margin-bottom: var(--spacing-xl);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-    }
-
-    .transfer-section-header {
-        background: var(--gray-800);
-        padding: var(--spacing-lg);
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .transfer-section-header h5 {
-        margin: 0;
-        font-size: var(--font-sm);
-        font-weight: 600;
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .transfer-section-body {
-        padding: var(--spacing-xl);
-    }
-
-    /* ==================== FORM CONTROLS ==================== */
-    .transfer-form-group {
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .transfer-form-group label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: var(--spacing-sm);
-        color: var(--gray-700);
-        font-size: var(--font-sm);
-    }
-
-    .transfer-form-group select,
-    .transfer-form-group input {
-        width: 100%;
-        padding: var(--spacing-sm) var(--spacing-md);
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius-sm);
-        font-size: var(--font-sm);
-        transition: var(--transition-base);
-    }
-
-    .transfer-form-group select:focus,
-    .transfer-form-group input:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        outline: none;
-    }
-
-    /* ==================== PEGAWAI CARD ==================== */
+    /* PEGAWAI CARD */
     .pegawai-card {
         background: white;
         border: 2px solid var(--gray-200);
-        border-radius: var(--radius-sm);
-        padding: var(--spacing-lg);
-        margin-bottom: var(--spacing-md);
+        border-radius: var(--radius);
+        padding: var(--space-3);
+        margin-bottom: var(--space-3);
         transition: all 0.2s;
         cursor: pointer;
     }
 
     .pegawai-card:hover {
         border-color: var(--primary);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        box-shadow: var(--shadow);
         transform: translateY(-2px);
     }
 
     .pegawai-card.selected {
         border-color: var(--primary);
-        background: rgba(59, 130, 246, 0.05);
+        background: var(--primary-light);
     }
 
-    /* ==================== MESIN CARD ==================== */
+    .pegawai-list-container {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: var(--space-2);
+    }
+
+    .pegawai-list-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .pegawai-list-container::-webkit-scrollbar-track {
+        background: var(--gray-100);
+        border-radius: 4px;
+    }
+
+    .pegawai-list-container::-webkit-scrollbar-thumb {
+        background: var(--gray-400);
+        border-radius: 4px;
+    }
+
+    /* MESIN CARD */
     .mesin-card {
         background: white;
         border: 2px solid var(--gray-200);
-        border-radius: var(--radius-sm);
-        padding: var(--spacing-lg);
+        border-radius: var(--radius);
+        padding: var(--space-3);
         cursor: pointer;
         transition: all 0.2s;
         position: relative;
@@ -211,68 +150,45 @@
     .mesin-card:hover {
         border-color: var(--primary);
         transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.1);
+        box-shadow: var(--shadow);
     }
 
     .mesin-card.selected {
         border-color: var(--primary);
-        background: rgba(59, 130, 246, 0.05);
+        background: var(--primary-light);
     }
 
     .mesin-card .badge-status {
         position: absolute;
-        top: var(--spacing-md);
-        right: var(--spacing-md);
+        top: var(--space-2);
+        right: var(--space-2);
     }
 
     .mesin-card h6 {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         font-weight: 600;
         color: var(--gray-900);
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--space-2);
     }
 
     .mesin-card p {
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         color: var(--gray-600);
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--space-1);
     }
 
     .mesin-card p:last-child {
         margin-bottom: 0;
     }
 
-    /* ==================== BADGES ==================== */
-    .badge {
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: var(--font-xs);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-    }
-
-    .badge-success {
-        background: rgba(16, 185, 129, 0.1);
-        color: var(--success);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
-    .badge-danger {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    /* ==================== CHECKBOX ==================== */
+    /* CHECKBOX LABEL */
     .checkbox-label {
         display: flex;
         align-items: start;
-        gap: var(--spacing-md);
-        padding: var(--spacing-lg);
+        gap: var(--space-3);
+        padding: var(--space-3);
         background: var(--gray-50);
-        border-radius: var(--radius-sm);
+        border-radius: var(--radius);
         cursor: pointer;
         transition: all 0.2s;
         border: 2px solid var(--gray-200);
@@ -290,48 +206,32 @@
         cursor: pointer;
     }
 
-    .checkbox-label span {
-        flex: 1;
-    }
-
-    .checkbox-label strong {
-        color: var(--gray-900);
-        font-size: var(--font-sm);
-    }
-
-    .checkbox-label small {
-        font-size: var(--font-xs);
-        color: var(--gray-600);
-        display: block;
-        margin-top: 4px;
-    }
-
-    /* ==================== INFO CARD ==================== */
+    /* INFO CARD */
     .info-card {
         background: var(--gray-50);
         border-left: 4px solid var(--primary);
-        border-radius: var(--radius-sm);
-        padding: var(--spacing-lg);
-        margin-bottom: var(--spacing-lg);
+        border-radius: var(--radius);
+        padding: var(--space-3);
+        margin-bottom: var(--space-3);
     }
 
     .info-card h6 {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         font-weight: 600;
         color: var(--gray-900);
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--space-2);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
     }
 
     .info-card table {
         width: 100%;
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
     }
 
     .info-card table td {
-        padding: var(--spacing-sm) 0;
+        padding: var(--space-1) 0;
         color: var(--gray-700);
     }
 
@@ -339,149 +239,49 @@
         font-weight: 600;
     }
 
-    /* ==================== TRANSFER SUMMARY ==================== */
+    /* TRANSFER SUMMARY */
     .transfer-summary {
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
         border-left: 4px solid var(--warning);
-        border-radius: var(--radius-sm);
-        padding: var(--spacing-xl);
-        margin-top: var(--spacing-xl);
+        border-radius: var(--radius);
+        padding: var(--space-4);
+        margin-top: var(--space-4);
     }
 
     .transfer-summary h6 {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         font-weight: 600;
         color: #92400e;
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--space-2);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
     }
 
     .transfer-summary ol {
         margin: 0;
-        padding-left: var(--spacing-xl);
+        padding-left: var(--space-4);
         color: #92400e;
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
     }
 
     .transfer-summary ol li {
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--space-1);
     }
 
     .transfer-summary .note-box {
-        margin-top: var(--spacing-lg);
-        padding: var(--spacing-md);
+        margin-top: var(--space-3);
+        padding: var(--space-2);
         background: white;
         border-radius: var(--radius-sm);
     }
 
     .transfer-summary .note-box small {
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         color: var(--gray-600);
     }
 
-    /* ==================== BUTTONS ==================== */
-    .btn {
-        padding: var(--spacing-sm) var(--spacing-lg);
-        font-size: var(--font-sm);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        border: none;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        cursor: pointer;
-    }
-
-    .btn i {
-        font-size: var(--font-sm);
-    }
-
-    .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-primary {
-        background: var(--primary);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--primary-dark);
-        color: white;
-    }
-
-    .btn-success {
-        background: var(--success);
-        color: white;
-    }
-
-    .btn-success:hover {
-        background: #059669;
-        color: white;
-    }
-
-    .btn-secondary {
-        background: var(--gray-600);
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background: var(--gray-700);
-        color: white;
-    }
-
-    .btn-outline-light {
-        background: transparent;
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.5);
-    }
-
-    .btn-outline-light:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: white;
-        color: white;
-    }
-
-    /* ==================== ALERT ==================== */
-    .alert {
-        border-radius: var(--radius-sm);
-        padding: var(--spacing-md) var(--spacing-lg);
-        margin-bottom: var(--spacing-lg);
-        display: flex;
-        align-items: start;
-        gap: var(--spacing-sm);
-        font-size: var(--font-sm);
-        border: none;
-    }
-
-    .alert i {
-        font-size: var(--font-base);
-        flex-shrink: 0;
-        margin-top: 2px;
-    }
-
-    .alert-info {
-        background: #dbeafe;
-        border-left: 4px solid var(--primary);
-        color: #1e3a8a;
-    }
-
-    .alert-warning {
-        background: #fef3c7;
-        border-left: 4px solid var(--warning);
-        color: #92400e;
-    }
-
-    .alert strong {
-        display: block;
-        margin-bottom: 4px;
-    }
-
-    /* ==================== PROGRESS MODAL ==================== */
+    /* PROGRESS MODAL */
     .progress-modal {
         position: fixed;
         top: 0;
@@ -501,8 +301,8 @@
 
     .progress-content {
         background: white;
-        border-radius: var(--card-radius);
-        padding: var(--spacing-xl);
+        border-radius: var(--radius);
+        padding: var(--space-6);
         max-width: 500px;
         width: 90%;
         text-align: center;
@@ -515,7 +315,7 @@
         width: 48px;
         height: 48px;
         animation: spin 1s linear infinite;
-        margin: 0 auto var(--spacing-lg);
+        margin: 0 auto var(--space-4);
     }
 
     @keyframes spin {
@@ -524,19 +324,19 @@
     }
 
     .progress-content h5 {
-        font-size: var(--font-base);
+        font-size: var(--text-base);
         font-weight: 600;
         color: var(--gray-900);
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--space-2);
     }
 
     .progress-content p {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         color: var(--gray-600);
         margin: 0;
     }
 
-    /* ==================== LOADING OVERLAY ==================== */
+    /* LOADING OVERLAY */
     .loading-overlay {
         position: absolute;
         top: 0;
@@ -547,414 +347,349 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: var(--radius-sm);
+        border-radius: var(--radius);
         z-index: 10;
     }
 
-    .loading-overlay .text-center {
-        color: var(--gray-600);
-    }
-
-    .loading-overlay .spinner {
-        margin-bottom: var(--spacing-md);
-    }
-
-    /* ==================== SEARCH INPUT ==================== */
-    .form-control {
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius-sm);
-        padding: var(--spacing-sm) var(--spacing-md);
-        font-size: var(--font-sm);
-        transition: var(--transition-base);
-    }
-
-    .form-control:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        outline: none;
-    }
-
-    /* ==================== LIST CONTAINERS ==================== */
-    .pegawai-list-container {
-        max-height: 400px;
-        overflow-y: auto;
-        padding-right: var(--spacing-sm);
-    }
-
-    .pegawai-list-container::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .pegawai-list-container::-webkit-scrollbar-track {
-        background: var(--gray-100);
-        border-radius: 4px;
-    }
-
-    .pegawai-list-container::-webkit-scrollbar-thumb {
-        background: var(--gray-400);
-        border-radius: 4px;
-    }
-
-    .pegawai-list-container::-webkit-scrollbar-thumb:hover {
-        background: var(--gray-500);
-    }
-
-    /* ==================== EMPTY STATE ==================== */
+    /* EMPTY STATE */
     .empty-state {
         text-align: center;
-        padding: var(--spacing-xl);
+        padding: var(--space-6);
         color: var(--gray-500);
     }
 
     .empty-state i {
         font-size: 3rem;
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--space-3);
         color: var(--gray-300);
     }
 
     .empty-state p {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         margin: 0;
     }
 
-    /* ==================== RESPONSIVE ==================== */
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-        .dashboard-card-header,
-        .dashboard-card-body,
-        .transfer-section-body {
-            padding: var(--spacing-lg);
-        }
-
         .step-indicator {
             flex-wrap: wrap;
         }
 
         .step {
             flex-basis: 50%;
-            margin-bottom: var(--spacing-lg);
+            margin-bottom: var(--space-4);
         }
 
         .step-indicator::before {
             display: none;
-        }
-
-        .mesin-card {
-            margin-bottom: var(--spacing-md);
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="dashboard-card">
-        <!-- HEADER -->
-        <div class="dashboard-card-header">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h4>
-                        <i class="fas fa-exchange-alt"></i>
-                        Transfer Pegawai ke Mesin Lain
-                    </h4>
-                    <small>Pindahkan data pegawai dan fingerprint ke mesin/cabang lain</small>
-                </div>
-                <a href="{% url 'menu_pengaturan' %}" class="btn btn-outline-light btn-sm">
-                    <i class="fas fa-arrow-left"></i> Kembali
-                </a>
-            </div>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h4>
+                <i class="fas fa-exchange-alt"></i>
+                Transfer Pegawai ke Mesin Lain
+            </h4>
+            <p>Pindahkan data pegawai dan fingerprint ke mesin/cabang lain</p>
         </div>
-
-        <div class="dashboard-card-body">
-            <!-- Step Indicator -->
-            <div class="step-indicator">
-                <div class="step active" id="step1">
-                    <div class="step-circle">1</div>
-                    <div class="step-label">Pilih Pegawai</div>
-                </div>
-                <div class="step" id="step2">
-                    <div class="step-circle">2</div>
-                    <div class="step-label">Mesin Asal</div>
-                </div>
-                <div class="step" id="step3">
-                    <div class="step-circle">3</div>
-                    <div class="step-label">Mesin Tujuan</div>
-                </div>
-                <div class="step" id="step4">
-                    <div class="step-circle">4</div>
-                    <div class="step-label">Konfirmasi</div>
-                </div>
-            </div>
-
-            <!-- Form Transfer -->
-            <form id="transferForm">
-                {% csrf_token %}
-
-                <!-- Step 1: Pilih Pegawai -->
-                <div class="transfer-step" id="step1-content">
-                    <div class="transfer-section">
-                        <div class="transfer-section-header">
-                            <h5>
-                                <i class="fas fa-user-check"></i>
-                                Pilih Pegawai yang Akan Ditransfer
-                            </h5>
-                        </div>
-                        <div class="transfer-section-body">
-                            <div class="transfer-form-group">
-                                <input type="text" id="searchPegawai" class="form-control" 
-                                       placeholder="🔍 Cari pegawai berdasarkan nama atau User ID...">
-                            </div>
-                            
-                            <div class="pegawai-list-container" id="pegawaiList">
-                                {% for pegawai in pegawai_list %}
-                                    {% if pegawai.is_active and pegawai.uid_mesin %}
-                                    <div class="pegawai-card" data-id="{{ pegawai.id }}" 
-                                        data-userid="{{ pegawai.userid }}"
-                                        data-nama="{{ pegawai.nama_lengkap }}">
-                                        <div class="d-flex align-items-center">
-                                            <input type="radio" name="pegawai_id" value="{{ pegawai.id }}" class="me-3">
-                                            <div class="flex-grow-1">
-                                                <strong style="font-size: var(--font-sm); color: var(--gray-900);">{{ pegawai.nama_lengkap }}</strong>
-                                                <br>
-                                                <small class="text-muted" style="font-size: var(--font-xs);">
-                                                    <i class="fas fa-hashtag"></i> {{ pegawai.userid }} |
-                                                    <i class="fas fa-briefcase"></i> {{ pegawai.departemen.nama|default:"-" }} |
-                                                    <i class="fas fa-fingerprint"></i> {{ pegawai.fingerprint_templates.count }} template
-                                                </small>
-                                            </div>
-                                            <div>
-                                                <span class="badge badge-success">
-                                                    <i class="fas fa-check-circle"></i> Aktif | UID: {{ pegawai.uid_mesin }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-
-                            <div class="alert alert-info mt-3">
-                                <i class="fas fa-info-circle"></i>
-                                <div>
-                                    <strong>Catatan:</strong><br>
-                                    <small>Hanya pegawai yang sudah aktif dan terdaftar di mesin yang dapat ditransfer. Pegawai yang masih menunggu registrasi atau tidak aktif tidak ditampilkan.</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end mt-3">
-                        <button type="button" class="btn btn-primary" onclick="nextStep(2)">
-                            Lanjut ke Mesin Asal <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Step 2: Pilih Mesin Asal -->
-                <div class="transfer-step" id="step2-content" style="display:none;">
-                    <div class="transfer-section">
-                        <div class="transfer-section-header">
-                            <h5>
-                                <i class="fas fa-server"></i>
-                                Pilih Mesin Asal (Sumber Data)
-                            </h5>
-                        </div>
-                        <div class="transfer-section-body">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i>
-                                <div>
-                                    <small>Sistem akan menampilkan mesin yang memiliki data pegawai yang dipilih</small>
-                                </div>
-                            </div>
-
-                            <div class="transfer-form-group">
-                                <label>Filter Berdasarkan Cabang (Opsional)</label>
-                                <select id="filterCabangAsal" class="form-control">
-                                    <option value="">-- Semua Cabang --</option>
-                                    {% for cabang in cabang_list %}
-                                    <option value="{{ cabang.id }}">{{ cabang.nama }} ({{ cabang.kode }})</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <div class="row" id="mesinAsalList" style="position: relative; min-height: 200px;">
-                                <div class="col-12 empty-state">
-                                    <i class="fas fa-arrow-up"></i>
-                                    <p>Pilih pegawai terlebih dahulu untuk melihat mesin yang tersedia</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between mt-3">
-                        <button type="button" class="btn btn-secondary" onclick="prevStep(1)">
-                            <i class="fas fa-arrow-left"></i> Kembali
-                        </button>
-                        <button type="button" class="btn btn-primary" onclick="nextStep(3)">
-                            Lanjut ke Mesin Tujuan <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Step 3: Pilih Mesin Tujuan -->
-                <div class="transfer-step" id="step3-content" style="display:none;">
-                    <div class="transfer-section">
-                        <div class="transfer-section-header">
-                            <h5>
-                                <i class="fas fa-server"></i>
-                                Pilih Mesin Tujuan (Tempat Baru)
-                            </h5>
-                        </div>
-                        <div class="transfer-section-body">
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <div>
-                                    <strong>Perhatian:</strong><br>
-                                    <small>Pastikan mesin tujuan berbeda dengan mesin asal!</small>
-                                </div>
-                            </div>
-
-                            <div class="transfer-form-group">
-                                <label>Filter Berdasarkan Cabang (Opsional)</label>
-                                <select id="filterCabangTujuan" class="form-control">
-                                    <option value="">-- Semua Cabang --</option>
-                                    {% for cabang in cabang_list %}
-                                    <option value="{{ cabang.id }}">{{ cabang.nama }} ({{ cabang.kode }})</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <div class="row" id="mesinTujuanList">
-                                {% for mesin in mesin_list %}
-                                <div class="col-md-6 mb-3 mesin-item-tujuan" data-cabang="{{ mesin.cabang.id|default:'' }}">
-                                    <div class="mesin-card" 
-                                         data-mesin-id="{{ mesin.id }}"
-                                         data-ip="{{ mesin.ip_address }}"
-                                         data-nama="{{ mesin.nama }}"
-                                         onclick="selectMesinTujuan('{{ mesin.id }}', '{{ mesin.ip_address }}', '{{ mesin.nama }}')">
-                                        <span class="badge badge-success badge-status">
-                                            <i class="fas fa-circle"></i> Online
-                                        </span>
-                                        <h6>
-                                            <i class="fas fa-fingerprint"></i>
-                                            {{ mesin.nama }}
-                                        </h6>
-                                        <p>
-                                            <i class="fas fa-network-wired"></i>
-                                            <code style="font-size: var(--font-xs);">{{ mesin.ip_address }}:{{ mesin.port }}</code>
-                                        </p>
-                                        <p>
-                                            <i class="fas fa-map-marker-alt"></i>
-                                            {{ mesin.cabang.nama|default:"-" }}
-                                        </p>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between mt-3">
-                        <button type="button" class="btn btn-secondary" onclick="prevStep(2)">
-                            <i class="fas fa-arrow-left"></i> Kembali
-                        </button>
-                        <button type="button" class="btn btn-primary" onclick="nextStep(4)">
-                            Lanjut ke Konfirmasi <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Step 4: Konfirmasi -->
-                <div class="transfer-step" id="step4-content" style="display:none;">
-                    <div class="transfer-section">
-                        <div class="transfer-section-header">
-                            <h5>
-                                <i class="fas fa-clipboard-check"></i>
-                                Konfirmasi Transfer
-                            </h5>
-                        </div>
-                        <div class="transfer-section-body">
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <div>
-                                    <strong>PERHATIAN PENTING!</strong><br>
-                                    <small>Transfer ini <strong>HANYA memindahkan User ID</strong>, bukan fingerprint template. Pegawai <strong>HARUS scan ulang fingerprint</strong> di mesin tujuan setelah transfer selesai.</small>
-                                </div>
-                            </div>
-
-                            <div class="info-card">
-                                <h6>
-                                    <i class="fas fa-info-circle"></i>
-                                    Ringkasan Transfer
-                                </h6>
-
-                                <table class="table table-borderless mb-0">
-                                    <tr>
-                                        <td style="width: 40%"><strong>👤 Pegawai:</strong></td>
-                                        <td id="summaryPegawai">-</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>📤 Mesin Asal:</strong></td>
-                                        <td id="summaryMesinAsal">-</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>📥 Mesin Tujuan:</strong></td>
-                                        <td id="summaryMesinTujuan">-</td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                            <div class="transfer-form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="hapusDariAsal" name="hapus_dari_asal">
-                                    <span>
-                                        <strong>Hapus user dari mesin asal setelah transfer berhasil</strong>
-                                        <small>
-                                            Data pegawai akan dihapus dari mesin asal. 
-                                            Hanya centang jika pegawai benar-benar pindah permanen.
-                                        </small>
-                                    </span>
-                                </label>
-                            </div>
-
-                            <div class="transfer-summary">
-                                <h6>
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    Proses yang Akan Dilakukan
-                                </h6>
-                                <ol class="mb-0">
-                                    <li>Mendaftarkan user ke mesin tujuan (User ID saja)</li>
-                                    <li>Update database dengan UID baru</li>
-                                    <li id="step5Delete" style="display:none; color: var(--danger);">
-                                        <strong>Menghapus user dari mesin asal</strong>
-                                    </li>
-                                    <li style="color: var(--warning);"><strong>Pegawai WAJIB scan ulang fingerprint di mesin tujuan</strong></li>
-                                </ol>
-                                
-                                <div class="note-box">
-                                    <small>
-                                        <i class="fas fa-info-circle"></i>
-                                        <strong>Kenapa harus scan ulang?</strong><br>
-                                        Format fingerprint template tidak kompatibel antar mesin karena perbedaan firmware dan teknologi sensor.
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between mt-3">
-                        <button type="button" class="btn btn-secondary" onclick="prevStep(3)">
-                            <i class="fas fa-arrow-left"></i> Kembali
-                        </button>
-                        <button type="button" class="btn btn-success" onclick="prosesTransfer()">
-                            <i class="fas fa-check-circle"></i> Proses Transfer
-                        </button>
-                    </div>
-                </div>
-            </form>
-
-        </div>
+        <a href="{% url 'menu_pengaturan' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </a>
     </div>
 </div>
+
+<!-- Step Indicator -->
+<div class="step-indicator">
+    <div class="step active" id="step1">
+        <div class="step-circle">1</div>
+        <div class="step-label">Pilih Pegawai</div>
+    </div>
+    <div class="step" id="step2">
+        <div class="step-circle">2</div>
+        <div class="step-label">Mesin Asal</div>
+    </div>
+    <div class="step" id="step3">
+        <div class="step-circle">3</div>
+        <div class="step-label">Mesin Tujuan</div>
+    </div>
+    <div class="step" id="step4">
+        <div class="step-circle">4</div>
+        <div class="step-label">Konfirmasi</div>
+    </div>
+</div>
+
+<!-- Form Transfer -->
+<form id="transferForm">
+    {% csrf_token %}
+
+    <!-- Step 1: Pilih Pegawai -->
+    <div class="transfer-step" id="step1-content">
+        <div class="card">
+            <div class="card-header">
+                <h5>
+                    <i class="fas fa-user-check"></i>
+                    Pilih Pegawai yang Akan Ditransfer
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <input type="text" id="searchPegawai" class="form-control" 
+                           placeholder="🔍 Cari pegawai berdasarkan nama atau User ID...">
+                </div>
+                
+                <div class="pegawai-list-container" id="pegawaiList">
+                    {% for pegawai in pegawai_list %}
+                        {% if pegawai.is_active and pegawai.uid_mesin %}
+                        <div class="pegawai-card" data-id="{{ pegawai.id }}" 
+                            data-userid="{{ pegawai.userid }}"
+                            data-nama="{{ pegawai.nama_lengkap }}">
+                            <div class="d-flex align-items-center">
+                                <input type="radio" name="pegawai_id" value="{{ pegawai.id }}" class="me-3">
+                                <div class="flex-grow-1">
+                                    <strong style="font-size: var(--text-sm); color: var(--gray-900);">{{ pegawai.nama_lengkap }}</strong>
+                                    <br>
+                                    <small class="text-muted" style="font-size: var(--text-xs);">
+                                        <i class="fas fa-hashtag"></i> {{ pegawai.userid }} |
+                                        <i class="fas fa-briefcase"></i> {{ pegawai.departemen.nama|default:"-" }} |
+                                        <i class="fas fa-fingerprint"></i> {{ pegawai.fingerprint_templates.count }} template
+                                    </small>
+                                </div>
+                                <div>
+                                    <span class="badge badge-success">
+                                        <i class="fas fa-check-circle"></i> Aktif | UID: {{ pegawai.uid_mesin }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>Catatan:</strong><br>
+                        <small>Hanya pegawai yang sudah aktif dan terdaftar di mesin yang dapat ditransfer. Pegawai yang masih menunggu registrasi atau tidak aktif tidak ditampilkan.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+            <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                Lanjut ke Mesin Asal <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 2: Pilih Mesin Asal -->
+    <div class="transfer-step" id="step2-content" style="display:none;">
+        <div class="card">
+            <div class="card-header">
+                <h5>
+                    <i class="fas fa-server"></i>
+                    Pilih Mesin Asal (Sumber Data)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <small>Sistem akan menampilkan mesin yang memiliki data pegawai yang dipilih</small>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Filter Berdasarkan Cabang (Opsional)</label>
+                    <select id="filterCabangAsal" class="form-select">
+                        <option value="">-- Semua Cabang --</option>
+                        {% for cabang in cabang_list %}
+                        <option value="{{ cabang.id }}">{{ cabang.nama }} ({{ cabang.kode }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="row" id="mesinAsalList" style="position: relative; min-height: 200px;">
+                    <div class="col-12 empty-state">
+                        <i class="fas fa-arrow-up"></i>
+                        <p>Pilih pegawai terlebih dahulu untuk melihat mesin yang tersedia</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary" onclick="prevStep(1)">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </button>
+            <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                Lanjut ke Mesin Tujuan <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 3: Pilih Mesin Tujuan -->
+    <div class="transfer-step" id="step3-content" style="display:none;">
+        <div class="card">
+            <div class="card-header">
+                <h5>
+                    <i class="fas fa-server"></i>
+                    Pilih Mesin Tujuan (Tempat Baru)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Perhatian:</strong><br>
+                        <small>Pastikan mesin tujuan berbeda dengan mesin asal!</small>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Filter Berdasarkan Cabang (Opsional)</label>
+                    <select id="filterCabangTujuan" class="form-select">
+                        <option value="">-- Semua Cabang --</option>
+                        {% for cabang in cabang_list %}
+                        <option value="{{ cabang.id }}">{{ cabang.nama }} ({{ cabang.kode }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="row" id="mesinTujuanList">
+                    {% for mesin in mesin_list %}
+                    <div class="col-md-6 mb-3 mesin-item-tujuan" data-cabang="{{ mesin.cabang.id|default:'' }}">
+                        <div class="mesin-card" 
+                             data-mesin-id="{{ mesin.id }}"
+                             data-ip="{{ mesin.ip_address }}"
+                             data-nama="{{ mesin.nama }}"
+                             onclick="selectMesinTujuan('{{ mesin.id }}', '{{ mesin.ip_address }}', '{{ mesin.nama }}')">
+                            <span class="badge badge-success badge-status">
+                                <i class="fas fa-circle"></i> Online
+                            </span>
+                            <h6>
+                                <i class="fas fa-fingerprint"></i>
+                                {{ mesin.nama }}
+                            </h6>
+                            <p>
+                                <i class="fas fa-network-wired"></i>
+                                <code style="font-size: var(--text-xs);">{{ mesin.ip_address }}:{{ mesin.port }}</code>
+                            </p>
+                            <p>
+                                <i class="fas fa-map-marker-alt"></i>
+                                {{ mesin.cabang.nama|default:"-" }}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary" onclick="prevStep(2)">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </button>
+            <button type="button" class="btn btn-primary" onclick="nextStep(4)">
+                Lanjut ke Konfirmasi <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 4: Konfirmasi -->
+    <div class="transfer-step" id="step4-content" style="display:none;">
+        <div class="card">
+            <div class="card-header">
+                <h5>
+                    <i class="fas fa-clipboard-check"></i>
+                    Konfirmasi Transfer
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>PERHATIAN PENTING!</strong><br>
+                        <small>Transfer ini <strong>HANYA memindahkan User ID</strong>, bukan fingerprint template. Pegawai <strong>HARUS scan ulang fingerprint</strong> di mesin tujuan setelah transfer selesai.</small>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h6>
+                        <i class="fas fa-info-circle"></i>
+                        Ringkasan Transfer
+                    </h6>
+
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <td style="width: 40%"><strong>👤 Pegawai:</strong></td>
+                            <td id="summaryPegawai">-</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📤 Mesin Asal:</strong></td>
+                            <td id="summaryMesinAsal">-</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📥 Mesin Tujuan:</strong></td>
+                            <td id="summaryMesinTujuan">-</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="mb-3">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="hapusDariAsal" name="hapus_dari_asal">
+                        <span>
+                            <strong>Hapus user dari mesin asal setelah transfer berhasil</strong>
+                            <small>
+                                Data pegawai akan dihapus dari mesin asal. 
+                                Hanya centang jika pegawai benar-benar pindah permanen.
+                            </small>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="transfer-summary">
+                    <h6>
+                        <i class="fas fa-exclamation-circle"></i>
+                        Proses yang Akan Dilakukan
+                    </h6>
+                    <ol class="mb-0">
+                        <li>Mendaftarkan user ke mesin tujuan (User ID saja)</li>
+                        <li>Update database dengan UID baru</li>
+                        <li id="step5Delete" style="display:none; color: var(--danger);">
+                            <strong>Menghapus user dari mesin asal</strong>
+                        </li>
+                        <li style="color: var(--warning);"><strong>Pegawai WAJIB scan ulang fingerprint di mesin tujuan</strong></li>
+                    </ol>
+                    
+                    <div class="note-box">
+                        <small>
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Kenapa harus scan ulang?</strong><br>
+                            Format fingerprint template tidak kompatibel antar mesin karena perbedaan firmware dan teknologi sensor.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary" onclick="prevStep(3)">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </button>
+            <button type="button" class="btn btn-success" onclick="prosesTransfer()">
+                <i class="fas fa-check-circle"></i> Proses Transfer
+            </button>
+        </div>
+    </div>
+</form>
 
 <!-- Progress Modal -->
 <div class="progress-modal" id="progressModal">
@@ -1061,7 +796,18 @@ function loadMesinAsalForPegawai(pegawaiId) {
     `;
 
     fetch(`/pegawai/api/get-mesin-by-pegawai/?pegawai_id=${encodeURIComponent(pegawaiId)}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Response bukan JSON. Server mengirim HTML error page.');
+            }
+            
+            return response.json();
+        })
         .then(data => {
             if (data.status === 'success') {
                 if (!data.machines || data.machines.length === 0) {
@@ -1071,7 +817,7 @@ function loadMesinAsalForPegawai(pegawaiId) {
                                 <i class="fas fa-exclamation-triangle"></i>
                                 <div>
                                     <strong>Tidak ada mesin ditemukan</strong><br>
-                                    <small>Pegawai <strong>${data.pegawai ? data.pegawai.nama : ''}</strong> tidak terdaftar di mesin manapun yang online.</small>
+                                    <small>Pegawai <strong>${data.pegawai ? data.pegawai.nama : ''}</strong> tidak terdaftar di mesin manapun yang online saat ini.</small>
                                 </div>
                             </div>
                         </div>
@@ -1097,13 +843,13 @@ function loadMesinAsalForPegawai(pegawaiId) {
                                 </h6>
                                 <p>
                                     <i class="fas fa-network-wired"></i>
-                                    <code style="font-size: var(--font-xs);">${mesin.ip_address}:${mesin.port}</code>
+                                    <code style="font-size: var(--text-xs);">${mesin.ip_address}:${mesin.port}</code>
                                 </p>
                                 <p>
                                     <i class="fas fa-map-marker-alt"></i>
                                     ${mesin.cabang || '-'}
                                 </p>
-                                <p style="color: var(--success); margin-top: var(--spacing-sm);">
+                                <p style="color: var(--success); margin-top: var(--space-2);">
                                     <i class="fas fa-fingerprint"></i>
                                     <strong>${mesin.fingerprint_count || 0} template</strong> tersimpan
                                 </p>
@@ -1127,6 +873,7 @@ function loadMesinAsalForPegawai(pegawaiId) {
                         <div class="alert alert-danger">
                             <i class="fas fa-times-circle"></i>
                             <div>
+                                <strong>Error:</strong><br>
                                 <small>${data.msg || 'Terjadi kesalahan saat memuat data mesin.'}</small>
                             </div>
                         </div>
@@ -1140,7 +887,7 @@ function loadMesinAsalForPegawai(pegawaiId) {
                     <div class="alert alert-danger">
                         <i class="fas fa-times-circle"></i>
                         <div>
-                            <strong>Error:</strong><br>
+                            <strong>Error saat memuat data mesin:</strong><br>
                             <small>${String(error)}</small>
                         </div>
                     </div>
@@ -1230,7 +977,7 @@ function prosesTransfer() {
         html: `
             <div style="text-align: left;">
                 <p><strong>Apakah Anda yakin ingin mentransfer pegawai ini?</strong></p>
-                <ul style="font-size: var(--font-sm);">
+                <ul style="font-size: var(--text-sm);">
                     <li>Pegawai: <strong>${escapeHtml(selectedPegawai.nama)}</strong></li>
                     <li>Dari: <strong>${escapeHtml(selectedMesinAsal.nama)}</strong> <code>${escapeHtml(selectedMesinAsal.ip)}</code></li>
                     <li>Ke: <strong>${escapeHtml(selectedMesinTujuan.nama)}</strong> <code>${escapeHtml(selectedMesinTujuan.ip)}</code></li>

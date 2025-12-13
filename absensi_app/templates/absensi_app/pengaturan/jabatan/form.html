@@ -5,156 +5,171 @@
 
 {% block extra_css %}
 <style>
-    .form-card {
-        background: white;
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--gray-200);
-        overflow: hidden;
-    }
+/* ===== FORM SECTIONS ===== */
+.form-section {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--gray-200);
+}
 
-    .form-card-header {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-        color: white;
-        padding: var(--spacing-lg) var(--spacing-xl);
-    }
+.form-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
 
-    .form-card-header h5 {
-        margin: 0;
-        font-size: var(--font-lg);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
+/* ===== INFO TEXT ===== */
+.info-text {
+    color: var(--gray-600);
+    font-size: var(--text-sm);
+    margin-top: var(--space-1);
+    display: block;
+}
 
-    .form-card-body {
-        padding: var(--spacing-xl);
-    }
+/* ===== FORM SWITCH ===== */
+.form-check-input[type="checkbox"] {
+    width: 40px;
+    height: 20px;
+    cursor: pointer;
+    border: 2px solid var(--gray-300);
+}
 
-    .form-section {
-        margin-bottom: var(--spacing-xl);
-    }
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
 
+.form-check-label {
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-left: var(--space-2);
+}
+
+.form-check-label strong {
+    display: block;
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+/* ===== BUTTONS ===== */
+.btn-group-actions {
+    display: flex;
+    gap: var(--space-3);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--gray-200);
+}
+
+.btn-secondary {
+    background: var(--gray-500);
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--gray-700);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
     .btn-group-actions {
-        display: flex;
-        gap: var(--spacing-md);
-        padding-top: var(--spacing-lg);
-        border-top: 2px solid var(--gray-100);
-        margin-top: var(--spacing-xl);
+        flex-direction: column;
     }
 
-    .btn-secondary {
-        background: var(--gray-500);
-        color: white;
+    .btn-group-actions .btn {
+        width: 100%;
     }
-
-    .btn-secondary:hover:not(:disabled) {
-        background: var(--gray-600);
-        transform: translateY(-1px);
-    }
-
-    @media (max-width: 768px) {
-        .form-card-body {
-            padding: var(--spacing-lg);
-        }
-
-        .btn-group-actions {
-            flex-direction: column;
-        }
-
-        .btn-group-actions .btn {
-            width: 100%;
-        }
-    }
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="form-card">
-                <div class="form-card-header">
-                    <h5>
-                        <i class="fas fa-briefcase"></i>
-                        {{ judul }}
-                    </h5>
-                </div>
+<div class="card">
+    <div class="card-header">
+        <h5>
+            <i class="fas fa-briefcase"></i>
+            {{ judul }}
+        </h5>
+    </div>
 
-                <div class="form-card-body">
-                    <form method="post" id="formJabatan">
-                        {% csrf_token %}
+    <div class="card-body">
+        <form method="post" id="formJabatan">
+            {% csrf_token %}
 
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.kode.id_for_label }}" class="form-label">
-                                        Kode Jabatan <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.kode }}
-                                    {% if form.kode.errors %}
-                                        <div class="text-danger small mt-1">{{ form.kode.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted d-block mt-1">
-                                        Contoh: MGR, SPV, STAFF (singkatan yang jelas)
-                                    </small>
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label d-block">&nbsp;</label>
-                                    <div class="form-check form-switch mt-2">
-                                        {{ form.is_active }}
-                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                                            <strong>Status Aktif</strong>
-                                        </label>
-                                    </div>
-                                    {% if form.is_active.errors %}
-                                        <div class="text-danger small mt-1">{{ form.is_active.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted d-block mt-1">
-                                        Jabatan tidak aktif tidak muncul di dropdown
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-12">
-                                    <label for="{{ form.nama.id_for_label }}" class="form-label">
-                                        Nama Jabatan <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.nama }}
-                                    {% if form.nama.errors %}
-                                        <div class="text-danger small mt-1">{{ form.nama.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted d-block mt-1">
-                                        Nama lengkap jabatan (Contoh: Manager, Supervisor, Staff)
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger" role="alert">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ form.non_field_errors }}
-                            </div>
+            <!-- KODE & STATUS -->
+            <div class="form-section">
+                <div class="row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label for="{{ form.kode.id_for_label }}" class="form-label">
+                            Kode Jabatan <span style="color: var(--danger);">*</span>
+                        </label>
+                        {{ form.kode }}
+                        {% if form.kode.errors %}
+                            <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                                {{ form.kode.errors }}
+                            </small>
                         {% endif %}
+                        <small class="info-text">
+                            Contoh: MGR, SPV, STAFF (singkatan yang jelas)
+                        </small>
+                    </div>
 
-                        <div class="btn-group-actions">
-                            <button type="submit" class="btn btn-primary" id="btnSubmit">
-                                <i class="fas fa-save"></i> Simpan Jabatan
-                            </button>
-                            <a href="{% url 'daftar_jabatan' %}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Batal
-                            </a>
+                    <div class="col-md-6">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="form-check form-switch" style="margin-top: var(--space-2);">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                <strong>Status Aktif</strong>
+                            </label>
                         </div>
-                    </form>
+                        {% if form.is_active.errors %}
+                            <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                                {{ form.is_active.errors }}
+                            </small>
+                        {% endif %}
+                        <small class="info-text">
+                            Jabatan tidak aktif tidak muncul di dropdown
+                        </small>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- NAMA -->
+            <div class="form-section">
+                <label for="{{ form.nama.id_for_label }}" class="form-label">
+                    Nama Jabatan <span style="color: var(--danger);">*</span>
+                </label>
+                {{ form.nama }}
+                {% if form.nama.errors %}
+                    <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                        {{ form.nama.errors }}
+                    </small>
+                {% endif %}
+                <small class="info-text">
+                    Nama lengkap jabatan (Contoh: Manager, Supervisor, Staff)
+                </small>
+            </div>
+
+            <!-- NON FIELD ERRORS -->
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>{{ form.non_field_errors }}</div>
+                </div>
+            {% endif %}
+
+            <!-- ACTIONS -->
+            <div class="btn-group-actions">
+                <button type="submit" class="btn btn-primary" id="btnSubmit">
+                    <i class="fas fa-save"></i>
+                    Simpan Jabatan
+                </button>
+                <a href="{% url 'daftar_jabatan' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

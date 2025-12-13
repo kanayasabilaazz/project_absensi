@@ -4,78 +4,46 @@
 {% block title %}Daftar Jabatan{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <style>
-    /* ==================== KONSISTEN DENGAN BASE & DASHBOARD ==================== */
-    :root {
-        --card-radius: var(--radius-md);
-        --card-shadow: var(--shadow-sm);
-        --card-shadow-hover: var(--shadow-md);
+    /* HEADER CARD - TERPISAH DI ATAS */
+    .header-card {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+        border-radius: var(--radius);
+        padding: var(--space-5);
+        margin-bottom: var(--space-4);
+        box-shadow: var(--shadow);
+        color: white;
     }
 
-    /* ==================== SECTION CARD ==================== */
-    .section-card {
-        background: white;
-        border-radius: var(--card-radius);
-        box-shadow: var(--card-shadow);
-        margin-bottom: var(--spacing-xl);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-        transition: var(--transition-base);
-    }
-
-    .section-card:hover {
-        box-shadow: var(--card-shadow-hover);
-    }
-
-    .section-header {
+    .header-top {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        padding: var(--spacing-lg) var(--spacing-xl);
-        border-bottom: 1px solid var(--gray-200);
+        align-items: flex-start;
+        gap: var(--space-3);
         flex-wrap: wrap;
-        gap: var(--spacing-lg);
-        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-        color: white;
     }
 
-    .section-title {
-        font-size: var(--font-lg);
+    .header-info h5 {
+        margin: 0 0 var(--space-1) 0;
+        font-size: var(--text-xl);
         font-weight: 700;
-        color: white;
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
-        margin: 0;
+        gap: var(--space-2);
     }
 
-    .section-title i {
-        font-size: var(--font-lg);
+    .header-subtitle {
+        font-size: var(--text-sm);
+        margin: 0 0 var(--space-2) 0;
+        opacity: 0.9;
     }
 
-    .section-body {
-        padding: var(--spacing-xl);
-    }
-
-    .section-footer {
-        padding: var(--spacing-md) var(--spacing-xl);
-        background: var(--gray-50);
-        border-top: 1px solid var(--gray-200);
-        font-size: var(--font-sm);
-        color: var(--gray-600);
-    }
-
-    .section-footer strong {
-        color: var(--gray-900);
-    }
-
-    /* ==================== BREADCRUMB ==================== */
+    /* BREADCRUMB */
     .breadcrumb {
         background: transparent;
         padding: 0;
-        margin-bottom: var(--spacing-lg);
-        font-size: var(--font-sm);
+        margin: 0;
+        font-size: var(--text-sm);
     }
 
     .breadcrumb-item {
@@ -85,11 +53,6 @@
     .breadcrumb-item a {
         color: rgba(255, 255, 255, 0.9);
         text-decoration: none;
-        transition: var(--transition-fast);
-    }
-
-    .breadcrumb-item a:hover {
-        color: white;
     }
 
     .breadcrumb-item.active {
@@ -100,35 +63,17 @@
         color: rgba(255, 255, 255, 0.6);
     }
 
-    /* ==================== BUTTONS (KONSISTEN) ==================== */
-    .btn {
-        padding: var(--spacing-md) var(--spacing-xl);
-        font-size: var(--font-sm);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        border: none;
-        transition: var(--transition-base);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        cursor: pointer;
-        text-decoration: none;
-    }
-
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-primary {
+    /* BUTTONS */
+    .btn-primary-light {
         background: rgba(255, 255, 255, 0.95);
-        color: var(--primary-dark);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: var(--primary-hover);
+        border: 1px solid rgba(255, 255, 255, 0.5);
     }
 
-    .btn-primary:hover {
+    .btn-primary-light:hover {
         background: white;
-        color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
     }
 
     .btn-outline-light {
@@ -139,179 +84,120 @@
 
     .btn-outline-light:hover {
         background: rgba(255, 255, 255, 0.25);
-        color: white;
     }
 
-    .btn-action {
-        padding: 0.5rem 0.875rem;
-        font-size: var(--font-xs);
+    /* CONTENT CARD - HANYA ISI */
+    .content-card {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
     }
 
-    .btn-warning {
-        background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
-        color: white;
-        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    .content-body {
+        padding: var(--space-5);
     }
 
-    .btn-danger {
-        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
-        color: white;
-        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
-    }
-
-    /* ==================== TABLE (SAMA PERSIS DASHBOARD) ==================== */
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .table {
-        margin-bottom: 0;
-        font-size: var(--font-sm);
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .table thead th {
-        background: var(--gray-800);
-        color: white;
-        font-weight: 600;
-        padding: var(--spacing-md);
-        font-size: var(--font-xs);
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        border: none;
-        white-space: nowrap;
-        text-align: left;
-    }
-
-    .table thead th:first-child {
-        border-top-left-radius: var(--radius-md);
-    }
-
-    .table thead th:last-child {
-        border-top-right-radius: var(--radius-md);
-    }
-
-    .table tbody td {
-        padding: var(--spacing-md);
-        vertical-align: middle;
-        border-bottom: 1px solid var(--gray-200);
-        color: var(--gray-700);
-    }
-
-    .table tbody tr {
-        transition: var(--transition-fast);
-    }
-
-    .table tbody tr:hover {
+    .content-footer {
+        padding: var(--space-3) var(--space-5);
         background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+        font-size: var(--text-sm);
+        color: var(--gray-600);
     }
 
-    .table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    /* ==================== BADGES ==================== */
+    /* BADGES */
     .badge-kode {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
         color: white;
-        padding: var(--spacing-sm) var(--spacing-md);
+        padding: var(--space-1) var(--space-3);
         border-radius: var(--radius-sm);
         font-weight: 700;
-        font-size: var(--font-sm);
-        display: inline-block;
+        font-size: var(--text-sm);
         box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
         letter-spacing: 0.5px;
     }
 
     .badge {
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-sm);
+        padding: var(--space-1) var(--space-3);
+        border-radius: 12px;
         font-weight: 600;
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         display: inline-flex;
         align-items: center;
-        gap: var(--spacing-xs);
-        white-space: nowrap;
+        gap: var(--space-1);
     }
 
-    .badge.bg-success {
-        background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+    .badge-success {
+        background: linear-gradient(135deg, var(--success), #059669);
         color: white;
         box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
     }
 
-    .badge.bg-danger {
-        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+    .badge-danger {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
         color: white;
         box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
     }
 
-    /* ==================== SPECIAL STYLES ==================== */
+    /* JABATAN NAME */
     .jabatan-name {
         font-weight: 600;
         color: var(--gray-900);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
     }
 
     .jabatan-name i {
         color: var(--primary);
     }
 
-    /* ==================== EMPTY STATE ==================== */
+    .jabatan-info {
+        margin-top: var(--space-1);
+    }
+
+    .jabatan-info small {
+        display: block;
+        color: var(--gray-600);
+        font-size: var(--text-xs);
+    }
+
+    /* EMPTY STATE */
     .empty-state {
         text-align: center;
-        padding: 48px var(--spacing-xl);
+        padding: var(--space-8);
     }
 
     .empty-state i {
         font-size: 3rem;
         color: var(--gray-300);
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: var(--space-4);
     }
 
     .empty-state h6 {
-        font-size: var(--font-base);
-        color: var(--gray-700);
-        margin-bottom: var(--spacing-sm);
+        font-size: var(--text-base);
         font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: var(--space-2);
     }
 
     .empty-state p {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         color: var(--gray-600);
         margin: 0;
     }
 
-    /* ==================== DATATABLE CUSTOMIZATION ==================== */
-    .dataTables_wrapper {
-        padding: 0 !important;
-    }
-
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-        display: none !important;
-    }
-
-    /* ==================== RESPONSIVE ==================== */
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-        .section-header {
+        .header-top {
             flex-direction: column;
             align-items: flex-start;
         }
 
-        .btn-action {
-            padding: var(--spacing-sm);
-            font-size: 0.65rem;
-        }
-
         .table {
-            min-width: 700px;
+            min-width: 800px;
         }
     }
 </style>
@@ -319,13 +205,15 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="section-card">
-        <div class="section-header">
-            <div>
-                <h5 class="section-title">
+    <!-- Header Card - Semua Info di Sini -->
+    <div class="header-card">
+        <div class="header-top">
+            <div class="header-info" style="flex: 1;">
+                <h5>
                     <i class="fas fa-briefcase"></i>
-                    Master Jabatan
+                    Daftar Jabatan
                 </h5>
+                <p class="header-subtitle">Kelola data jabatan pegawai dengan mudah</p>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
@@ -335,7 +223,7 @@
                 </nav>
             </div>
             <div class="d-flex gap-2">
-                <a href="{% url 'tambah_jabatan' %}" class="btn btn-primary">
+                <a href="{% url 'tambah_jabatan' %}" class="btn btn-primary-light">
                     <i class="fas fa-plus"></i> Tambah Jabatan
                 </a>
                 <a href="{% url 'menu_pengaturan' %}" class="btn btn-outline-light">
@@ -343,104 +231,85 @@
                 </a>
             </div>
         </div>
+    </div>
 
-        <div class="section-body">
+    <!-- Content Card - Hanya Table -->
+    <div class="content-card">
+        <div class="content-body">
             <div class="table-responsive">
-                <table class="table table-hover" id="jabatanTable">
-                        <thead>
-                            <tr>
-                                <th class="text-center" style="width: 50px;">No</th>
-                                <th class="text-center" style="width: 150px;">Kode</th>
-                                <th>Nama Jabatan</th>
-                                <th class="text-center" style="width: 100px;">Status</th>
-                                <th class="text-center" style="width: 180px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if jabatan_list %}
-                                {% for jabatan in jabatan_list %}
-                                <tr>
-                                    <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
-                                    <td class="text-center">
-                                        <span class="badge-kode">{{ jabatan.kode }}</span>
-                                    </td>
-                                    <td>
-                                        <div class="jabatan-name">
-                                            <i class="fas fa-briefcase"></i>
-                                            {{ jabatan.nama }}
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        {% if jabatan.is_active %}
-                                            <span class="badge bg-success">
-                                                <i class="fas fa-check-circle"></i> Aktif
-                                            </span>
-                                        {% else %}
-                                            <span class="badge bg-danger">
-                                                <i class="fas fa-times-circle"></i> Nonaktif
-                                            </span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex gap-2 justify-content-center flex-wrap">
-                                            <a href="{% url 'edit_jabatan' jabatan.pk %}" 
-                                               class="btn btn-warning btn-action"
-                                               title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{% url 'hapus_jabatan' jabatan.pk %}" 
-                                               class="btn btn-danger btn-action"
-                                               title="Hapus"
-                                               onclick="return confirm('⚠️ Yakin ingin menghapus jabatan {{ jabatan.nama }}?\n\nData yang dihapus tidak dapat dikembalikan!')">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="5">
-                                        <div class="empty-state">
-                                            <i class="fas fa-inbox"></i>
-                                            <h6>Tidak Ada Data Jabatan</h6>
-                                            <p>Silakan tambah jabatan baru untuk memulai</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width: 50px;">No</th>
+                            <th class="text-center" style="width: 150px;">Kode</th>
+                            <th>Nama Jabatan</th>
+                            <th class="text-center" style="width: 100px;">Status</th>
+                            <th class="text-center" style="width: 180px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in jabatan_stats %}
+                        {% with jabatan=item.jabatan %}
+                        <tr>
+                            <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
+                            <td class="text-center">
+                                <span class="badge-kode">{{ jabatan.kode }}</span>
+                            </td>
+                            <td>
+                                <div class="jabatan-name">
+                                    <i class="fas fa-briefcase"></i>
+                                    {{ jabatan.nama }}
+                                </div>
+                                <div class="jabatan-info">
+                                    <small style="color: var(--primary); font-weight: 600;">
+                                        <i class="fas fa-users"></i> Total Pegawai: {{ item.total_pegawai }}
+                                    </small>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                {% if jabatan.is_active %}
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check-circle"></i> Aktif
+                                </span>
+                                {% else %}
+                                <span class="badge badge-danger">
+                                    <i class="fas fa-times-circle"></i> Nonaktif
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <a href="{% url 'edit_jabatan' jabatan.pk %}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'hapus_jabatan' jabatan.pk %}" 
+                                       class="btn btn-danger btn-sm"
+                                       onclick="return confirm('Yakin hapus jabatan {{ jabatan.nama }}?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endwith %}
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <h6>Tidak Ada Data</h6>
+                                    <p>Belum ada jabatan terdaftar</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+        </div>
 
-        <div class="section-footer">
-            Total: <strong>{{ jabatan_list|length }}</strong> Jabatan
+        <div class="content-footer">
+            Total: <strong>{{ jabatan_stats|length }}</strong> Jabatan
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-
-<script>
-$(document).ready(function() {
-    // Initialize DataTable without pagination
-    if ($('#jabatanTable tbody tr').length > 0 && !$('#jabatanTable tbody tr td[colspan]').length) {
-        $('#jabatanTable').DataTable({
-            paging: false,
-            searching: false,
-            info: false,
-            ordering: true,
-            order: [[1, 'asc']],
-            columnDefs: [
-                { orderable: false, targets: [4] },
-                { className: "text-center", targets: [0, 1, 3, 4] }
-            ]
-        });
-    }
-});
-</script>
 {% endblock %}

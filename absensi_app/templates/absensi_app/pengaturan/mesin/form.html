@@ -5,272 +5,292 @@
 
 {% block extra_css %}
 <style>
-    .form-card {
-        background: white;
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--gray-200);
-        overflow: hidden;
-    }
+/* ===== FORM SECTIONS ===== */
+.form-section {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--gray-200);
+}
 
-    .form-card-header {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-        color: white;
-        padding: var(--spacing-lg) var(--spacing-xl);
-    }
+.form-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
 
-    .form-card-header h5 {
-        margin: 0;
-        font-size: var(--font-lg);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
+/* ===== INFO TEXT ===== */
+.info-text {
+    color: var(--gray-600);
+    font-size: var(--text-sm);
+    margin-top: var(--space-1);
+    display: block;
+}
 
-    .form-card-body {
-        padding: var(--spacing-xl);
-    }
+/* ===== CONNECTION STATUS ===== */
+#connectionStatus {
+    font-size: var(--text-sm);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    margin-top: var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
 
-    .form-section {
-        margin-bottom: var(--spacing-xl);
-    }
+#connectionStatus.success {
+    color: #065f46;
+    background: var(--success-light);
+    border: 1px solid var(--success);
+}
 
-    #connectionStatus {
-        font-size: var(--font-sm);
-        padding: var(--spacing-md) var(--spacing-lg);
-        border-radius: var(--radius-sm);
-        margin-top: var(--spacing-sm);
-    }
+#connectionStatus.error {
+    color: #991b1b;
+    background: var(--danger-light);
+    border: 1px solid var(--danger);
+}
 
-    #connectionStatus.success {
-        color: #065f46;
-        background-color: var(--success-light);
-        border: 1px solid var(--success);
-    }
+/* ===== FORM SWITCH ===== */
+.form-check-input[type="checkbox"] {
+    width: 40px;
+    height: 20px;
+    cursor: pointer;
+    border: 2px solid var(--gray-300);
+}
 
-    #connectionStatus.error {
-        color: #991b1b;
-        background-color: var(--danger-light);
-        border: 1px solid var(--danger);
-    }
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
 
-    .btn-info {
-        background: var(--info);
-        color: white;
-    }
+.form-check-label {
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-left: var(--space-2);
+}
 
-    .btn-info:hover:not(:disabled) {
-        background: var(--info-dark);
-        transform: translateY(-1px);
-    }
+.form-check-label strong {
+    display: block;
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--gray-900);
+}
 
+/* ===== BUTTONS ===== */
+.btn-group-actions {
+    display: flex;
+    gap: var(--space-3);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--gray-200);
+}
+
+.btn-secondary {
+    background: var(--gray-500);
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--gray-700);
+}
+
+.btn-info {
+    background: #0ea5e9;
+    color: white;
+}
+
+.btn-info:hover:not(:disabled) {
+    background: #0284c7;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
     .btn-group-actions {
-        display: flex;
-        gap: var(--spacing-md);
-        padding-top: var(--spacing-lg);
-        border-top: 2px solid var(--gray-100);
-        margin-top: var(--spacing-xl);
+        flex-direction: column;
     }
 
-    .btn-secondary {
-        background: var(--gray-500);
-        color: white;
+    .btn-group-actions .btn {
+        width: 100%;
     }
-
-    .btn-secondary:hover:not(:disabled) {
-        background: var(--gray-600);
-        transform: translateY(-1px);
-    }
-
-    @media (max-width: 768px) {
-        .form-card-body {
-            padding: var(--spacing-lg);
-        }
-
-        .btn-group-actions {
-            flex-direction: column;
-        }
-
-        .btn-group-actions .btn {
-            width: 100%;
-        }
-    }
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="form-card">
-                <div class="form-card-header">
-                    <h5>
-                        <i class="fas fa-fingerprint"></i>
-                        {{ judul }}
-                    </h5>
-                </div>
+<div class="card">
+    <div class="card-header">
+        <h5>
+            <i class="fas fa-fingerprint"></i>
+            {{ judul }}
+        </h5>
+    </div>
 
-                <div class="form-card-body">
-                    <form method="post" id="formMesin">
-                        {% csrf_token %}
+    <div class="card-body">
+        <form method="post" id="formMesin">
+            {% csrf_token %}
 
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-12">
-                                    <label for="{{ form.nama.id_for_label }}" class="form-label">
-                                        Nama Mesin <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.nama }}
-                                    {% if form.nama.errors %}
-                                        <div class="text-danger small mt-1">{{ form.nama.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted d-block mt-1">
-                                        Contoh: Mesin Absensi Lantai 1, Mesin Lobby Utama
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
+            <!-- NAMA MESIN -->
+            <div class="form-section">
+                <label for="{{ form.nama.id_for_label }}" class="form-label">
+                    Nama Mesin <span style="color: var(--danger);">*</span>
+                </label>
+                {{ form.nama }}
+                {% if form.nama.errors %}
+                    <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                        {{ form.nama.errors }}
+                    </small>
+                {% endif %}
+                <small class="info-text">
+                    Contoh: Mesin Absensi Lantai 1, Mesin Lobby Utama
+                </small>
+            </div>
 
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.kode.id_for_label }}" class="form-label">
-                                        Kode Mesin <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.kode }}
-                                    {% if form.kode.errors %}
-                                        <div class="text-danger small mt-1">{{ form.kode.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted d-block mt-1">
-                                        Kode unik untuk identifikasi (Contoh: MSN-001)
-                                    </small>
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.cabang.id_for_label }}" class="form-label">
-                                        Cabang <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.cabang }}
-                                    {% if form.cabang.errors %}
-                                        <div class="text-danger small mt-1">{{ form.cabang.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted d-block mt-1">
-                                        Pilih cabang tempat mesin berada
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-md-8 mb-3">
-                                    <label for="{{ form.ip_address.id_for_label }}" class="form-label">
-                                        IP Address <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.ip_address }}
-                                    {% if form.ip_address.errors %}
-                                        <div class="text-danger small mt-1">{{ form.ip_address.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted d-block mt-1">
-                                        IP Address mesin di jaringan lokal (Contoh: 192.168.1.100)
-                                    </small>
-                                </div>
-
-                                <div class="col-md-4 mb-3">
-                                    <label for="{{ form.port.id_for_label }}" class="form-label">
-                                        Port <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.port }}
-                                    {% if form.port.errors %}
-                                        <div class="text-danger small mt-1">{{ form.port.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted d-block mt-1">
-                                        Default: 4370
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <button type="button" class="btn btn-info btn-sm" id="testConnectionBtn">
-                                <i class="fas fa-plug"></i> Test Koneksi ke Mesin
-                            </button>
-                            <div id="connectionStatus"></div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-12">
-                                    <label for="{{ form.lokasi.id_for_label }}" class="form-label">
-                                        Lokasi Mesin
-                                    </label>
-                                    {{ form.lokasi }}
-                                    {% if form.lokasi.errors %}
-                                        <div class="text-danger small mt-1">{{ form.lokasi.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted d-block mt-1">
-                                        Deskripsi lokasi penempatan mesin (Contoh: Lobby Utama, Lantai 2 Dekat Lift)
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-12">
-                                    <label for="{{ form.keterangan.id_for_label }}" class="form-label">
-                                        Keterangan
-                                    </label>
-                                    {{ form.keterangan }}
-                                    {% if form.keterangan.errors %}
-                                        <div class="text-danger small mt-1">{{ form.keterangan.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted d-block mt-1">
-                                        Informasi tambahan tentang mesin (opsional)
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-check form-switch">
-                                        {{ form.is_active }}
-                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                                            <strong>Status Aktif</strong>
-                                        </label>
-                                    </div>
-                                    {% if form.is_active.errors %}
-                                        <div class="text-danger small mt-1">{{ form.is_active.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted d-block mt-1">
-                                        Nonaktifkan jika mesin sedang tidak digunakan
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger" role="alert">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ form.non_field_errors }}
-                            </div>
+            <!-- KODE & CABANG -->
+            <div class="form-section">
+                <div class="row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label for="{{ form.kode.id_for_label }}" class="form-label">
+                            Kode Mesin <span style="color: var(--danger);">*</span>
+                        </label>
+                        {{ form.kode }}
+                        {% if form.kode.errors %}
+                            <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                                {{ form.kode.errors }}
+                            </small>
                         {% endif %}
+                        <small class="info-text">
+                            Kode unik untuk identifikasi (Contoh: MSN-001)
+                        </small>
+                    </div>
 
-                        <div class="btn-group-actions">
-                            <button type="submit" class="btn btn-primary" id="btnSubmit">
-                                <i class="fas fa-save"></i> Simpan Mesin
-                            </button>
-                            <a href="{% url 'daftar_mesin' %}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Batal
-                            </a>
-                        </div>
-                    </form>
+                    <div class="col-md-6">
+                        <label for="{{ form.cabang.id_for_label }}" class="form-label">
+                            Cabang <span style="color: var(--danger);">*</span>
+                        </label>
+                        {{ form.cabang }}
+                        {% if form.cabang.errors %}
+                            <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                                {{ form.cabang.errors }}
+                            </small>
+                        {% endif %}
+                        <small class="info-text">
+                            Pilih cabang tempat mesin berada
+                        </small>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- IP & PORT -->
+            <div class="form-section">
+                <div class="row">
+                    <div class="col-md-8 mb-3 mb-md-0">
+                        <label for="{{ form.ip_address.id_for_label }}" class="form-label">
+                            IP Address <span style="color: var(--danger);">*</span>
+                        </label>
+                        {{ form.ip_address }}
+                        {% if form.ip_address.errors %}
+                            <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                                {{ form.ip_address.errors }}
+                            </small>
+                        {% endif %}
+                        <small class="info-text">
+                            IP Address mesin di jaringan lokal (Contoh: 192.168.1.100)
+                        </small>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="{{ form.port.id_for_label }}" class="form-label">
+                            Port <span style="color: var(--danger);">*</span>
+                        </label>
+                        {{ form.port }}
+                        {% if form.port.errors %}
+                            <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                                {{ form.port.errors }}
+                            </small>
+                        {% endif %}
+                        <small class="info-text">Default: 4370</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TEST CONNECTION -->
+            <div class="form-section">
+                <button type="button" class="btn btn-sm btn-info" id="testConnectionBtn">
+                    <i class="fas fa-plug"></i>
+                    Test Koneksi ke Mesin
+                </button>
+                <div id="connectionStatus"></div>
+            </div>
+
+            <!-- LOKASI -->
+            <div class="form-section">
+                <label for="{{ form.lokasi.id_for_label }}" class="form-label">
+                    Lokasi Mesin
+                </label>
+                {{ form.lokasi }}
+                {% if form.lokasi.errors %}
+                    <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                        {{ form.lokasi.errors }}
+                    </small>
+                {% endif %}
+                <small class="info-text">
+                    Deskripsi lokasi penempatan mesin (Contoh: Lobby Utama, Lantai 2 Dekat Lift)
+                </small>
+            </div>
+
+            <!-- KETERANGAN -->
+            <div class="form-section">
+                <label for="{{ form.keterangan.id_for_label }}" class="form-label">
+                    Keterangan
+                </label>
+                {{ form.keterangan }}
+                {% if form.keterangan.errors %}
+                    <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                        {{ form.keterangan.errors }}
+                    </small>
+                {% endif %}
+                <small class="info-text">
+                    Informasi tambahan tentang mesin (opsional)
+                </small>
+            </div>
+
+            <!-- STATUS AKTIF -->
+            <div class="form-section">
+                <div class="form-check form-switch">
+                    {{ form.is_active }}
+                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                        <strong>Status Aktif</strong>
+                        <small class="info-text" style="margin-top: 0;">
+                            Nonaktifkan jika mesin sedang tidak digunakan
+                        </small>
+                    </label>
+                </div>
+                {% if form.is_active.errors %}
+                    <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                        {{ form.is_active.errors }}
+                    </small>
+                {% endif %}
+            </div>
+
+            <!-- NON FIELD ERRORS -->
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>{{ form.non_field_errors }}</div>
+                </div>
+            {% endif %}
+
+            <!-- ACTIONS -->
+            <div class="btn-group-actions">
+                <button type="submit" class="btn btn-primary" id="btnSubmit">
+                    <i class="fas fa-save"></i>
+                    Simpan Mesin
+                </button>
+                <a href="{% url 'daftar_mesin' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
@@ -296,9 +316,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         testConnectionBtn.disabled = true;
-        testConnectionBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Mengecek koneksi...';
+        testConnectionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengecek...';
         connectionStatus.className = '';
-        connectionStatus.innerHTML = '<div class="spinner-border spinner-border-sm"></div> Menghubungi mesin di ' + ipAddress + ':' + port + '...';
+        connectionStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghubungi mesin di ' + ipAddress + ':' + port + '...';
 
         setTimeout(() => {
             testConnectionBtn.disabled = false;

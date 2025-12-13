@@ -1,453 +1,321 @@
 {% extends 'absensi_app/base.html' %}
 {% load static %}
 {% load custom_filters %}
+
 {% block title %}Assign Mode Jam Kerja{% endblock %}
 
 {% block extra_css %}
 <style>
-:root {
-  --primary: #3b82f6;
-  --primary-dark: #2563eb;
-  --primary-light: #eff6ff;
-  --success: #10b981;
-  --danger: #ef4444;
-  --gray-50: #f9fafb;
-  --gray-100: #f3f4f6;
-  --gray-200: #e5e7eb;
-  --gray-300: #d1d5db;
-  --gray-400: #9ca3af;
-  --gray-500: #6b7280;
-  --gray-600: #4b5563;
-  --gray-700: #374151;
-  --gray-900: #111827;
-  --spacing-xs: 0.2rem;
-  --spacing-sm: 0.4rem;
-  --spacing-md: 0.6rem;
-  --spacing-lg: 0.8rem;
-  --spacing-xl: 1.2rem;
-  --spacing-2xl: 1.6rem;
-  --font-xs: 0.55rem;
-  --font-sm: 0.65rem;
-  --font-lg: 0.8rem;
-  --font-xl: 1rem;
-  --font-2xl: 1.2rem;
-  --radius-md: 0.4rem;
-  --radius-lg: 0.6rem;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md: 0 3px 10px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 20px rgba(0,0,0,0.12);
-  --transition-base: 0.2s ease;
-  --transition-slow: 0.3s ease;
-}
-
-.assign-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: var(--spacing-2xl);
-}
-
+/* ===== PAGE HEADER ===== */
 .page-header {
-  background: white;
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-2xl);
-  margin-bottom: var(--spacing-2xl);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--gray-200);
-  border-left: 4px solid var(--primary);
+    background: white;
+    border-radius: var(--radius);
+    padding: var(--space-5);
+    margin-bottom: var(--space-6);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-200);
+    border-left: 4px solid var(--primary);
 }
 
 .page-header h2 {
-  font-size: var(--font-2xl);
-  font-weight: 700;
-  color: var(--gray-900);
-  margin: 0 0 var(--spacing-lg) 0;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 var(--space-4) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
 }
 
-.page-header .info-line {
-  font-size: var(--font-sm);
-  color: var(--gray-500);
-  margin: var(--spacing-sm) 0;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    font-size: var(--text-sm);
+    color: var(--gray-700);
 }
 
-.page-header .info-line strong {
-  color: var(--gray-900);
-  font-weight: 600;
-  min-width: 120px;
+.info-item strong {
+    min-width: 100px;
+    color: var(--gray-900);
+    font-weight: 600;
 }
 
-.alert-info-box {
-  background: #dbeafe;
-  border: 1.5px solid var(--primary);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  margin-bottom: var(--spacing-2xl);
-  display: flex;
-  gap: var(--spacing-lg);
-  align-items: flex-start;
+/* ===== MODE GRID ===== */
+.modes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: var(--space-5);
 }
 
-.alert-info-box i {
-  color: var(--primary);
-  font-size: var(--font-xl);
-  margin-top: 2px;
-  flex-shrink: 0;
-}
-
-.alert-info-box-content strong {
-  display: block;
-  font-size: var(--font-sm);
-  font-weight: 700;
-  margin-bottom: var(--spacing-sm);
-  color: #0c4a6e;
-}
-
-.alert-info-box-content p {
-  margin: 0;
-  font-size: var(--font-sm);
-  color: #0c4a6e;
-  line-height: 1.6;
-}
-
-.modes-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: var(--spacing-2xl);
-  margin-bottom: var(--spacing-2xl);
-}
-
+/* ===== MODE CARD ===== */
 .mode-card {
-  background: white;
-  border: 2px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  transition: all var(--transition-slow);
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+    transition: all 0.2s;
 }
 
 .mode-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-  border-color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
 }
 
 .mode-card.selected {
-  border-color: var(--primary);
-  background: var(--primary-light);
-  box-shadow: 0 8px 24px rgba(59,130,246,0.12);
+    border-color: var(--primary);
+    background: var(--primary-light);
 }
 
-.mode-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-xl);
-  gap: var(--spacing-lg);
+.mode-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
 }
 
 .mode-info {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-lg);
-  flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    flex: 1;
 }
 
 .mode-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-xl);
-  color: white;
-  flex-shrink: 0;
-  box-shadow: var(--shadow-md);
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xl);
+    color: white;
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
 }
 
 .mode-details h4 {
-  margin: 0 0 var(--spacing-xs) 0;
-  font-size: var(--font-lg);
-  font-weight: 700;
-  color: var(--gray-900);
+    font-size: var(--text-base);
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 var(--space-1) 0;
 }
 
-.mode-details .mode-code {
-  font-size: var(--font-xs);
-  color: var(--gray-500);
-  background: var(--gray-100);
-  padding: 2px 6px;
-  border-radius: 3px;
-  display: inline-block;
-  margin-top: var(--spacing-xs);
+.mode-code {
+    font-size: var(--text-xs);
+    color: var(--gray-600);
+    background: var(--gray-100);
+    padding: var(--space-1) var(--space-2);
+    border-radius: 4px;
+    display: inline-block;
 }
 
 .mode-checkbox-wrapper {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  cursor: pointer;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  background: var(--gray-50);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--gray-200);
-  transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .mode-checkbox-wrapper:hover {
-  background: var(--primary-light);
-  border-color: var(--primary);
+    background: var(--primary-light);
+    border-color: var(--primary);
 }
 
 .mode-checkbox-wrapper input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--primary);
-  cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
 }
 
+.mode-checkbox-wrapper span {
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+/* ===== GROUP SELECTION ===== */
 .group-selection {
-  padding: var(--spacing-lg);
-  background: var(--gray-50);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--gray-200);
-  margin-top: var(--spacing-lg);
-  max-height: 500px;
-  overflow-y: auto;
+    padding: var(--space-4);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    margin-top: var(--space-4);
 }
 
 .group-selection.hidden {
-  display: none;
+    display: none;
 }
 
 .group-selection label {
-  font-size: var(--font-xs);
-  font-weight: 700;
-  margin-bottom: var(--spacing-md);
-  display: block;
-  color: var(--gray-700);
-  text-transform: uppercase;
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: var(--space-2);
 }
 
 .group-select {
-  width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-md);
-  font-size: var(--font-sm);
-  background: white;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all var(--transition-base);
+    width: 100%;
+    height: 40px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    background: white;
+    color: var(--gray-900);
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .group-select:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-.action-buttons {
-  display: flex;
-  gap: var(--spacing-lg);
-  margin-top: var(--spacing-2xl);
-  padding-top: var(--spacing-2xl);
-  border-top: 1px solid var(--gray-200);
+/* ===== ACTION BAR ===== */
+.action-bar {
+    display: flex;
+    gap: var(--space-3);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--gray-200);
 }
 
-.btn-action {
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: var(--radius-md);
-  font-size: var(--font-sm);
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  text-decoration: none;
-  transition: all var(--transition-base);
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-action:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-action-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: white;
-}
-
-.btn-action-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--primary-dark) 0%, #0c2d6b 100%);
-}
-
-.btn-action-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-action-secondary {
-  background: var(--gray-400);
-  color: white;
-}
-
-.btn-action-secondary:hover {
-  background: var(--gray-600);
-}
-
-.validation-error {
-  display: none;
-  background: #fee2e2;
-  border: 1px solid var(--danger);
-  color: #7f1d1d;
-  padding: var(--spacing-lg) var(--spacing-xl);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-xl);
-  font-size: var(--font-sm);
-}
-
-.validation-error.show {
-  display: block;
-}
-
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .assign-container {
-    padding: var(--spacing-xl);
-  }
+    .modes-grid {
+        grid-template-columns: 1fr;
+    }
 
-  .modes-container {
-    grid-template-columns: 1fr;
-  }
+    .mode-card-header {
+        flex-direction: column;
+    }
 
-  .action-buttons {
-    flex-direction: column;
-  }
+    .mode-checkbox-wrapper {
+        width: 100%;
+        justify-content: center;
+    }
 
-  .btn-action {
-    width: 100%;
-    justify-content: center;
-  }
+    .action-bar {
+        flex-direction: column;
+    }
+
+    .action-bar .btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="assign-container">
-
-  <div class="page-header">
-    <h2>
-      <i class="fas fa-clock"></i>
-      Assign Mode Jam Kerja
-    </h2>
-    
-    <div class="info-line">
-      <strong>👤 Pegawai:</strong>
-      <span>{{ pegawai.nama_lengkap }} ({{ pegawai.userid }})</span>
-    </div>
-    
-    <div class="info-line">
-      <strong>🏢 Departemen:</strong>
-      <span>{{ pegawai.departemen.nama|default:"-" }}</span>
-    </div>
-    
-    <div class="info-line">
-      <strong>🏭 Cabang:</strong>
-      <span>
-        {% if cabang_aktif %}
-          <strong>{{ cabang_aktif.nama }}</strong>
-        {% else %}
-          <span style="color: var(--gray-400);">-</span>
-        {% endif %}
-      </span>
-    </div>
-  </div>
-
-  <div class="alert-info-box">
-    <i class="fas fa-info-circle"></i>
-    <div class="alert-info-box-content">
-      <strong>📌 Cara Menggunakan:</strong>
-      <p>
-        1. Centang mode yang ingin di-assign<br>
-        2. Pilih grup jam kerja untuk setiap mode<br>
-        3. Klik tombol "Simpan Assignment"
-      </p>
-    </div>
-  </div>
-
-  <form id="assignForm" method="POST" novalidate>
-    {% csrf_token %}
-
-    <div class="validation-error" id="validationError"></div>
-
-    {% if modes_with_assignment %}
-      <div class="modes-container">
-        {% for item in modes_with_assignment %}
-        <div class="mode-card {% if item.is_assigned %}selected{% endif %}" 
-             data-mode-id="{{ item.mode.id }}" 
-             data-color="{{ item.mode.warna }}">
-
-          <div class="mode-header">
-            <div class="mode-info">
-              <div class="mode-icon"></div>
-              <div class="mode-details">
-                <h4>{{ item.mode.nama }}</h4>
-                <div class="mode-code">{{ item.mode.kode }}</div>
-              </div>
-            </div>
-
-            <label class="mode-checkbox-wrapper">
-              <input type="checkbox" 
-                     class="mode-checkbox" 
-                     data-mode-id="{{ item.mode.id }}" 
-                     {% if item.is_assigned %}checked{% endif %}>
-              <span>Assign</span>
-            </label>
-          </div>
-
-          <div class="group-selection {% if not item.is_assigned %}hidden{% endif %}">
-            <label for="group_{{ item.mode.id }}">
-              📅 Pilih Jadwal Kerja:
-            </label>
-            <select class="group-select" 
-                    id="group_{{ item.mode.id }}" 
-                    data-mode-id="{{ item.mode.id }}">
-              <option value="">-- Pilih Jadwal --</option>
-              {% for group_name, group_info in item.jadwal_groups.items %}
-                {% if group_info.days %}
-                  <option value="{{ group_info.first_jadwal_id }}"
-                        {% if item.is_assigned %}selected{% endif %}>
-                    {{ group_name }} ({{ group_info.jam_masuk_display }}-{{ group_info.jam_keluar_display }})
-                  </option>
-                {% endif %}
-              {% endfor %}
-            </select>
-          </div>
-
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h2>
+            <i class="fas fa-clock"></i>
+            Assign Mode Jam Kerja
+        </h2>
+        
+        <div class="info-item">
+            <strong>Pegawai:</strong>
+            <span>{{ pegawai.nama_lengkap }} ({{ pegawai.userid }})</span>
         </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <p style="text-align: center; color: var(--gray-500);">Belum ada mode. Buat di Pengaturan → Mode Jam Kerja</p>
-    {% endif %}
-
-    <div class="action-buttons">
-      <button type="submit" class="btn-action btn-action-primary" id="submitBtn">
-        <i class="fas fa-save"></i> Simpan Assignment
-      </button>
-      <a href="{% url 'Pegawai_detail' pegawai.id %}" class="btn-action btn-action-secondary">
-        <i class="fas fa-arrow-left"></i> Kembali
-      </a>
+        
+        <div class="info-item">
+            <strong>Departemen:</strong>
+            <span>{{ pegawai.departemen.nama|default:"-" }}</span>
+        </div>
+        
+        <div class="info-item">
+            <strong>Cabang:</strong>
+            <span>{{ cabang_aktif.nama|default:"-" }}</span>
+        </div>
     </div>
 
-  </form>
+    <!-- Form -->
+    <form id="assignForm" method="POST">
+        {% csrf_token %}
 
+        {% if modes_with_assignment %}
+        <div class="modes-grid">
+            {% for item in modes_with_assignment %}
+            <div class="mode-card {% if item.is_assigned %}selected{% endif %}"
+                 data-mode-id="{{ item.mode.id }}"
+                 data-color="{{ item.mode.warna }}">
+
+                <div class="mode-card-header">
+                    <div class="mode-info">
+                        <div class="mode-icon"></div>
+                        <div class="mode-details">
+                            <h4>{{ item.mode.nama }}</h4>
+                            <span class="mode-code">{{ item.mode.kode }}</span>
+                        </div>
+                    </div>
+
+                    <label class="mode-checkbox-wrapper">
+                        <input type="checkbox"
+                               class="mode-checkbox"
+                               data-mode-id="{{ item.mode.id }}"
+                               {% if item.is_assigned %}checked{% endif %}>
+                        <span>Assign</span>
+                    </label>
+                </div>
+
+                <div class="group-selection {% if not item.is_assigned %}hidden{% endif %}">
+                    <label for="group_{{ item.mode.id }}">Pilih Jadwal Kerja:</label>
+                    <select class="group-select"
+                            id="group_{{ item.mode.id }}"
+                            data-mode-id="{{ item.mode.id }}">
+                        <option value="">-- Pilih Jadwal --</option>
+                        {% for group_name, group_info in item.jadwal_groups.items %}
+                            {% if group_info.days %}
+                                <option value="{{ group_info.first_jadwal_id }}"
+                                        {% if item.is_assigned %}selected{% endif %}>
+                                    {{ group_name }} ({{ group_info.jam_masuk_display }}-{{ group_info.jam_keluar_display }})
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-inbox" style="font-size: 3rem; color: var(--gray-300);"></i>
+                    <p class="text-muted mt-3">Belum ada mode. Buat di Pengaturan → Mode Jam Kerja</p>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="card mt-5">
+            <div class="card-body">
+                <div class="action-bar">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-save"></i>
+                        Simpan
+                    </button>
+                    <a href="{% url 'Pegawai_detail' pegawai.id %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </form>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -455,115 +323,110 @@
 
 <script>
 $(document).ready(function() {
-  'use strict';
-
-  $('.mode-card').each(function() {
-    const color = $(this).data('color') || '#3b82f6';
-    const $icon = $(this).find('.mode-icon');
-    $icon.css('background-color', color);
-    $icon.html('<i class="fas fa-clock"></i>');
-  });
-
-  $(document).on('change', '.mode-checkbox', function() {
-    const modeId = $(this).data('mode-id');
-    const $card = $(`.mode-card[data-mode-id="${modeId}"]`);
-    const $groupSelection = $card.find('.group-selection');
-
-    if ($(this).is(':checked')) {
-      $card.addClass('selected');
-      $groupSelection.removeClass('hidden').slideDown(200);
-    } else {
-      $card.removeClass('selected');
-      $groupSelection.slideUp(200, function() {
-        $groupSelection.addClass('hidden');
-      });
-      $card.find('.group-select').val('');
-    }
-  });
-
-  $('#assignForm').on('submit', function(e) {
-    e.preventDefault();
-
-    $('#validationError').removeClass('show').text('');
-
-    const assignments = {};
-    const errors = [];
-
-    $('.mode-checkbox:checked').each(function() {
-      const modeId = $(this).data('mode-id');
-      const groupId = $(`.group-select[data-mode-id="${modeId}"]`).val();
-
-      if (!groupId) {
-        errors.push(`Mode: Pilih grup jam kerja`);
-        return;
-      }
-
-      assignments[modeId] = {
-        assigned: true,
-        group_id: parseInt(groupId)
-      };
+    $('.mode-card').each(function() {
+        const color = $(this).data('color') || '#2563eb';
+        const $icon = $(this).find('.mode-icon');
+        $icon.css('background-color', color);
+        $icon.html('<i class="fas fa-clock"></i>');
     });
 
-    if (Object.keys(assignments).length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Pilih Mode!',
-        text: 'Minimal 1 mode harus dipilih'
-      });
-      return false;
-    }
+    $(document).on('change', '.mode-checkbox', function() {
+        const modeId = $(this).data('mode-id');
+        const $card = $(`.mode-card[data-mode-id="${modeId}"]`);
+        const $groupSelection = $card.find('.group-selection');
 
-    if (errors.length > 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        html: errors.join('<br>')
-      });
-      return false;
-    }
-
-    $('#submitBtn').prop('disabled', true);
-
-    Swal.fire({
-      title: '⏳ Menyimpan...',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
+        if ($(this).is(':checked')) {
+            $card.addClass('selected');
+            $groupSelection.removeClass('hidden').slideDown(200);
+        } else {
+            $card.removeClass('selected');
+            $groupSelection.slideUp(200, function() {
+                $groupSelection.addClass('hidden');
+            });
+            $card.find('.group-select').val('');
+        }
     });
 
-    const pegawaiId = "{{ pegawai.id }}";
-    const csrfToken = $('[name="csrfmiddlewaretoken"]').val();
+    $('#assignForm').on('submit', function(e) {
+        e.preventDefault();
 
-    $.ajax({
-      type: 'POST',
-      url: `/pegawai/${pegawaiId}/simpan-assign-mode/`,
-      data: {
-        assignments: JSON.stringify(assignments),
-        csrfmiddlewaretoken: csrfToken
-      },
-      dataType: 'json',
-      timeout: 30000,
-      
-      success: function(response) {
-        Swal.fire({
-          icon: 'success',
-          title: '✅ Berhasil!',
-          html: response.msg.replace(/\n/g, '<br>')
-        }).then(() => {
-          window.location.href = `/pegawai/${pegawaiId}/`;
+        const assignments = {};
+        const errors = [];
+
+        $('.mode-checkbox:checked').each(function() {
+            const modeId = $(this).data('mode-id');
+            const groupId = $(`.group-select[data-mode-id="${modeId}"]`).val();
+
+            if (!groupId) {
+                errors.push('Pilih grup jam kerja untuk semua mode yang dipilih');
+                return;
+            }
+
+            assignments[modeId] = {
+                assigned: true,
+                group_id: parseInt(groupId)
+            };
         });
-      },
-      
-      error: function(xhr) {
-        $('#submitBtn').prop('disabled', false);
+
+        if (Object.keys(assignments).length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Pilih Mode',
+                text: 'Minimal 1 mode harus dipilih'
+            });
+            return false;
+        }
+
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                html: errors.join('<br>')
+            });
+            return false;
+        }
+
+        $('#submitBtn').prop('disabled', true);
+
         Swal.fire({
-          icon: 'error',
-          title: 'Gagal!',
-          text: xhr.responseJSON?.msg || 'Terjadi kesalahan'
+            title: 'Menyimpan...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
         });
-      }
+
+        const pegawaiId = "{{ pegawai.id }}";
+        const csrfToken = $('[name="csrfmiddlewaretoken"]').val();
+
+        $.ajax({
+            type: 'POST',
+            url: `/pegawai/${pegawaiId}/simpan-assign-mode/`,
+            data: {
+                assignments: JSON.stringify(assignments),
+                csrfmiddlewaretoken: csrfToken
+            },
+            dataType: 'json',
+            timeout: 30000,
+            
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    html: response.msg.replace(/\n/g, '<br>')
+                }).then(() => {
+                    window.location.href = `/pegawai/${pegawaiId}/`;
+                });
+            },
+            
+            error: function(xhr) {
+                $('#submitBtn').prop('disabled', false);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: xhr.responseJSON?.msg || 'Terjadi kesalahan'
+                });
+            }
+        });
     });
-  });
 });
 </script>
-
 {% endblock %}

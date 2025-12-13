@@ -7,35 +7,31 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <style>
-    /* ==================== VARIABLES ==================== */
-    :root {
-        --card-radius: var(--radius-md);
-        --card-shadow: var(--shadow-sm);
-        --card-shadow-hover: var(--shadow-md);
+    /* ===== PROFILE HEADER ===== */
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+        color: white;
+        padding: var(--space-5);
+        border-radius: var(--radius);
+        margin-bottom: var(--space-6);
+        box-shadow: var(--shadow-lg);
     }
 
-    /* ==================== PROFILE HEADER ==================== */
-    .profile-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: var(--spacing-lg) var(--spacing-xl);
-        border-radius: var(--card-radius);
-        margin-bottom: var(--spacing-xl);
-        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+    .profile-header-content {
         display: flex;
         align-items: center;
-        gap: var(--spacing-lg);
+        gap: var(--space-4);
     }
 
     .profile-avatar {
-        width: 60px;
-        height: 60px;
+        width: 56px;
+        height: 56px;
         background: rgba(255, 255, 255, 0.2);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        font-size: var(--text-2xl);
         font-weight: 700;
         border: 3px solid rgba(255, 255, 255, 0.3);
         flex-shrink: 0;
@@ -46,76 +42,67 @@
     }
 
     .profile-info h4 {
-        margin: 0 0 var(--spacing-sm) 0;
-        font-size: 1.3rem;
+        margin: 0 0 var(--space-2) 0;
+        font-size: var(--text-xl);
         font-weight: 700;
     }
 
     .profile-meta {
         display: flex;
-        gap: var(--spacing-lg);
+        gap: var(--space-4);
         flex-wrap: wrap;
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         opacity: 0.95;
     }
 
     .profile-meta-item {
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
     }
 
-    /* ==================== JAM KERJA INFO CARD ==================== */
+    /* ===== JAM KERJA CARD ===== */
     .jam-kerja-card {
         background: white;
-        border-radius: var(--card-radius);
+        border-radius: var(--radius);
         overflow: hidden;
-        margin-bottom: var(--spacing-xl);
-        box-shadow: var(--card-shadow);
-        transition: var(--transition-base);
+        margin-bottom: var(--space-6);
+        box-shadow: var(--shadow);
         border: 1px solid var(--gray-200);
     }
 
-    .jam-kerja-card:hover {
-        box-shadow: var(--card-shadow-hover);
-    }
-
     .jam-kerja-header {
-        padding: var(--spacing-lg) var(--spacing-xl);
+        padding: var(--space-4);
         color: white;
         display: flex;
         align-items: center;
-        gap: var(--spacing-lg);
-        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        gap: var(--space-3);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
     }
 
     .jam-kerja-header.warning {
-        background: linear-gradient(135deg, #f59e0b, #d97706);
+        background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
     }
 
     .jam-kerja-header.danger {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
+        background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
     }
 
     .jam-kerja-icon {
-        width: 42px;
-        height: 42px;
+        width: 40px;
+        height: 40px;
         background: rgba(255, 255, 255, 0.2);
         border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: var(--font-xl);
+        font-size: var(--text-lg);
         flex-shrink: 0;
     }
 
-    .jam-kerja-content {
-        flex: 1;
-    }
-
     .jam-kerja-content h6 {
-        margin: 0 0 4px 0;
-        font-size: var(--font-xs);
+        margin: 0 0 var(--space-1) 0;
+        font-size: var(--text-xs);
         font-weight: 600;
         opacity: 0.9;
         text-transform: uppercase;
@@ -124,59 +111,58 @@
 
     .jam-kerja-content p {
         margin: 0;
-        font-size: var(--font-base);
+        font-size: var(--text-base);
         font-weight: 700;
     }
 
     .jam-kerja-content small {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         opacity: 0.95;
-        font-weight: 500;
     }
 
-    /* ==================== STATS CARDS ==================== */
-    .stats-section {
+    /* ===== STATS GRID ===== */
+    .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: var(--spacing-lg);
-        margin-bottom: var(--spacing-xl);
+        gap: var(--space-4);
+        margin-bottom: var(--space-6);
     }
 
     .stats-card {
         background: white;
-        padding: var(--spacing-lg);
-        border-radius: var(--card-radius);
-        box-shadow: var(--card-shadow);
+        padding: var(--space-5);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
         text-align: center;
         cursor: pointer;
-        transition: var(--transition-base);
+        transition: all 0.2s;
         border: 2px solid transparent;
     }
 
     .stats-card:hover {
         transform: translateY(-2px);
-        box-shadow: var(--card-shadow-hover);
+        box-shadow: var(--shadow-lg);
     }
 
     .stats-card.active {
         border-color: var(--primary);
-        background: #eff6ff;
+        background: var(--primary-light);
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
     .stats-card i {
         font-size: 2rem;
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--space-2);
     }
 
     .stats-card .number {
-        font-size: 1.8rem;
+        font-size: var(--text-2xl);
         font-weight: 700;
-        margin: var(--spacing-sm) 0;
+        margin: var(--space-2) 0;
     }
 
     .stats-card .label {
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         color: var(--gray-700);
         text-transform: uppercase;
         font-weight: 600;
@@ -195,375 +181,72 @@
     .stats-card.danger i,
     .stats-card.danger .number { color: var(--danger); }
 
-    /* ==================== FILTER SECTION ==================== */
-    .filter-section {
-        background: white;
-        border-radius: var(--card-radius);
-        padding: var(--spacing-xl);
-        box-shadow: var(--card-shadow);
-        margin-bottom: var(--spacing-xl);
-        border: 1px solid var(--gray-200);
-        transition: var(--transition-base);
-    }
-
-    .filter-section:hover {
-        box-shadow: var(--card-shadow-hover);
-    }
-
-    .filter-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: var(--spacing-lg);
-        padding-bottom: var(--spacing-md);
-        border-bottom: 2px solid var(--gray-200);
-    }
-
-    .filter-title {
-        font-size: var(--font-base);
-        font-weight: 600;
-        color: var(--gray-900);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        margin: 0;
-    }
-
-    .filter-title i {
-        color: var(--primary);
-    }
-
-    /* ==================== TOTAL JAM SUMMARY ==================== */
+    /* ===== TOTAL JAM SUMMARY ===== */
     .total-jam-summary {
         background: white;
-        border-radius: var(--card-radius);
-        padding: var(--spacing-lg) var(--spacing-xl);
-        box-shadow: var(--card-shadow);
-        margin-bottom: var(--spacing-xl);
+        border-radius: var(--radius);
+        padding: var(--space-4);
+        box-shadow: var(--shadow);
+        margin-bottom: var(--space-6);
         border: 1px solid var(--gray-200);
         display: flex;
         align-items: center;
         justify-content: space-between;
-        transition: var(--transition-base);
-    }
-
-    .total-jam-summary:hover {
-        box-shadow: var(--card-shadow-hover);
     }
 
     .total-jam-summary .label {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         font-weight: 600;
         color: var(--gray-700);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
     }
 
     .total-jam-summary .label i {
         color: var(--primary);
-        font-size: var(--font-base);
     }
 
     .total-jam-summary .value {
-        font-size: 1.5rem;
+        font-size: var(--text-2xl);
         font-weight: 700;
         color: var(--primary);
     }
 
-    /* ==================== TABLE SECTION ==================== */
-    .table-section {
-        background: white;
-        border-radius: var(--card-radius);
-        box-shadow: var(--card-shadow);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-        transition: var(--transition-base);
-        margin-bottom: var(--spacing-xl);
-    }
-
-    .table-section:hover {
-        box-shadow: var(--card-shadow-hover);
-    }
-
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: var(--spacing-lg) var(--spacing-xl);
-        border-bottom: 1px solid var(--gray-200);
-        flex-wrap: wrap;
-        gap: var(--spacing-lg);
-        background: white;
-    }
-
-    .section-title {
-        font-size: var(--font-base);
-        font-weight: 600;
-        color: var(--gray-900);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        margin: 0;
-    }
-
-    .section-title i {
-        color: var(--primary);
-        font-size: var(--font-base);
-    }
-
-    .section-body {
-        padding: var(--spacing-xl);
-    }
-
-    .section-footer {
-        padding: var(--spacing-md) var(--spacing-xl);
-        background: var(--gray-50);
-        border-top: 1px solid var(--gray-200);
-        font-size: var(--font-sm);
-        color: var(--gray-600);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: var(--spacing-sm);
-    }
-
-    .section-footer strong {
-        color: var(--gray-900);
-    }
-
-    /* ==================== VIEW CONTROLS ==================== */
-    .view-controls {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .view-controls label {
-        font-size: var(--font-sm);
-        font-weight: 600;
-        color: var(--gray-700);
-        margin: 0;
-    }
-
-    .entries-select {
-        padding: 6px 12px;
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius-sm);
-        font-size: var(--font-sm);
-        font-weight: 600;
-        color: var(--gray-900);
-        background: white;
-        cursor: pointer;
-        transition: var(--transition-base);
-    }
-
-    .entries-select:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-    }
-
-    /* ==================== TABLE ==================== */
-    .table-wrapper {
-        background: white;
-        border-radius: 12px !important;
-        overflow: hidden !important;
-        border: 1px solid var(--gray-200);
-    }
-
-    .table-responsive {
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .table {
-        margin-bottom: 0 !important;
-        font-size: var(--font-sm);
-        width: 100% !important;
-        min-width: 1000px !important;
-        border: none !important;
-        table-layout: auto !important;
-    }
-
-    .table thead {
-        background: var(--gray-800);
-    }
-
-    .table thead th {
-        background: var(--gray-800) !important;
-        color: white;
-        font-weight: 600;
-        padding: var(--spacing-md);
-        font-size: var(--font-xs);
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        border: none !important;
-        white-space: nowrap;
-    }
-
-    .table thead th:first-child {
-        padding-left: var(--spacing-lg);
-    }
-
-    .table thead th:last-child {
-        padding-right: var(--spacing-lg);
-    }
-
-    .table tbody td {
-        padding: var(--spacing-md);
-        vertical-align: middle;
-        border-bottom: 1px solid var(--gray-200);
-        color: var(--gray-700);
-    }
-
-    .table tbody td:first-child {
-        padding-left: var(--spacing-lg);
-    }
-
-    .table tbody td:last-child {
-        padding-right: var(--spacing-lg);
-    }
-
-    .table tbody tr:hover {
-        background: var(--gray-50);
-    }
-
-    /* ==================== BADGES ==================== */
-    .badge {
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: var(--font-xs);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-        white-space: nowrap;
-    }
-
-    /* ==================== JAM KERJA ==================== */
+    /* ===== BADGES & JAM TEXT ===== */
     .jam-text {
         font-weight: 700;
-        font-size: var(--font-sm);
-        color: var(--gray-600);
+        font-size: var(--text-sm);
+        color: var(--gray-700);
     }
 
     .jam-text.violation {
-        color: var(--danger) !important;
+        color: var(--danger);
     }
 
     .total-jam-card {
         display: inline-block;
-        padding: var(--spacing-sm) var(--spacing-md);
+        padding: var(--space-1) var(--space-3);
         border-radius: var(--radius-sm);
         font-weight: 700;
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         background: var(--gray-100);
         color: var(--gray-700);
         border: 1px solid var(--gray-300);
     }
 
     .total-jam-card.violation {
-        background: #fee2e2;
+        background: var(--danger-light);
         color: #991b1b;
-        border-color: #fca5a5;
+        border-color: var(--danger);
     }
 
-    /* ==================== BUTTONS ==================== */
-    .btn-primary {
-        background: var(--primary);
-        color: white;
-        padding: var(--spacing-sm) var(--spacing-lg);
-        font-size: var(--font-sm);
-        font-weight: 600;
-        border-radius: var(--radius-sm);
-        border: none;
-        transition: var(--transition-base);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .btn-primary:hover {
-        background: var(--primary-dark);
-        transform: translateY(-1px);
-        color: white;
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-action {
-        padding: 5px 10px;
-        font-size: 11px;
-        border-radius: 5px;
-        font-weight: 600;
-        border: none;
-        color: white;
-        transition: all 0.15s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        line-height: 1.2;
-    }
-
-    .btn-action i {
-        font-size: 11px;
-    }
-
-    .btn-action:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .btn-action.btn-warning {
-        background: #f59e0b;
-    }
-
-    .btn-action.btn-warning:hover {
-        background: #d97706;
-        color: white;
-    }
-
-    .btn-action.btn-danger {
-        background: #ef4444;
-    }
-
-    .btn-action.btn-danger:hover {
-        background: #dc2626;
-        color: white;
-    }
-
-    /* ==================== FORMS ==================== */
-    .form-label {
-        font-weight: 600;
-        font-size: var(--font-sm);
-        margin-bottom: 6px;
-        color: var(--gray-700);
-    }
-
-    .form-control,
-    .form-select {
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius-sm);
-        padding: var(--spacing-sm) var(--spacing-md);
-        font-size: var(--font-sm);
-        transition: var(--transition-base);
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        outline: none;
-    }
-
-    /* ==================== PAGINATION ==================== */
+    /* ===== PAGINATION ===== */
     .custom-pagination {
         display: flex;
-        gap: 4px;
+        gap: var(--space-1);
         justify-content: center;
-        padding: var(--spacing-lg) 0;
+        padding: var(--space-4) 0;
         list-style: none;
         margin: 0;
     }
@@ -573,13 +256,13 @@
         color: var(--gray-700);
         border: 1px solid var(--gray-300);
         border-radius: var(--radius-sm);
-        padding: 6px 12px;
+        padding: var(--space-2) var(--space-3);
         font-weight: 600;
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         cursor: pointer;
         min-width: 36px;
         text-align: center;
-        transition: var(--transition-base);
+        transition: all 0.2s;
     }
 
     .page-btn:hover:not(.disabled):not(.active) {
@@ -598,9 +281,9 @@
         cursor: not-allowed;
     }
 
-    /* ==================== RESPONSIVE ==================== */
+    /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
-        .profile-header {
+        .profile-header-content {
             flex-direction: column;
             text-align: center;
         }
@@ -609,49 +292,29 @@
             justify-content: center;
         }
 
-        .stats-section {
+        .stats-grid {
             grid-template-columns: repeat(2, 1fr);
         }
 
         .total-jam-summary {
             flex-direction: column;
             text-align: center;
-            gap: var(--spacing-sm);
-        }
-
-        .filter-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: var(--spacing-md);
-        }
-
-        .section-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .table {
-            font-size: var(--font-xs);
-        }
-
-        .btn-action {
-            padding: 4px 8px;
-            font-size: 0.65rem;
+            gap: var(--space-2);
         }
     }
 
     @media (max-width: 576px) {
-        .section-body {
-            padding: var(--spacing-lg);
+        .stats-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- PROFILE HEADER -->
-    <div class="profile-header">
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="profile-header-content">
         <div class="profile-avatar">
             {{ pegawai.nama_lengkap|slice:":1"|upper }}
         </div>
@@ -677,109 +340,99 @@
             </div>
         </div>
     </div>
+</div>
 
-    <!-- JAM KERJA INFO CARD -->
-    {% if jadwal_hari_ini %}
-    <div class="jam-kerja-card">
-        <div class="jam-kerja-header">
-            <div class="jam-kerja-icon">
-                <i class="fas fa-business-time"></i>
-            </div>
-            <div class="jam-kerja-content">
-                <h6>Jam Kerja Hari Ini</h6>
-                <p>
-                    {% if mode_info %}
-                        <strong>{{ mode_info.mode_nama }}</strong> - 
-                    {% endif %}
-                    {{ jadwal_hari_ini.jam_masuk|time:"H:i" }} s/d {{ jadwal_hari_ini.jam_keluar|time:"H:i" }}
-                </p>
-                {% if jadwal_hari_ini.jam_istirahat_keluar %}
-                <small>
-                    Istirahat: {{ jadwal_hari_ini.jam_istirahat_keluar|time:"H:i" }} - {{ jadwal_hari_ini.jam_istirahat_masuk|time:"H:i" }}
-                </small>
-                {% endif %}
-            </div>
+<!-- Jam Kerja Card -->
+{% if jadwal_hari_ini %}
+<div class="jam-kerja-card">
+    <div class="jam-kerja-header">
+        <div class="jam-kerja-icon">
+            <i class="fas fa-business-time"></i>
+        </div>
+        <div class="jam-kerja-content">
+            <h6>Jam Kerja Hari Ini</h6>
+            <p>
+                {% if mode_info %}{{ mode_info.mode_nama }} - {% endif %}
+                {{ jadwal_hari_ini.jam_masuk|time:"H:i" }} s/d {{ jadwal_hari_ini.jam_keluar|time:"H:i" }}
+            </p>
+            {% if jadwal_hari_ini.jam_istirahat_keluar %}
+            <small>Istirahat: {{ jadwal_hari_ini.jam_istirahat_keluar|time:"H:i" }} - {{ jadwal_hari_ini.jam_istirahat_masuk|time:"H:i" }}</small>
+            {% endif %}
         </div>
     </div>
-    {% elif mode_info %}
-    <div class="jam-kerja-card">
-        <div class="jam-kerja-header warning">
-            <div class="jam-kerja-icon">
-                <i class="fas fa-info-circle"></i>
-            </div>
-            <div class="jam-kerja-content">
-                <h6>Mode Jam Kerja</h6>
-                <p>
-                    <strong>{{ mode_info.mode_nama }}</strong> - Jadwal belum diatur untuk hari ini
-                </p>
-            </div>
+</div>
+{% elif mode_info %}
+<div class="jam-kerja-card">
+    <div class="jam-kerja-header warning">
+        <div class="jam-kerja-icon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="jam-kerja-content">
+            <h6>Mode Jam Kerja</h6>
+            <p>{{ mode_info.mode_nama }} - Jadwal belum diatur untuk hari ini</p>
         </div>
     </div>
-    {% else %}
-    <div class="jam-kerja-card">
-        <div class="jam-kerja-header danger">
-            <div class="jam-kerja-icon">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div class="jam-kerja-content">
-                <h6>Peringatan</h6>
-                <p>Pegawai belum di-assign ke Mode Jam Kerja manapun</p>
-            </div>
+</div>
+{% else %}
+<div class="jam-kerja-card">
+    <div class="jam-kerja-header danger">
+        <div class="jam-kerja-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="jam-kerja-content">
+            <h6>Peringatan</h6>
+            <p>Pegawai belum di-assign ke Mode Jam Kerja manapun</p>
         </div>
     </div>
-    {% endif %}
+</div>
+{% endif %}
 
-    <!-- STATS CARDS -->
-    <div class="stats-section">
-        <div class="stats-card success" data-filter="Hadir" title="Klik untuk filter Hadir">
-            <i class="fas fa-check-circle"></i>
-            <div class="number">{{ total_hadir }}</div>
-            <div class="label">Hadir</div>
-        </div>
-
-        <div class="stats-card info" data-filter="Sakit" title="Klik untuk filter Sakit">
-            <i class="fas fa-notes-medical"></i>
-            <div class="number">{{ total_sakit }}</div>
-            <div class="label">Sakit</div>
-        </div>
-
-        <div class="stats-card warning" data-filter="Izin" title="Klik untuk filter Izin">
-            <i class="fas fa-file-alt"></i>
-            <div class="number">{{ total_izin }}</div>
-            <div class="label">Izin</div>
-        </div>
-
-        <div class="stats-card danger" data-filter="Absen" title="Klik untuk filter Absen">
-            <i class="fas fa-times-circle"></i>
-            <div class="number">{{ total_absen }}</div>
-            <div class="label">Absen</div>
-        </div>
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stats-card success" data-filter="Hadir" title="Klik untuk filter Hadir">
+        <i class="fas fa-check-circle"></i>
+        <div class="number">{{ total_hadir }}</div>
+        <div class="label">Hadir</div>
     </div>
 
-    <!-- FILTER SECTION -->
-    <div class="filter-section">
-        <div class="filter-header">
-            <h5 class="filter-title">
-                <i class="fas fa-filter"></i>
-                Filter Periode
-            </h5>
-        </div>
+    <div class="stats-card info" data-filter="Sakit" title="Klik untuk filter Sakit">
+        <i class="fas fa-notes-medical"></i>
+        <div class="number">{{ total_sakit }}</div>
+        <div class="label">Sakit</div>
+    </div>
 
+    <div class="stats-card warning" data-filter="Izin" title="Klik untuk filter Izin">
+        <i class="fas fa-file-alt"></i>
+        <div class="number">{{ total_izin }}</div>
+        <div class="label">Izin</div>
+    </div>
+
+    <div class="stats-card danger" data-filter="Absen" title="Klik untuk filter Absen">
+        <i class="fas fa-times-circle"></i>
+        <div class="number">{{ total_absen }}</div>
+        <div class="label">Absen</div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-filter"></i> Filter Periode</h5>
+    </div>
+    <div class="card-body">
         <form method="get" class="row g-3" id="filterForm">
             <div class="col-md-3">
-                <label for="tanggal_mulai" class="form-label">Tanggal Mulai</label>
-                <input type="date" name="tanggal_mulai" class="form-control" 
-                       value="{{ form.tanggal_mulai.value|default:'' }}" id="tanggal_mulai">
+                <label class="form-label">Tanggal Mulai</label>
+                <input type="date" name="tanggal_mulai" class="form-control" value="{{ form.tanggal_mulai.value|default:'' }}" id="tanggal_mulai">
             </div>
 
             <div class="col-md-3">
-                <label for="tanggal_akhir" class="form-label">Tanggal Akhir</label>
-                <input type="date" name="tanggal_akhir" class="form-control" 
-                       value="{{ form.tanggal_akhir.value|default:'' }}" id="tanggal_akhir">
+                <label class="form-label">Tanggal Akhir</label>
+                <input type="date" name="tanggal_akhir" class="form-control" value="{{ form.tanggal_akhir.value|default:'' }}" id="tanggal_akhir">
             </div>
 
             <div class="col-md-3">
-                <label for="periodSelect" class="form-label">Filter Cepat</label>
+                <label class="form-label">Filter Cepat</label>
                 <select name="period" class="form-select" id="periodSelect">
                     <option value="">Custom Range</option>
                     <option value="week" {% if period == 'week' %}selected{% endif %}>Minggu Ini</option>
@@ -798,195 +451,168 @@
             <input type="hidden" name="status_filter" id="hiddenStatusFilter" value="{{ request.GET.status_filter|default:'' }}">
         </form>
     </div>
+</div>
 
-    <!-- TOTAL JAM SUMMARY -->
-    <div class="total-jam-summary">
-        <div class="label">
-            <i class="fas fa-clock"></i>
-            <span>Total Jam Kerja (Periode yang Ditampilkan)</span>
-        </div>
-        <div class="value">
-            <strong>{{ total_jam_kerja_formatted }}</strong>
+<!-- Total Jam Summary -->
+<div class="total-jam-summary">
+    <div class="label">
+        <i class="fas fa-clock"></i>
+        <span>Total Jam Kerja (Periode yang Ditampilkan)</span>
+    </div>
+    <div class="value">{{ total_jam_kerja_formatted }}</div>
+</div>
+
+<!-- Table Section -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-table"></i> Data Riwayat Absensi</h5>
+        <div class="d-flex align-items-center gap-2">
+            <label style="margin: 0; font-size: var(--text-sm); font-weight: 600;">Tampilkan:</label>
+            <select class="form-select" id="entriesSelect" style="width: auto; padding: var(--space-2) var(--space-3);">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="-1" selected>Semua</option>
+            </select>
         </div>
     </div>
 
-    <!-- TABLE SECTION -->
-    <div class="table-section">
-        <div class="section-header">
-            <h5 class="section-title">
-                <i class="fas fa-table"></i>
-                Data Riwayat Absensi
-            </h5>
-            
-            <div class="view-controls">
-                <label>Tampilkan:</label>
-                <select class="entries-select" id="entriesSelect">
-                    <option value="10">10 Data</option>
-                    <option value="25">25 Data</option>
-                    <option value="50">50 Data</option>
-                    <option value="100">100 Data</option>
-                    <option value="-1" selected>Semua Data</option>
-                </select>
-            </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table" id="absensiTable">
+                <thead>
+                    <tr>
+                        <th class="text-center">No</th>
+                        <th class="text-center">Tanggal</th>
+                        <th class="text-center">Masuk</th>
+                        <th class="text-center">Ist. Keluar</th>
+                        <th class="text-center">Ist. Masuk</th>
+                        <th class="text-center">Pulang</th>
+                        <th class="text-center">Total Jam</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Ket</th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for absensi in absensi_list %}
+                    <tr data-status="{{ absensi.status }}">
+                        <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
+
+                        <td class="text-center" data-order="{{ absensi.tanggal|date:'Y-m-d' }}">
+                            {{ absensi.tanggal|date:"d M Y" }}
+                        </td>
+
+                        <td class="text-center">
+                            {% if absensi.tap_masuk %}
+                                <span class="jam-text{% if absensi.is_late %} violation{% endif %}">
+                                    {{ absensi.tap_masuk|date:"H:i" }}
+                                </span>
+                            {% else %}
+                                <span class="badge badge-secondary">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+                            {% if absensi.tap_istirahat_keluar %}
+                                <span class="jam-text">{{ absensi.tap_istirahat_keluar|date:"H:i" }}</span>
+                            {% elif absensi.tap_masuk and absensi.tap_pulang %}
+                                <span class="jam-text violation" title="Tidak tap istirahat">12:00 <i class="fas fa-exclamation-circle" style="font-size: 10px;"></i></span>
+                            {% else %}
+                                <span class="badge badge-secondary">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+                            {% if absensi.tap_istirahat_masuk %}
+                                <span class="jam-text">{{ absensi.tap_istirahat_masuk|date:"H:i" }}</span>
+                            {% elif absensi.tap_masuk and absensi.tap_pulang %}
+                                <span class="jam-text violation" title="Tidak tap istirahat">14:00 <i class="fas fa-exclamation-circle" style="font-size: 10px;"></i></span>
+                            {% else %}
+                                <span class="badge badge-secondary">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+                            {% if absensi.tap_pulang %}
+                                <span class="jam-text{% if absensi.is_early_departure %} violation{% endif %}">
+                                    {{ absensi.tap_pulang|date:"H:i" }}
+                                </span>
+                            {% else %}
+                                <span class="badge badge-secondary">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+                            {% if absensi.total_jam_kerja and absensi.total_jam_kerja != '-' %}
+                                <span class="total-jam-card{% if absensi.has_violation %} violation{% endif %}">
+                                    {{ absensi.total_jam_kerja }}
+                                </span>
+                            {% else %}
+                                <span class="badge badge-secondary">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+                            {% if absensi.status == 'Hadir' %}
+                                <span class="badge badge-success">Hadir</span>
+                            {% elif absensi.status == 'Sakit' %}
+                                <span class="badge badge-warning">Sakit</span>
+                            {% elif absensi.status == 'Izin' %}
+                                <span class="badge" style="background: #0ea5e9; color: white;">Izin</span>
+                            {% elif absensi.status == 'Absen' %}
+                                <span class="badge badge-danger">Absen</span>
+                            {% else %}
+                                <span class="badge badge-secondary">{{ absensi.status }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+                            {% if absensi.keterangan %}
+                                <small style="color: var(--gray-600);">{{ absensi.keterangan|truncatewords:2 }}</small>
+                            {% else %}
+                                <span style="color: var(--gray-400);">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+                            <div class="d-flex gap-2 justify-content-center">
+                                <a href="{% url 'absensi_edit' absensi.pk %}" class="btn btn-warning btn-sm" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'absensi_hapus' absensi.pk %}" class="btn btn-danger btn-sm" title="Hapus"
+                                   onclick="return confirm('Yakin ingin menghapus?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center" style="padding: var(--space-8);">
+                            <i class="fas fa-inbox" style="font-size: 3rem; color: var(--gray-300);"></i>
+                            <p style="margin-top: var(--space-3); color: var(--gray-600);">Tidak ada data absensi</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
-        <div class="section-body">
-            <div class="table-wrapper">
-                <div class="table-responsive">
-                    <table class="table table-hover" id="absensiTable">
-                        <thead>
-                            <tr>
-                                <th class="text-center" style="width: 40px;">No</th>
-                                <th class="text-center">Tanggal</th>
-                                <th class="text-center">Masuk</th>
-                                <th class="text-center">Ist. Keluar</th>
-                                <th class="text-center">Ist. Masuk</th>
-                                <th class="text-center">Pulang</th>
-                                <th class="text-center">Total Jam</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center">Ket</th>
-                                <th class="text-center" style="width: 100px;">Aksi</th>
-                            </tr>
-                        </thead>
+        <div class="custom-pagination" id="customPagination"></div>
+    </div>
 
-                        <tbody>
-                     <tbody>
-                            {% for absensi in absensi_list %}
-                            <tr data-status="{{ absensi.status }}">
-                                <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
-
-                                <td class="text-center" data-order="{{ absensi.tanggal|date:'Y-m-d' }}">
-                                    <small>{{ absensi.tanggal|date:"d M Y" }}</small>
-                                </td>
-
-                                <td class="text-center">
-                                    {% if absensi.tap_masuk %}
-                                        <span class="jam-text{% if absensi.is_late %} violation{% endif %}">
-                                            {{ absensi.tap_masuk|date:"H:i" }}
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">-</span>
-                                    {% endif %}
-                                </td>
-
-                                <td class="text-center">
-                                    {% if absensi.tap_istirahat_keluar %}
-                                        <span class="jam-text">{{ absensi.tap_istirahat_keluar|date:"H:i" }}</span>
-                                    {% elif absensi.tap_masuk and absensi.tap_pulang %}
-                                        <span class="jam-text violation" title="Tidak tap istirahat">12:00 <i class="fas fa-exclamation-circle" style="font-size: 0.65rem;"></i></span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">-</span>
-                                    {% endif %}
-                                </td>
-
-                                <td class="text-center">
-                                    {% if absensi.tap_istirahat_masuk %}
-                                        <span class="jam-text">{{ absensi.tap_istirahat_masuk|date:"H:i" }}</span>
-                                    {% elif absensi.tap_masuk and absensi.tap_pulang %}
-                                        <span class="jam-text violation" title="Tidak tap istirahat">14:00 <i class="fas fa-exclamation-circle" style="font-size: 0.65rem;"></i></span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">-</span>
-                                    {% endif %}
-                                </td>
-
-                                <td class="text-center">
-                                    {% if absensi.tap_pulang %}
-                                        <span class="jam-text{% if absensi.is_early_departure %} violation{% endif %}">
-                                            {{ absensi.tap_pulang|date:"H:i" }}
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">-</span>
-                                    {% endif %}
-                                </td>
-
-                                <td class="text-center">
-                                    {% if absensi.total_jam_kerja and absensi.total_jam_kerja != '-' %}
-                                        <span class="total-jam-card{% if absensi.has_violation %} violation{% endif %}">
-                                            {{ absensi.total_jam_kerja }}
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">-</span>
-                                    {% endif %}
-                                </td>
-
-                                <td class="text-center">
-                                    {% if absensi.status == 'Hadir' %}
-                                        <span class="badge bg-success">
-                                            <i class="fas fa-check-circle"></i> Hadir
-                                        </span>
-                                    {% elif absensi.status == 'Sakit' %}
-                                        <span class="badge bg-warning">
-                                            <i class="fas fa-thermometer-half"></i> Sakit
-                                        </span>
-                                    {% elif absensi.status == 'Izin' %}
-                                        <span class="badge bg-info">
-                                            <i class="fas fa-file-signature"></i> Izin
-                                        </span>
-                                    {% elif absensi.status == 'Absen' %}
-                                        <span class="badge bg-danger">
-                                            <i class="fas fa-times-circle"></i> Absen
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">{{ absensi.status }}</span>
-                                    {% endif %}
-                                </td>
-
-                                <td class="text-center">
-                                    {% if absensi.keterangan %}
-                                        <small style="color: var(--gray-600);">{{ absensi.keterangan|truncatewords:2 }}</small>
-                                    {% else %}
-                                        <span style="color: #9ca3af;">-</span>
-                                    {% endif %}
-                                </td>
-
-                                <td class="text-center">
-                                    <div class="d-flex gap-1 justify-content-center">
-                                        <a href="{% url 'absensi_edit' absensi.pk %}" class="btn-action btn-warning" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{% url 'absensi_hapus' absensi.pk %}" class="btn-action btn-danger" title="Hapus"
-                                           onclick="return confirm('Yakin ingin menghapus?')">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="10">
-                                    <div class="empty-state" style="text-align: center; padding: 48px 20px;">
-                                        <i class="fas fa-inbox" style="font-size: 3rem; color: var(--gray-300); margin-bottom: 16px;"></i>
-                                        <h6 style="font-size: var(--font-base); color: var(--gray-700); margin-bottom: 8px; font-weight: 600;">Tidak Ada Data</h6>
-                                        <p style="font-size: var(--font-sm); color: var(--gray-600); margin: 0;">Belum ada riwayat absensi</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="custom-pagination" id="customPagination"></div>
-        </div>
-
-        <div class="section-footer">
-            <div>
-                Total: <strong id="totalAbsensi">{{ absensi_list|length }}</strong> Data
-            </div>
-            <div>
-                <span id="showingInfo" style="color: var(--gray-600); font-size: var(--font-sm);">Menampilkan semua data</span>
-            </div>
-        </div>
+    <div class="card-footer">
+        Total: <strong id="totalAbsensi">{{ absensi_list|length }}</strong> Data
+        <span id="showingInfo" style="color: var(--gray-600); margin-left: var(--space-3);">Menampilkan semua data</span>
     </div>
 </div>
-{% endblock content %}
+{% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-
 <script>
 $(document).ready(function() {
     let table;
@@ -1027,12 +653,8 @@ $(document).ready(function() {
         let start = Math.max(0, current - 2);
         let end = Math.min(total - 1, current + 2);
 
-        if (current <= 2) {
-            end = Math.min(4, total - 1);
-        }
-        if (current >= total - 3) {
-            start = Math.max(0, total - 5);
-        }
+        if (current <= 2) end = Math.min(4, total - 1);
+        if (current >= total - 3) start = Math.max(0, total - 5);
 
         for (let i = start; i <= end; i++) {
             html += i === current ?
@@ -1052,7 +674,6 @@ $(document).ready(function() {
         table.page(page).draw('page');
     }
 
-    // Initialize DataTable
     table = $('#absensiTable').DataTable({
         paging: true,
         pageLength: -1,
@@ -1061,22 +682,10 @@ $(document).ready(function() {
         searching: false,
         info: false,
         scrollX: true,
-        scrollCollapse: false,
-        autoWidth: false,
         dom: 'rt',
         order: [[1, 'desc']],
         columnDefs: [
-            { orderable: false, targets: [9] },
-            { width: "40px", targets: 0 },
-            { width: "120px", targets: 1 },
-            { width: "80px", targets: 2 },
-            { width: "80px", targets: 3 },
-            { width: "80px", targets: 4 },
-            { width: "80px", targets: 5 },
-            { width: "100px", targets: 6 },
-            { width: "100px", targets: 7 },
-            { width: "150px", targets: 8 },
-            { width: "100px", targets: 9 }
+            { orderable: false, targets: [9] }
         ],
         language: {
             emptyTable: 'Tidak ada data'
@@ -1086,13 +695,11 @@ $(document).ready(function() {
         }
     });
 
-    // Handle entries select change
     $('#entriesSelect').on('change', function() {
         const value = parseInt($(this).val());
         table.page.len(value).draw();
     });
 
-    // Stats Card Filter
     $('.stats-card').click(function() {
         var filter = $(this).data('filter');
 
@@ -1110,14 +717,12 @@ $(document).ready(function() {
         }
     });
 
-    // Period Select
     $('#periodSelect').change(function() {
         if ($(this).val() !== '') {
             $('#filterForm').submit();
         }
     });
 
-    // Check if there's an active filter from URL
     const urlParams = new URLSearchParams(window.location.search);
     const statusFilter = urlParams.get('status_filter');
     if (statusFilter) {
@@ -1126,7 +731,6 @@ $(document).ready(function() {
         table.column(7).search(statusFilter).draw();
     }
 
-    // Initial render
     renderCustomPagination();
 });
 </script>

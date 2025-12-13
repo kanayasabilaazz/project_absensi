@@ -4,125 +4,94 @@
 
 {% block extra_css %}
 <style>
+    /* DELETE PAGE CONTAINER */
     .delete-container {
-        max-width: 500px;
+        max-width: 600px;
         margin: 0 auto;
     }
 
+    /* DELETE CARD */
     .delete-card {
         background: white;
         border-radius: var(--radius);
         border: 1px solid var(--gray-200);
         box-shadow: var(--shadow);
-        overflow: hidden;
     }
 
     .delete-header {
         background: var(--danger);
         color: white;
         padding: var(--space-5);
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
+        border-radius: var(--radius) var(--radius) 0 0;
     }
 
     .delete-header h4 {
         margin: 0;
-        font-size: var(--text-lg);
-        font-weight: 600;
-    }
-
-    .delete-header i {
         font-size: var(--text-xl);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
     }
 
     .delete-body {
         padding: var(--space-6);
     }
 
+    /* ALERT */
     .alert-warning {
         background: var(--warning-light);
-        border: 1px solid var(--warning);
-        color: #92400e;
-        padding: var(--space-4);
+        border: 2px solid var(--warning);
         border-radius: var(--radius-sm);
+        padding: var(--space-4);
         margin-bottom: var(--space-5);
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         gap: var(--space-3);
         font-size: var(--text-sm);
+        font-weight: 600;
+        color: #92400e;
     }
 
     .alert-warning i {
-        font-size: var(--text-base);
-        margin-top: 2px;
+        font-size: var(--text-lg);
         flex-shrink: 0;
     }
 
+    /* INFO TABLE */
     .info-table {
         width: 100%;
-        margin: var(--space-6) 0;
+        margin: var(--space-5) 0;
         border-collapse: collapse;
-    }
-
-    .info-table tr {
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .info-table tr:last-child {
-        border-bottom: none;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
     }
 
     .info-table th {
-        background: var(--gray-50);
-        font-weight: 600;
-        font-size: var(--text-sm);
-        color: var(--gray-700);
+        background: var(--gray-100);
         padding: var(--space-3) var(--space-4);
+        font-size: var(--text-sm);
+        font-weight: 600;
+        color: var(--gray-700);
         text-align: left;
-        width: 120px;
+        width: 140px;
+        border-bottom: 1px solid var(--gray-200);
     }
 
     .info-table td {
         padding: var(--space-3) var(--space-4);
         font-size: var(--text-sm);
         color: var(--gray-900);
+        border-bottom: 1px solid var(--gray-200);
     }
 
-    .delete-text {
-        font-size: var(--text-sm);
-        color: var(--gray-700);
-        margin-bottom: var(--space-4);
-        line-height: 1.5;
+    .info-table tr:last-child th,
+    .info-table tr:last-child td {
+        border-bottom: none;
     }
 
-    .impact-list {
-        background: var(--gray-50);
-        border-left: 3px solid var(--warning);
-        padding: var(--space-4);
-        border-radius: var(--radius-sm);
-        margin-bottom: var(--space-5);
-        font-size: var(--text-sm);
-        color: var(--gray-700);
-    }
-
-    .impact-list li {
-        margin-bottom: var(--space-2);
-        display: flex;
-        gap: var(--space-2);
-    }
-
-    .impact-list li:last-child {
-        margin-bottom: 0;
-    }
-
-    .impact-list li i {
-        color: var(--warning);
-        font-size: var(--text-xs);
-        margin-top: 4px;
-        flex-shrink: 0;
-    }
-
+    /* BUTTON GROUP */
     .btn-group {
         display: flex;
         gap: var(--space-3);
@@ -130,57 +99,14 @@
         margin-top: var(--space-6);
     }
 
-    .btn {
-        height: 40px;
-        padding: 0 var(--space-4);
-        font-size: var(--text-sm);
-        font-weight: 600;
-        border-radius: var(--radius-sm);
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-2);
-        transition: all 0.2s;
-        text-decoration: none;
-        white-space: nowrap;
-    }
-
-    .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .btn-danger {
-        background: var(--danger);
-        color: white;
-    }
-
-    .btn-danger:hover:not(:disabled) {
-        background: #dc2626;
-    }
-
-    .btn-secondary {
-        background: var(--gray-300);
-        color: var(--gray-900);
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-        background: var(--gray-400);
-    }
-
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-        .delete-container {
-            padding: var(--space-4);
-        }
-
         .delete-body {
             padding: var(--space-4);
         }
 
         .btn-group {
-            flex-direction: column;
+            flex-direction: column-reverse;
         }
 
         .btn {
@@ -194,17 +120,17 @@
 <div class="delete-container">
     <div class="delete-card">
         <div class="delete-header">
-            <i class="fas fa-exclamation-circle"></i>
-            <h4>Hapus Sesi Absensi</h4>
+            <h4>
+                <i class="fas fa-exclamation-triangle"></i>
+                Hapus Sesi Absensi
+            </h4>
         </div>
 
         <div class="delete-body">
             <div class="alert-warning">
-                <i class="fas fa-exclamation-triangle"></i>
-                <div>Data sesi akan dihapus permanen dan tidak dapat dikembalikan.</div>
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Data akan dihapus permanen dan tidak dapat dikembalikan</span>
             </div>
-
-            <p class="delete-text">Anda yakin ingin menghapus data sesi berikut?</p>
 
             <table class="info-table">
                 <tr>
@@ -235,20 +161,16 @@
                 {% endif %}
             </table>
 
-            <div class="impact-list">
-                <li><i class="fas fa-circle"></i> <span>Semua data absensi terkait sesi akan terhapus</span></li>
-                <li><i class="fas fa-circle"></i> <span>Riwayat tap masuk, tap pulang, dan tap istirahat hilang</span></li>
-                <li><i class="fas fa-circle"></i> <span>Laporan yang menggunakan data ini akan terpengaruh</span></li>
-            </div>
-
             <form method="POST" id="deleteForm">
                 {% csrf_token %}
                 <div class="btn-group">
                     <a href="{% url 'riwayat_sesi_absensi' %}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Batal
+                        <i class="fas fa-arrow-left"></i>
+                        Batal
                     </a>
                     <button type="submit" class="btn btn-danger" id="deleteBtn">
-                        <i class="fas fa-trash"></i> Ya, Hapus
+                        <i class="fas fa-trash"></i>
+                        Hapus Sesi
                     </button>
                 </div>
             </form>
@@ -263,7 +185,7 @@ document.getElementById('deleteForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('deleteBtn');
     
-    if (confirm('Yakin hapus sesi {{ sesi.nama_sesi }}?\n\nData tidak dapat dikembalikan!')) {
+    if (confirm('Yakin menghapus sesi "{{ sesi.nama_sesi }}"?\n\nData tidak dapat dikembalikan!')) {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
         this.submit();

@@ -4,78 +4,46 @@
 {% block title %}Daftar Cabang{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <style>
-    /* ==================== KONSISTEN DENGAN BASE & DASHBOARD ==================== */
-    :root {
-        --card-radius: var(--radius-md);
-        --card-shadow: var(--shadow-sm);
-        --card-shadow-hover: var(--shadow-md);
+    /* HEADER CARD - TERPISAH DI ATAS */
+    .header-card {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+        border-radius: var(--radius);
+        padding: var(--space-5);
+        margin-bottom: var(--space-4);
+        box-shadow: var(--shadow);
+        color: white;
     }
 
-    /* ==================== SECTION CARD ==================== */
-    .section-card {
-        background: white;
-        border-radius: var(--card-radius);
-        box-shadow: var(--card-shadow);
-        margin-bottom: var(--spacing-xl);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-        transition: var(--transition-base);
-    }
-
-    .section-card:hover {
-        box-shadow: var(--card-shadow-hover);
-    }
-
-    .section-header {
+    .header-top {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        padding: var(--spacing-lg) var(--spacing-xl);
-        border-bottom: 1px solid var(--gray-200);
+        align-items: flex-start;
+        gap: var(--space-3);
         flex-wrap: wrap;
-        gap: var(--spacing-lg);
-        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-        color: white;
     }
 
-    .section-title {
-        font-size: var(--font-lg);
+    .header-info h5 {
+        margin: 0 0 var(--space-1) 0;
+        font-size: var(--text-xl);
         font-weight: 700;
-        color: white;
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
-        margin: 0;
+        gap: var(--space-2);
     }
 
-    .section-title i {
-        font-size: var(--font-lg);
+    .header-subtitle {
+        font-size: var(--text-sm);
+        margin: 0 0 var(--space-2) 0;
+        opacity: 0.9;
     }
 
-    .section-body {
-        padding: var(--spacing-xl);
-    }
-
-    .section-footer {
-        padding: var(--spacing-md) var(--spacing-xl);
-        background: var(--gray-50);
-        border-top: 1px solid var(--gray-200);
-        font-size: var(--font-sm);
-        color: var(--gray-600);
-    }
-
-    .section-footer strong {
-        color: var(--gray-900);
-    }
-
-    /* ==================== BREADCRUMB ==================== */
+    /* BREADCRUMB */
     .breadcrumb {
         background: transparent;
         padding: 0;
-        margin-bottom: var(--spacing-lg);
-        font-size: var(--font-sm);
+        margin: 0;
+        font-size: var(--text-sm);
     }
 
     .breadcrumb-item {
@@ -85,11 +53,6 @@
     .breadcrumb-item a {
         color: rgba(255, 255, 255, 0.9);
         text-decoration: none;
-        transition: var(--transition-fast);
-    }
-
-    .breadcrumb-item a:hover {
-        color: white;
     }
 
     .breadcrumb-item.active {
@@ -100,35 +63,17 @@
         color: rgba(255, 255, 255, 0.6);
     }
 
-    /* ==================== BUTTONS (KONSISTEN) ==================== */
-    .btn {
-        padding: var(--spacing-md) var(--spacing-xl);
-        font-size: var(--font-sm);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        border: none;
-        transition: var(--transition-base);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        cursor: pointer;
-        text-decoration: none;
-    }
-
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-primary {
+    /* BUTTONS */
+    .btn-primary-light {
         background: rgba(255, 255, 255, 0.95);
-        color: var(--primary-dark);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: var(--primary-hover);
+        border: 1px solid rgba(255, 255, 255, 0.5);
     }
 
-    .btn-primary:hover {
+    .btn-primary-light:hover {
         background: white;
-        color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
     }
 
     .btn-outline-light {
@@ -139,189 +84,116 @@
 
     .btn-outline-light:hover {
         background: rgba(255, 255, 255, 0.25);
-        color: white;
     }
 
-    .btn-action {
-        padding: 0.5rem 0.875rem;
-        font-size: var(--font-xs);
+    /* CONTENT CARD - HANYA ISI */
+    .content-card {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
     }
 
-    .btn-info {
-        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-        color: white;
-        box-shadow: 0 2px 4px rgba(14, 165, 233, 0.3);
+    .content-body {
+        padding: var(--space-5);
     }
 
-    .btn-warning {
-        background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
-        color: white;
-        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
-    }
-
-    .btn-danger {
-        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
-        color: white;
-        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
-    }
-
-    /* ==================== TABLE (SAMA PERSIS DASHBOARD) ==================== */
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .table {
-        margin-bottom: 0;
-        font-size: var(--font-sm);
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .table thead th {
-        background: var(--gray-800);
-        color: white;
-        font-weight: 600;
-        padding: var(--spacing-md);
-        font-size: var(--font-xs);
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        border: none;
-        white-space: nowrap;
-        text-align: left;
-    }
-
-    .table thead th:first-child {
-        border-top-left-radius: var(--radius-md);
-    }
-
-    .table thead th:last-child {
-        border-top-right-radius: var(--radius-md);
-    }
-
-    .table tbody td {
-        padding: var(--spacing-md);
-        vertical-align: middle;
-        border-bottom: 1px solid var(--gray-200);
-        color: var(--gray-700);
-    }
-
-    .table tbody tr {
-        transition: var(--transition-fast);
-    }
-
-    .table tbody tr:hover {
+    .content-footer {
+        padding: var(--space-3) var(--space-5);
         background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+        font-size: var(--text-sm);
+        color: var(--gray-600);
     }
 
-    .table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    /* ==================== BADGES ==================== */
+    /* BADGES */
     .badge {
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-sm);
+        padding: var(--space-1) var(--space-3);
+        border-radius: 12px;
         font-weight: 600;
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         display: inline-flex;
         align-items: center;
-        gap: var(--spacing-xs);
-        white-space: nowrap;
+        gap: var(--space-1);
     }
 
-    .badge.bg-success {
-        background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+    .badge-success {
+        background: linear-gradient(135deg, var(--success), #059669);
         color: white;
         box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
     }
 
-    .badge.bg-danger {
-        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+    .badge-danger {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
         color: white;
         box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
     }
 
-    .badge.bg-secondary {
-        background: #e5e7eb;
-        color: #6b7280;
+    .badge-secondary {
+        background: var(--gray-200);
+        color: var(--gray-700);
     }
 
-    .badge.bg-info {
-        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    .badge-info {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
         color: white;
         box-shadow: 0 2px 4px rgba(14, 165, 233, 0.3);
     }
 
-    /* ==================== SPECIAL STYLES ==================== */
+    /* CABANG NAME */
     .cabang-name {
         font-weight: 600;
         color: var(--gray-900);
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-2);
     }
 
     .cabang-name i {
         color: var(--primary);
     }
 
-    .ip-address-cell code {
+    /* IP ADDRESS */
+    .ip-code {
         font-family: 'Courier New', monospace;
-        font-size: var(--font-sm);
+        font-size: var(--text-xs);
         background: var(--gray-100);
-        padding: var(--spacing-xs) var(--spacing-sm);
+        padding: 2px var(--space-2);
         border-radius: var(--radius-sm);
         color: var(--gray-800);
     }
 
-    /* ==================== EMPTY STATE ==================== */
+    /* EMPTY STATE */
     .empty-state {
         text-align: center;
-        padding: 48px var(--spacing-xl);
+        padding: var(--space-8);
     }
 
     .empty-state i {
         font-size: 3rem;
         color: var(--gray-300);
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: var(--space-4);
     }
 
     .empty-state h6 {
-        font-size: var(--font-base);
-        color: var(--gray-700);
-        margin-bottom: var(--spacing-sm);
+        font-size: var(--text-base);
         font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: var(--space-2);
     }
 
     .empty-state p {
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         color: var(--gray-600);
         margin: 0;
     }
 
-    /* ==================== DATATABLE CUSTOMIZATION ==================== */
-    .dataTables_wrapper {
-        padding: 0 !important;
-    }
-
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-        display: none !important;
-    }
-
-    /* ==================== RESPONSIVE ==================== */
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-        .section-header {
+        .header-top {
             flex-direction: column;
             align-items: flex-start;
-        }
-
-        .btn-action {
-            padding: var(--spacing-sm);
-            font-size: 0.65rem;
         }
 
         .table {
@@ -333,13 +205,15 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="section-card">
-        <div class="section-header">
-            <div>
-                <h5 class="section-title">
-                    <i class="fas fa-building"></i>
-                    Master Cabang
+    <!-- Header Card - Semua Info di Sini -->
+    <div class="header-card">
+        <div class="header-top">
+            <div class="header-info" style="flex: 1;">
+                <h5>
+                    <i class="fas fa-map-marker-alt"></i>
+                    Daftar Cabang
                 </h5>
+                <p class="header-subtitle">Kelola data cabang dan lokasi kantor dengan mudah</p>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
@@ -349,7 +223,7 @@
                 </nav>
             </div>
             <div class="d-flex gap-2">
-                <a href="{% url 'tambah_cabang' %}" class="btn btn-primary">
+                <a href="{% url 'tambah_cabang' %}" class="btn btn-primary-light">
                     <i class="fas fa-plus"></i> Tambah Cabang
                 </a>
                 <a href="{% url 'menu_pengaturan' %}" class="btn btn-outline-light">
@@ -357,111 +231,109 @@
                 </a>
             </div>
         </div>
+    </div>
 
-        <div class="section-body">
+    <!-- Content Card - Hanya Table -->
+    <div class="content-card">
+        <div class="content-body">
             <div class="table-responsive">
-                <table class="table table-hover" id="cabangTable">
-                        <thead>
-                            <tr>
-                                <th class="text-center" style="width: 50px;">No</th>
-                                <th style="width: 100px;">Kode</th>
-                                <th>Nama Cabang</th>
-                                <th>Alamat</th>
-                                <th class="text-center">IP Mesin</th>
-                                <th class="text-center" style="width: 80px;">Port</th>
-                                <th class="text-center" style="width: 100px;">Status</th>
-                                <th class="text-center" style="width: 200px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cabang in cabang_list %}
-                            <tr>
-                                <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
-                                <td><strong>{{ cabang.kode }}</strong></td>
-                                <td>
-                                    <div class="cabang-name">
-                                        <i class="fas fa-building"></i>
-                                        {{ cabang.nama }}
-                                    </div>
-                                    {% if cabang.id == request.session.cabang_aktif_id %}
-                                        <span class="badge bg-info">Aktif Sekarang</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <small style="color: var(--gray-600);">
-                                        <i class="fas fa-map-marker-alt" style="color: var(--danger);"></i>
-                                        {{ cabang.alamat|truncatewords:10 }}
-                                    </small>
-                                </td>
-                                <td class="text-center ip-address-cell">
-                                    {% if cabang.ip_mesin_fingerprint %}
-                                        {% with ips=cabang.get_ip_list %}
-                                            {% if ips|length > 1 %}
-                                                <span class="badge bg-secondary" title="{{ cabang.ip_mesin_fingerprint }}">
-                                                    {{ ips|length }} Mesin
-                                                </span>
-                                                <br><small><code>{{ ips.0 }}</code></small>
-                                            {% else %}
-                                                <code>{{ cabang.ip_mesin_fingerprint }}</code>
-                                            {% endif %}
-                                        {% endwith %}
-                                    {% else %}
-                                        <span style="color: var(--gray-400);">-</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-center"><code>{{ cabang.port_mesin }}</code></td>
-                                <td class="text-center">
-                                    {% if cabang.is_active %}
-                                        <span class="badge bg-success">
-                                            <i class="fas fa-check-circle"></i> Aktif
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-danger">
-                                            <i class="fas fa-times-circle"></i> Nonaktif
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    <div class="d-flex gap-2 justify-content-center flex-wrap">
-                                        {% if cabang.id != request.session.cabang_aktif_id %}
-                                            <button class="btn btn-info btn-action switch-cabang-btn" 
-                                                    data-id="{{ cabang.id }}" 
-                                                    data-nama="{{ cabang.nama }}"
-                                                    title="Aktifkan Cabang">
-                                                <i class="fas fa-exchange-alt"></i>
-                                            </button>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width: 50px;">No</th>
+                            <th style="width: 100px;">Kode</th>
+                            <th>Nama Cabang</th>
+                            <th>Alamat</th>
+                            <th class="text-center">IP Mesin</th>
+                            <th class="text-center" style="width: 80px;">Port</th>
+                            <th class="text-center" style="width: 100px;">Status</th>
+                            <th class="text-center" style="width: 200px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cabang in cabang_list %}
+                        <tr>
+                            <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
+                            <td><strong>{{ cabang.kode }}</strong></td>
+                            <td>
+                                <div class="cabang-name">
+                                    <i class="fas fa-building"></i>
+                                    {{ cabang.nama }}
+                                </div>
+                                {% if cabang.id == request.session.cabang_aktif_id %}
+                                <span class="badge badge-info">Aktif Sekarang</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small style="color: var(--gray-600);">
+                                    <i class="fas fa-map-marker-alt" style="color: var(--danger);"></i>
+                                    {{ cabang.alamat|truncatewords:10 }}
+                                </small>
+                            </td>
+                            <td class="text-center">
+                                {% if cabang.ip_mesin_fingerprint %}
+                                    {% with ips=cabang.get_ip_list %}
+                                        {% if ips|length > 1 %}
+                                            <span class="badge badge-secondary">{{ ips|length }} Mesin</span>
+                                            <br><small><span class="ip-code">{{ ips.0 }}</span></small>
+                                        {% else %}
+                                            <span class="ip-code">{{ cabang.ip_mesin_fingerprint }}</span>
                                         {% endif %}
-                                        <a href="{% url 'edit_cabang' cabang.pk %}" 
-                                           class="btn btn-warning btn-action"
-                                           title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{% url 'hapus_cabang' cabang.pk %}" 
-                                           class="btn btn-danger btn-action"
-                                           title="Hapus"
-                                           onclick="return confirm('⚠️ Yakin ingin menghapus cabang {{ cabang.nama }}?\n\nData yang dihapus tidak dapat dikembalikan!')">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="8">
-                                    <div class="empty-state">
-                                        <i class="fas fa-inbox"></i>
-                                        <h6>Tidak Ada Data Cabang</h6>
-                                        <p>Silakan tambah cabang baru untuk memulai</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                    {% endwith %}
+                                {% else %}
+                                    <span style="color: var(--gray-400);">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center"><span class="ip-code">{{ cabang.port_mesin }}</span></td>
+                            <td class="text-center">
+                                {% if cabang.is_active %}
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check-circle"></i> Aktif
+                                </span>
+                                {% else %}
+                                <span class="badge badge-danger">
+                                    <i class="fas fa-times-circle"></i> Nonaktif
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex gap-2 justify-content-center">
+                                    {% if cabang.id != request.session.cabang_aktif_id %}
+                                    <button class="btn btn-sm switch-cabang-btn" 
+                                            style="background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white;"
+                                            data-id="{{ cabang.id }}" 
+                                            data-nama="{{ cabang.nama }}">
+                                        <i class="fas fa-exchange-alt"></i>
+                                    </button>
+                                    {% endif %}
+                                    <a href="{% url 'edit_cabang' cabang.pk %}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'hapus_cabang' cabang.pk %}" 
+                                       class="btn btn-danger btn-sm"
+                                       onclick="return confirm('Yakin hapus cabang {{ cabang.nama }}?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <h6>Tidak Ada Data</h6>
+                                    <p>Belum ada cabang terdaftar</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+        </div>
 
-        <div class="section-footer">
+        <div class="content-footer">
             Total: <strong>{{ cabang_list|length }}</strong> Cabang
         </div>
     </div>
@@ -469,30 +341,15 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-
 <script>
-$(document).ready(function() {
-    // Initialize DataTable without pagination
-    $('#cabangTable').DataTable({
-        paging: false,
-        searching: false,
-        info: false,
-        ordering: true,
-        order: [[1, 'asc']],
-        columnDefs: [
-            { orderable: false, targets: [7] },
-            { className: "text-center", targets: [0, 4, 5, 6, 7] }
-        ]
-    });
-
-    $('.switch-cabang-btn').click(function() {
-        const cabangId = $(this).data('id');
-        const cabangNama = $(this).data('nama');
+document.querySelectorAll('.switch-cabang-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const cabangId = this.dataset.id;
+        const cabangNama = this.dataset.nama;
         
-        if (confirm(`⚠️ Aktifkan cabang "${cabangNama}"?\n\nSistem akan beralih ke cabang ini.`)) {
-            $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+        if (confirm(`Aktifkan cabang "${cabangNama}"?`)) {
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
             window.location.href = `/cabang/switch/${cabangId}/`;
         }
     });

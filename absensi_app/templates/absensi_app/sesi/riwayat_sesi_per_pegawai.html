@@ -6,78 +6,75 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <style>
-    /* ==================== PAGE HEADER ==================== */
+    /* ===== PAGE HEADER ===== */
     .page-header {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
         color: white;
-        padding: var(--spacing-xl);
-        border-radius: var(--radius-lg);
-        margin-bottom: var(--spacing-xl);
+        padding: var(--space-5);
+        border-radius: var(--radius);
+        margin-bottom: var(--space-6);
         box-shadow: var(--shadow-lg);
     }
 
     .page-header-content {
         display: flex;
         align-items: center;
-        gap: var(--spacing-lg);
+        gap: var(--space-4);
     }
 
     .page-header-icon {
-        width: 64px;
-        height: 64px;
+        width: 56px;
+        height: 56px;
         background: rgba(255, 255, 255, 0.2);
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.8rem;
+        font-size: var(--text-2xl);
+        flex-shrink: 0;
     }
 
     .page-header-info h4 {
-        margin: 0 0 var(--spacing-xs) 0;
-        font-size: var(--font-xl);
+        margin: 0 0 var(--space-2) 0;
+        font-size: var(--text-xl);
         font-weight: 700;
     }
 
     .page-header-meta {
         display: flex;
-        gap: var(--spacing-lg);
-        margin-top: var(--spacing-sm);
+        gap: var(--space-4);
+        margin-top: var(--space-2);
         flex-wrap: wrap;
     }
 
     .meta-item {
         display: flex;
         align-items: center;
-        gap: var(--spacing-xs);
-        font-size: var(--font-sm);
+        gap: var(--space-2);
+        font-size: var(--text-sm);
         opacity: 0.95;
     }
 
-    .meta-item i {
-        font-size: var(--font-sm);
-    }
-
-    /* ==================== STATS CARDS ==================== */
+    /* ===== STATS GRID ===== */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-lg);
-        margin-bottom: var(--spacing-xl);
+        gap: var(--space-4);
+        margin-bottom: var(--space-6);
     }
 
     .stat-card {
         background: white;
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-lg);
-        box-shadow: var(--shadow-sm);
+        border-radius: var(--radius);
+        padding: var(--space-5);
+        box-shadow: var(--shadow);
         border: 1px solid var(--gray-200);
-        transition: all var(--transition-base);
+        transition: all 0.2s;
     }
 
     .stat-card:hover {
         transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--shadow-lg);
     }
 
     .stat-icon {
@@ -87,173 +84,102 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: var(--font-lg);
+        font-size: var(--text-xl);
         color: white;
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--space-3);
     }
 
     .stat-value {
-        font-size: 1.8rem;
+        font-size: var(--text-2xl);
         font-weight: 700;
         color: var(--gray-900);
-        margin-bottom: var(--spacing-xs);
+        margin-bottom: var(--space-1);
     }
 
     .stat-label {
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         color: var(--gray-600);
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.3px;
     }
 
-    /* ==================== FILTER SECTION ==================== */
-    .filter-section {
-        background: white;
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
-        box-shadow: var(--shadow-sm);
-        margin-bottom: var(--spacing-xl);
-        border: 1px solid var(--gray-200);
-    }
-
-    .filter-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: var(--spacing-lg);
-        padding-bottom: var(--spacing-md);
-        border-bottom: 2px solid var(--gray-200);
-    }
-
-    .filter-title {
-        font-size: var(--font-base);
-        font-weight: 600;
-        color: var(--gray-900);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        margin: 0;
-    }
-
-    /* ==================== TABLE SECTION ==================== */
-    .table-section {
-        background: white;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-    }
-
-    table.dataTable thead th {
-        background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%) !important;
-        color: white !important;
-        font-weight: 600;
-        padding: var(--spacing-md) !important;
-        font-size: 0.65rem;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        white-space: nowrap;
-        border: none !important;
-    }
-
-    table.dataTable tbody td {
-        padding: var(--spacing-md) !important;
-        vertical-align: middle;
-        border-bottom: 1px solid var(--gray-200) !important;
-        font-size: var(--font-xs);
-    }
-
-    table.dataTable tbody tr:hover {
-        background: var(--gray-50) !important;
-    }
-
-    /* ==================== BADGES ==================== */
-    .badge {
-        padding: 0.2rem 0.5rem;
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: 0.65rem;
-        white-space: nowrap;
-    }
-
+    /* ===== BADGES ===== */
     .sesi-badge {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        background: var(--primary);
         color: white;
-        padding: 0.25rem 0.6rem;
+        padding: var(--space-1) var(--space-3);
         border-radius: var(--radius-sm);
         font-weight: 700;
-        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        font-size: var(--text-xs);
+        font-family: 'Courier New', monospace;
     }
 
     .cross-day-badge {
-        background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+        background: var(--warning);
         color: white;
-        padding: 0.15rem 0.5rem;
-        border-radius: 10px;
-        font-size: 0.6rem;
+        padding: 2px var(--space-2);
+        border-radius: 12px;
+        font-size: 10px;
         font-weight: 600;
         display: inline-flex;
         align-items: center;
         gap: 2px;
     }
 
-    /* ==================== BUTTONS ==================== */
-    .btn {
-        padding: var(--spacing-sm) var(--spacing-lg);
-        font-size: var(--font-xs);
-        border-radius: var(--radius-sm);
+    /* ===== MODAL ===== */
+    .detail-section-title {
+        font-size: var(--text-sm);
         font-weight: 600;
-        border: none;
-        transition: all var(--transition-base);
-        display: inline-flex;
+        color: var(--gray-900);
+        margin-bottom: var(--space-3);
+        padding-bottom: var(--space-2);
+        border-bottom: 2px solid var(--gray-200);
+        display: flex;
         align-items: center;
-        gap: var(--spacing-xs);
-        cursor: pointer;
+        gap: var(--space-2);
     }
 
-    .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-back {
-        background: var(--gray-600);
-        color: white;
-    }
-
-    .btn-back:hover {
-        background: var(--gray-700);
-        color: white;
-    }
-
-    .btn-action {
-        padding: 0.2rem 0.5rem;
-        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-        color: white;
-        border: none;
+    .cross-day-info {
+        background: var(--warning-light);
+        border: 1px solid var(--warning);
         border-radius: var(--radius-sm);
+        padding: var(--space-3);
+        margin-bottom: var(--space-4);
+    }
+
+    .cross-day-info-title {
+        font-size: var(--text-sm);
         font-weight: 600;
-        font-size: 0.65rem;
+        color: #92400e;
+        margin-bottom: var(--space-2);
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
     }
 
-    .btn-action:hover {
-        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-        color: white;
+    .cross-day-info-dates {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
     }
 
-    .btn-delete {
-        padding: 0.2rem 0.5rem;
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        color: white;
+    .cross-day-date-item {
+        font-size: var(--text-xs);
+        color: #92400e;
     }
 
-    .btn-delete:hover {
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-        color: white;
+    .cross-day-date-label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 2px;
     }
 
-    /* ==================== RESPONSIVE ==================== */
+    .cross-day-date-value {
+        display: block;
+    }
+
+    /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
         .page-header-content {
             flex-direction: column;
@@ -264,8 +190,8 @@
             grid-template-columns: repeat(2, 1fr);
         }
 
-        .page-header-meta {
-            justify-content: center;
+        .cross-day-info-dates {
+            grid-template-columns: 1fr;
         }
     }
 
@@ -278,111 +204,99 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="page-header-content">
-            <div class="page-header-icon">
-                <i class="fas fa-user-circle"></i>
-            </div>
-            <div class="page-header-info flex-grow-1">
-                <h4>{{ pegawai.nama_lengkap }}</h4>
-                <div class="page-header-meta">
-                    <div class="meta-item">
-                        <i class="fas fa-id-badge"></i>
-                        <span>{{ pegawai.userid }}</span>
-                    </div>
-                    {% if pegawai.departemen %}
-                    <div class="meta-item">
-                        <i class="fas fa-building"></i>
-                        <span>{{ pegawai.departemen.nama }}</span>
-                    </div>
-                    {% endif %}
-                    {% if pegawai.jabatan %}
-                    <div class="meta-item">
-                        <i class="fas fa-briefcase"></i>
-                        <span>{{ pegawai.jabatan.nama }}</span>
-                    </div>
-                    {% endif %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <div class="page-header-icon">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="page-header-info flex-grow-1">
+            <h4>{{ pegawai.nama_lengkap }}</h4>
+            <div class="page-header-meta">
+                <div class="meta-item">
+                    <i class="fas fa-id-badge"></i>
+                    <span>{{ pegawai.userid }}</span>
                 </div>
-            </div>
-            <div>
-                <a href="{% url 'riwayat_sesi_absensi' %}" class="btn btn-back">
-                    <i class="fas fa-arrow-left"></i>
-                    Kembali
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);">
-                <i class="fas fa-calendar-check"></i>
-            </div>
-            <div class="stat-value">{{ total_sesi }}</div>
-            <div class="stat-label">Total Sesi</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #059669 0%, var(--success) 100%);">
-                <i class="fas fa-calendar-day"></i>
-            </div>
-            <div class="stat-value">{{ total_hari_kerja }}</div>
-            <div class="stat-label">Hari Kerja</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);">
-                <i class="fas fa-layer-group"></i>
-            </div>
-            <div class="stat-value">
-                {% if total_hari_kerja > 0 %}
-                {{ total_sesi|floatformat:1|default:"0" }} / {{ total_hari_kerja }}
-                {% else %}
-                0
+                {% if pegawai.departemen %}
+                <div class="meta-item">
+                    <i class="fas fa-building"></i>
+                    <span>{{ pegawai.departemen.nama }}</span>
+                </div>
+                {% endif %}
+                {% if pegawai.jabatan %}
+                <div class="meta-item">
+                    <i class="fas fa-briefcase"></i>
+                    <span>{{ pegawai.jabatan.nama }}</span>
+                </div>
                 {% endif %}
             </div>
-            <div class="stat-label">Rata-rata Sesi/Hari</div>
         </div>
+        <a href="{% url 'riwayat_sesi_absensi' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Kembali
+        </a>
+    </div>
+</div>
 
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-            <div class="stat-value">
-                {{ tanggal_mulai|date:"d M" }} - {{ tanggal_akhir|date:"d M Y" }}
-            </div>
-            <div class="stat-label">Periode</div>
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: var(--primary);">
+            <i class="fas fa-calendar-check"></i>
         </div>
+        <div class="stat-value">{{ total_sesi }}</div>
+        <div class="stat-label">Total Sesi</div>
     </div>
 
-    <!-- Filter Section -->
-    <div class="filter-section">
-        <div class="filter-header">
-            <h5 class="filter-title">
-                <i class="fas fa-filter"></i>
-                Filter Periode
-            </h5>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: var(--success);">
+            <i class="fas fa-calendar-day"></i>
         </div>
+        <div class="stat-value">{{ total_hari_kerja }}</div>
+        <div class="stat-label">Hari Kerja</div>
+    </div>
 
-        <form method="get" class="row g-3 align-items-end">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: var(--warning);">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="stat-value">
+            {% if total_hari_kerja > 0 %}
+            {{ total_sesi|floatformat:1 }} / {{ total_hari_kerja }}
+            {% else %}
+            0
+            {% endif %}
+        </div>
+        <div class="stat-label">Rata-rata Sesi/Hari</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #8b5cf6;">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="stat-value" style="font-size: var(--text-lg);">
+            {{ tanggal_mulai|date:"d M" }} - {{ tanggal_akhir|date:"d M Y" }}
+        </div>
+        <div class="stat-label">Periode</div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-filter"></i> Filter Periode</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
             <div class="col-md-5">
-                <label class="form-label">
-                    <i class="fas fa-calendar"></i>
-                    Tanggal Mulai
-                </label>
+                <label class="form-label">Tanggal Mulai</label>
                 <input type="date" name="tanggal_mulai" class="form-control" value="{{ tanggal_mulai|date:'Y-m-d' }}">
             </div>
             <div class="col-md-5">
-                <label class="form-label">
-                    <i class="fas fa-calendar"></i>
-                    Tanggal Akhir
-                </label>
+                <label class="form-label">Tanggal Akhir</label>
                 <input type="date" name="tanggal_akhir" class="form-control" value="{{ tanggal_akhir|date:'Y-m-d' }}">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="fas fa-search"></i>
                     Cari
@@ -390,21 +304,26 @@
             </div>
         </form>
     </div>
+</div>
 
-    <!-- Table Section -->
-    <div class="table-section">
+<!-- Table Section -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-table"></i> Data Riwayat Sesi</h5>
+    </div>
+    <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover" id="sesiTable">
+            <table class="table" id="sesiTable">
                 <thead>
                     <tr>
-                        <th class="text-center" style="width: 5%;">No</th>
-                        <th class="text-center" style="width: 12%;">Tanggal</th>
-                        <th class="text-center" style="width: 8%;">Sesi</th>
-                        <th class="text-center" style="width: 10%;">Tap Masuk</th>
-                        <th class="text-center" style="width: 10%;">Tap Pulang</th>
-                        <th class="text-center" style="width: 10%;">Durasi</th>
-                        <th class="text-center" style="width: 8%;">Status</th>
-                        <th class="text-center" style="width: 10%;">Aksi</th>
+                        <th class="text-center">No</th>
+                        <th class="text-center">Tanggal</th>
+                        <th class="text-center">Sesi</th>
+                        <th class="text-center">Tap Masuk</th>
+                        <th class="text-center">Tap Pulang</th>
+                        <th class="text-center">Durasi</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -413,13 +332,12 @@
                         <tr>
                             <td class="text-center"><strong>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</strong></td>
                             <td class="text-center" data-order="{{ sesi.tanggal_mulai|date:'Y-m-d' }}">
-                                <small>{{ sesi.tanggal_mulai|date:"d M Y" }}</small>
+                                {{ sesi.tanggal_mulai|date:"d M Y" }}
                                 {% if sesi.is_cross_day %}
                                     <span class="cross-day-badge" title="Shift Malam Lintas Hari">
-                                        <i class="fas fa-moon"></i>
-                                        Cross
+                                        <i class="fas fa-moon"></i> Cross
                                     </span>
-                                    <div style="font-size: 0.6rem; color: var(--gray-600); margin-top: 2px;">
+                                    <div style="font-size: 10px; color: var(--gray-600); margin-top: 2px;">
                                         s/d {{ sesi.tanggal_selesai|date:"d M Y" }}
                                     </div>
                                 {% endif %}
@@ -429,42 +347,36 @@
                             </td>
                             <td class="text-center">
                                 {% if sesi.tap_masuk_pertama %}
-                                    <strong style="color: var(--success); font-size: 0.7rem;">
-                                        {{ sesi.tap_masuk_pertama|date:"H:i" }}
-                                    </strong>
+                                    <strong style="color: var(--success);">{{ sesi.tap_masuk_pertama|date:"H:i" }}</strong>
                                 {% else %}
-                                    <span class="badge bg-secondary">-</span>
+                                    <span class="badge badge-secondary">-</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
                                 {% if sesi.tap_pulang_terakhir %}
-                                    <strong style="color: var(--danger); font-size: 0.7rem;">
-                                        {{ sesi.tap_pulang_terakhir|date:"H:i" }}
-                                    </strong>
+                                    <strong style="color: var(--danger);">{{ sesi.tap_pulang_terakhir|date:"H:i" }}</strong>
                                 {% else %}
-                                    <span class="badge bg-secondary">-</span>
+                                    <span class="badge badge-secondary">-</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
                                 {% if sesi.durasi_kerja_menit %}
-                                    <strong style="color: var(--primary); font-size: 0.7rem;">
-                                        {{ sesi.get_durasi_formatted }}
-                                    </strong>
+                                    <strong style="color: var(--primary);">{{ sesi.get_durasi_formatted }}</strong>
                                 {% else %}
-                                    <span class="badge bg-secondary">-</span>
+                                    <span class="badge badge-secondary">-</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <span class="badge {% if sesi.status == 'Hadir' %}bg-success{% else %}bg-warning{% endif %}">
+                                <span class="badge {% if sesi.status == 'Hadir' %}badge-success{% else %}badge-warning{% endif %}">
                                     {% if sesi.status == 'Hadir' %}Complete{% else %}Incomplete{% endif %}
                                 </span>
                             </td>
                             <td class="text-center">
-                                <div style="display: flex; gap: 4px; justify-content: center;">
-                                    <button class="btn-action" onclick="showDetail('{{ sesi.id }}')" title="Lihat Detail">
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <button class="btn btn-primary btn-sm" onclick="showDetail('{{ sesi.id }}')" title="Lihat Detail">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn-delete" 
+                                    <button class="btn btn-danger btn-sm" 
                                             data-sesi-id="{{ sesi.id }}" 
                                             data-pegawai-nama="{{ pegawai.nama_lengkap|escapejs }}" 
                                             data-tanggal="{{ sesi.tanggal_mulai|date:'d M Y' }}"
@@ -478,9 +390,9 @@
                         {% endfor %}
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center py-4">
-                            <i class="fas fa-inbox" style="font-size: 2.5rem; color: var(--gray-300);"></i>
-                            <p style="margin-top: var(--spacing-md); color: var(--gray-600);">Tidak ada data sesi</p>
+                        <td colspan="8" class="text-center" style="padding: var(--space-8);">
+                            <i class="fas fa-inbox" style="font-size: 3rem; color: var(--gray-300);"></i>
+                            <p style="margin-top: var(--space-3); color: var(--gray-600);">Tidak ada data sesi</p>
                         </td>
                     </tr>
                     {% endfor %}
@@ -488,9 +400,12 @@
             </table>
         </div>
     </div>
+    <div class="card-footer">
+        Total: <strong>{{ total_sesi }}</strong> Sesi
+    </div>
 </div>
 
-<!-- Modal Detail (sama seperti di riwayat_sesi.html) -->
+<!-- Modal Detail -->
 <div class="modal fade" id="modalDetailSesi" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
@@ -502,11 +417,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="modalDetailContent">
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-3" style="color: var(--gray-600); font-size: var(--font-sm);">Loading...</p>
+                <div class="text-center" style="padding: var(--space-8);">
+                    <div class="spinner-border text-primary"></div>
+                    <p style="margin-top: var(--space-3); color: var(--gray-600);">Loading...</p>
                 </div>
             </div>
         </div>
@@ -517,7 +430,6 @@
 {% block extra_js %}
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
     $('#sesiTable').DataTable({
@@ -529,13 +441,13 @@ $(document).ready(function() {
         info: true,
         order: [[1, 'desc']],
         language: {
-            "sInfo": "Menampilkan _START_ - _END_ dari _TOTAL_",
-            "sInfoEmpty": "Menampilkan 0 - 0 dari 0",
-            "sLengthMenu": "Tampilkan _MENU_",
-            "sZeroRecords": "Tidak ada data",
-            "oPaginate": {
-                "sPrevious": "←",
-                "sNext": "→"
+            sInfo: "Menampilkan _START_ - _END_ dari _TOTAL_",
+            sInfoEmpty: "Menampilkan 0 - 0 dari 0",
+            sLengthMenu: "Tampilkan _MENU_",
+            sZeroRecords: "Tidak ada data",
+            oPaginate: {
+                sPrevious: "←",
+                sNext: "→"
             }
         },
         columnDefs: [
@@ -553,9 +465,8 @@ function getCookie(name) {
 }
 
 function showDetail(sesiId) {
-    // SAMA SEPERTI DI riwayat_sesi.html
     $('#modalDetailSesi').modal('show');
-    $('#modalDetailContent').html('<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>');
+    $('#modalDetailContent').html('<div class="text-center" style="padding: var(--space-8);"><div class="spinner-border text-primary"></div></div>');
     
     $.ajax({
         url: '/api/sesi/' + sesiId + '/',
@@ -587,10 +498,38 @@ function showDetail(sesiId) {
                     `;
                 }
                 
-                let html = crossDayHtml + `<div class="mb-4"><h6 class="detail-section-title"><i class="fas fa-info-circle text-primary"></i> Informasi Sesi</h6><table class="table table-sm table-bordered"><tr><td style="width: 150px; font-weight: 600; background: var(--gray-50);">Pegawai</td><td><strong>${s.pegawai_nama}</strong> (${s.pegawai_userid})</td></tr>${!s.is_cross_day ? `<tr><td style="font-weight: 600; background: var(--gray-50);">Tanggal</td><td>${s.tanggal_mulai}</td></tr>` : ''}<tr><td style="font-weight: 600; background: var(--gray-50);">Tap Masuk</td><td><strong style="color: var(--success);">${s.tap_masuk_pertama}</strong></td></tr><tr><td style="font-weight: 600; background: var(--gray-50);">Tap Pulang</td><td><strong style="color: var(--danger);">${s.tap_pulang_terakhir || 'Belum'}</strong></td></tr><tr><td style="font-weight: 600; background: var(--gray-50);">Durasi</td><td><strong style="color: var(--primary);">${s.durasi}</strong></td></tr><tr><td style="font-weight: 600; background: var(--gray-50);">Status</td><td><span class="badge ${s.status === 'Hadir' ? 'bg-success' : 'bg-warning'}">${s.status === 'Hadir' ? 'Complete' : 'Incomplete'}</span></td></tr></table></div><div><h6 class="detail-section-title"><i class="fas fa-list text-success"></i> Tap Logs <span class="badge bg-primary">${t.length} tap</span></h6><table class="table table-sm table-bordered"><thead class="table-light"><tr><th class="text-center" style="width: 50px;">No</th><th>Waktu</th><th>Jenis</th><th>Mesin</th></tr></thead><tbody>`;
+                let html = crossDayHtml + `
+                    <div style="margin-bottom: var(--space-4);">
+                        <h6 class="detail-section-title">
+                            <i class="fas fa-info-circle"></i> Informasi Sesi
+                        </h6>
+                        <table class="table table-bordered">
+                            <tr><td style="width: 150px; font-weight: 600;">Pegawai</td><td><strong>${s.pegawai_nama}</strong> (${s.pegawai_userid})</td></tr>
+                            ${!s.is_cross_day ? `<tr><td style="font-weight: 600;">Tanggal</td><td>${s.tanggal_mulai}</td></tr>` : ''}
+                            <tr><td style="font-weight: 600;">Tap Masuk</td><td><strong style="color: var(--success);">${s.tap_masuk_pertama}</strong></td></tr>
+                            <tr><td style="font-weight: 600;">Tap Pulang</td><td><strong style="color: var(--danger);">${s.tap_pulang_terakhir || 'Belum'}</strong></td></tr>
+                            <tr><td style="font-weight: 600;">Durasi</td><td><strong style="color: var(--primary);">${s.durasi}</strong></td></tr>
+                            <tr><td style="font-weight: 600;">Status</td><td><span class="badge ${s.status === 'Hadir' ? 'badge-success' : 'badge-warning'}">${s.status === 'Hadir' ? 'Complete' : 'Incomplete'}</span></td></tr>
+                        </table>
+                    </div>
+                    <div>
+                        <h6 class="detail-section-title">
+                            <i class="fas fa-list"></i> Tap Logs <span class="badge badge-secondary">${t.length} tap</span>
+                        </h6>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 50px;">No</th>
+                                    <th>Waktu</th>
+                                    <th>Jenis</th>
+                                    <th>Mesin</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
                 
                 t.forEach(function(x, i) {
-                    const badgeClass = x.punch_type_display.includes('Masuk') ? 'bg-success' : 'bg-info';
+                    const badgeClass = x.punch_type_display.includes('Masuk') ? 'badge-success' : 'badge-secondary';
                     html += `<tr><td class="text-center">${i+1}</td><td><strong>${x.waktu_tap}</strong></td><td><span class="badge ${badgeClass}">${x.punch_type_display}</span></td><td>${x.mesin_nama}</td></tr>`;
                 });
                 
@@ -607,11 +546,20 @@ async function hapusSesi(button) {
     const tanggal = button.getAttribute('data-tanggal');
     
     const result = await Swal.fire({
-        title: '🗑️ Hapus Sesi?',
-        html: `<div class="text-start"><p>Anda akan menghapus sesi absensi:</p><div class="alert alert-warning mb-3"><strong>Pegawai:</strong> ${pegawaiNama}<br><strong>Tanggal:</strong> ${tanggal}</div><p class="text-danger mb-0"><i class="fas fa-exclamation-triangle"></i> <strong>Peringatan:</strong> Semua tap logs terkait juga akan terhapus!</p></div>`,
+        title: 'Hapus Sesi?',
+        html: `
+            <div class="text-start">
+                <p>Anda akan menghapus sesi absensi:</p>
+                <div class="alert alert-warning">
+                    <strong>Pegawai:</strong> ${pegawaiNama}<br>
+                    <strong>Tanggal:</strong> ${tanggal}
+                </div>
+                <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> <strong>Peringatan:</strong> Semua tap logs terkait juga akan terhapus!</p>
+            </div>
+        `,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: '<i class="fas fa-trash me-1"></i>Ya, Hapus!',
+        confirmButtonText: '<i class="fas fa-trash"></i> Ya, Hapus!',
         cancelButtonText: 'Batal',
         confirmButtonColor: '#ef4444',
         cancelButtonColor: '#6b7280',
@@ -627,7 +575,7 @@ async function hapusSesi(button) {
 
     if (result.isConfirmed && result.value) {
         await Swal.fire({
-            title: result.value.status === 'success' ? '✅ Berhasil Dihapus!' : '❌ Gagal Hapus',
+            title: result.value.status === 'success' ? 'Berhasil Dihapus!' : 'Gagal Hapus',
             text: result.value.message,
             icon: result.value.status === 'success' ? 'success' : 'error',
             timer: 2000

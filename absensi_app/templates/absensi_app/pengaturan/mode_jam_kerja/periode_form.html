@@ -1,348 +1,320 @@
 {% extends 'absensi_app/base.html' %}
 {% load static %}
 
-{% block title %}{% if periode %}Edit{% else %}Tambah{% endif %} Periode - {{ mode.nama }}{% endblock %}
+{% block title %}{{ judul }}{% endblock %}
 
 {% block extra_css %}
 <style>
-    .form-card {
-        background: white;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--gray-200);
-        overflow: hidden;
-        max-width: 800px;
-        margin: 0 auto;
+/* ===== FORM SECTIONS ===== */
+.form-section {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* ===== INFO TEXT ===== */
+.info-text {
+    color: var(--gray-600);
+    font-size: var(--text-sm);
+    margin-top: var(--space-1);
+    display: block;
+}
+
+/* ===== MODE INFO BOX ===== */
+.mode-info-box {
+    background: var(--gray-50);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-bottom: var(--space-6);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.mode-info-box i {
+    font-size: 2rem;
+    color: var(--primary);
+}
+
+.mode-info-box h6 {
+    margin: 0 0 var(--space-1) 0;
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.mode-info-box small {
+    color: var(--gray-600);
+    font-size: var(--text-sm);
+    margin: 0;
+}
+
+/* ===== DATE PREVIEW ===== */
+.date-preview {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-top: var(--space-3);
+}
+
+.date-preview h6 {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin: 0 0 var(--space-3) 0;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.date-preview.invalid {
+    background: #fee2e2;
+    border-color: var(--danger);
+}
+
+.date-preview.invalid h6 {
+    color: #991b1b;
+}
+
+.date-preview-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+.date-preview-content div {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.badge {
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: var(--text-xs);
+    display: inline-block;
+}
+
+.badge.primary {
+    background: var(--primary);
+    color: white;
+}
+
+.badge.danger {
+    background: var(--danger);
+    color: white;
+}
+
+/* ===== ALERT ===== */
+.alert {
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-bottom: var(--space-6);
+    border: 1px solid;
+    font-size: var(--text-sm);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+}
+
+.alert-info {
+    background: #dbeafe;
+    border-color: #0ea5e9;
+    color: #0284c7;
+}
+
+.alert i {
+    margin-top: 2px;
+}
+
+/* ===== BUTTONS ===== */
+.btn-group-actions {
+    display: flex;
+    gap: var(--space-3);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--gray-200);
+}
+
+.btn-secondary {
+    background: var(--gray-500);
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--gray-700);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .btn-group-actions {
+        flex-direction: column;
     }
 
-    .form-card-header {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-        color: white;
-        padding: var(--spacing-xl);
-    }
-
-    .form-card-header h5 {
-        margin: 0 0 var(--spacing-sm) 0;
-        font-size: var(--font-lg);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .form-card-header p {
-        margin: 0;
-        font-size: var(--font-sm);
-        opacity: 0.9;
-    }
-
-    .form-card-body {
-        padding: var(--spacing-2xl);
-    }
-
-    .form-section {
-        margin-bottom: var(--spacing-xl);
-    }
-
-    .form-label {
-        font-weight: 600;
-        font-size: var(--font-sm);
-        color: var(--gray-700);
-        margin-bottom: var(--spacing-sm);
-    }
-
-    .form-control, .form-select {
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius-sm);
-        padding: var(--spacing-sm) var(--spacing-md);
-        font-size: var(--font-sm);
-        transition: all var(--transition-base);
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        outline: none;
-    }
-
-    .text-danger {
-        color: var(--danger);
-    }
-
-    .text-muted {
-        color: var(--gray-500);
-        font-size: var(--font-sm);
+    .btn-group-actions .btn {
+        width: 100%;
     }
 
     .mode-info-box {
-        background: var(--gray-50);
-        padding: var(--spacing-lg);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--spacing-xl);
-        border-left: 4px solid var(--primary);
+        flex-direction: column;
+        text-align: center;
     }
 
-    .mode-info-box h6 {
-        font-size: var(--font-sm);
-        font-weight: 600;
-        margin: 0;
+    .date-preview-content {
+        flex-direction: column;
+        align-items: flex-start;
     }
-
-    .date-preview {
-        background: var(--info-light);
-        border: 1px solid var(--info);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-lg);
-        margin-top: var(--spacing-lg);
-    }
-
-    .date-preview h6 {
-        font-size: var(--font-sm);
-        font-weight: 600;
-        margin-bottom: var(--spacing-md);
-        color: #1e40af;
-    }
-
-    .date-preview.invalid {
-        background: var(--danger-light);
-        border-color: var(--danger);
-    }
-
-    .date-preview.invalid h6 {
-        color: #991b1b;
-    }
-
-    .badge {
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: var(--font-xs);
-        display: inline-block;
-    }
-
-    .badge.bg-primary {
-        background: var(--primary);
-        color: white;
-    }
-
-    .badge.bg-danger {
-        background: var(--danger);
-        color: white;
-    }
-
-    .btn-group-actions {
-        display: flex;
-        gap: var(--spacing-md);
-        padding-top: var(--spacing-xl);
-        border-top: 2px solid var(--gray-100);
-        margin-top: var(--spacing-xl);
-        justify-content: flex-end;
-    }
-
-    .btn {
-        padding: var(--spacing-sm) var(--spacing-xl);
-        border-radius: var(--radius-sm);
-        font-size: var(--font-sm);
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        transition: all var(--transition-base);
-        text-decoration: none;
-    }
-
-    .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-md);
-        text-decoration: none;
-    }
-
-    .btn-primary {
-        background: var(--primary);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--primary-dark);
-        color: white;
-    }
-
-    .btn-secondary {
-        background: var(--gray-600);
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background: var(--gray-700);
-        color: white;
-    }
-
-    .alert {
-        border-radius: var(--radius-md);
-        padding: var(--spacing-lg);
-        margin-bottom: var(--spacing-xl);
-        border: 1px solid;
-        font-size: var(--font-sm);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-    }
-
-    .alert-info {
-        background: var(--info-light);
-        border-color: var(--info);
-        color: #1e40af;
-    }
-
-    @media (max-width: 768px) {
-        .form-card-body {
-            padding: var(--spacing-xl);
-        }
-
-        .btn-group-actions {
-            flex-direction: column;
-        }
-
-        .btn-group-actions .btn {
-            width: 100%;
-            justify-content: center;
-        }
-    }
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="form-card">
-        <div class="form-card-header" id="formHeader">
-            <h5>
-                <i class="fas fa-calendar-plus"></i>
-                {% if periode %}Edit Periode{% else %}Tambah Periode Baru{% endif %}
-            </h5>
-            <p>Mode: {{ mode.nama }} ({{ mode.kode }})</p>
+<div class="card">
+    <div class="card-header">
+        <h5>
+            <i class="fas fa-calendar-plus"></i>
+            {{ judul }}
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <!-- MODE INFO BOX -->
+        <div class="mode-info-box" id="modeInfoBox">
+            <i class="fas fa-clock" id="modeIcon"></i>
+            <div>
+                <h6 id="modeName">{{ mode.nama }}</h6>
+                <small id="modeDeskripsi">{{ mode.deskripsi|default:"Mode jam kerja" }}</small>
+            </div>
         </div>
 
-        <div class="form-card-body">
-            <div class="mode-info-box" id="modeInfoBox">
-                <div class="d-flex align-items-center">
-                    <i class="{{ mode.icon|default:'fas fa-clock' }} fa-2x me-3" id="modeIcon"></i>
-                    <div>
-                        <h6>{{ mode.nama }}</h6>
-                        <small class="text-muted">{{ mode.deskripsi|default:"Mode jam kerja" }}</small>
+        <!-- INFO ALERT -->
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <div>
+                <strong>Petunjuk:</strong> Tentukan periode berlakunya jadwal mode jam kerja ini.
+            </div>
+        </div>
+
+        <form method="POST" id="periodeForm">
+            {% csrf_token %}
+
+            <!-- NAMA PERIODE SECTION -->
+            <div class="form-section">
+                <label for="id_nama" class="form-label">
+                    Nama Periode <span style="color: var(--danger);">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="id_nama" 
+                    name="nama"
+                    value="{% if form_data %}{{ form_data.nama }}{% elif periode %}{{ periode.nama }}{% endif %}"
+                    placeholder="Contoh: Ramadhan 2025, Libur Natal 2024"
+                    required
+                    maxlength="100"
+                >
+                <small class="info-text">
+                    Berikan nama yang jelas untuk periode ini
+                </small>
+            </div>
+
+            <!-- TANGGAL SECTION -->
+            <div class="form-section">
+                <div class="row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label for="id_tanggal_mulai" class="form-label">
+                            Tanggal Mulai <span style="color: var(--danger);">*</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            class="form-control" 
+                            id="id_tanggal_mulai" 
+                            name="tanggal_mulai"
+                            value="{% if form_data.tanggal_mulai %}{{ form_data.tanggal_mulai }}{% elif periode %}{{ periode.tanggal_mulai|date:'Y-m-d' }}{% endif %}"
+                            required
+                        >
+                        <small class="info-text">
+                            Kapan periode mulai berlaku
+                        </small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_tanggal_selesai" class="form-label">
+                            Tanggal Selesai <span style="color: var(--danger);">*</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            class="form-control" 
+                            id="id_tanggal_selesai" 
+                            name="tanggal_selesai"
+                            value="{% if form_data.tanggal_selesai %}{{ form_data.tanggal_selesai }}{% elif periode %}{{ periode.tanggal_selesai|date:'Y-m-d' }}{% endif %}"
+                            required
+                        >
+                        <small class="info-text">
+                            Kapan periode berakhir
+                        </small>
+                    </div>
+                </div>
+
+                <!-- DATE PREVIEW -->
+                <div class="date-preview" id="datePreview" style="display: none;">
+                    <h6>
+                        <i class="fas fa-calendar-check"></i> Preview Periode
+                    </h6>
+                    <div class="date-preview-content">
+                        <div>
+                            <strong id="previewStart">-</strong>
+                        </div>
+                        <div>
+                            <i class="fas fa-arrow-right" style="color: var(--gray-400);"></i>
+                        </div>
+                        <div>
+                            <strong id="previewEnd">-</strong>
+                        </div>
+                        <div>
+                            <span class="badge primary" id="previewDays">0 hari</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <form method="POST" id="periodeForm">
-                {% csrf_token %}
+            <!-- CATATAN SECTION -->
+            <div class="form-section">
+                <label for="id_catatan" class="form-label">
+                    Catatan
+                </label>
+                <textarea 
+                    class="form-control" 
+                    id="id_catatan" 
+                    name="catatan"
+                    rows="4"
+                    placeholder="Tambahkan catatan atau informasi tambahan tentang periode ini..."
+                >{% if form_data %}{{ form_data.catatan }}{% elif periode %}{{ periode.catatan }}{% endif %}</textarea>
+                <small class="info-text">
+                    Informasi tambahan yang perlu diketahui tentang periode ini (opsional)
+                </small>
+            </div>
 
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i>
-                    <div>
-                        <strong>Petunjuk:</strong> Tentukan periode berlakunya jadwal mode jam kerja ini.
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <label for="id_nama" class="form-label">
-                        Nama Periode <span class="text-danger">*</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        class="form-control" 
-                        id="id_nama" 
-                        name="nama"
-                        value="{% if form_data %}{{ form_data.nama }}{% elif periode %}{{ periode.nama }}{% endif %}"
-                        placeholder="Contoh: Ramadhan 2025, Libur Natal 2024"
-                        required
-                        maxlength="100"
-                    >
-                    <small class="text-muted d-block mt-1">
-                        Berikan nama yang jelas untuk periode ini
-                    </small>
-                </div>
-
-                <div class="form-section">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="id_tanggal_mulai" class="form-label">
-                                Tanggal Mulai <span class="text-danger">*</span>
-                            </label>
-                            <input 
-                                type="date" 
-                                class="form-control" 
-                                id="id_tanggal_mulai" 
-                                name="tanggal_mulai"
-                                value="{% if form_data.tanggal_mulai %}{{ form_data.tanggal_mulai }}{% elif periode %}{{ periode.tanggal_mulai|date:'Y-m-d' }}{% endif %}"
-                                required
-                            >
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_tanggal_selesai" class="form-label">
-                                Tanggal Selesai <span class="text-danger">*</span>
-                            </label>
-                            <input 
-                                type="date" 
-                                class="form-control" 
-                                id="id_tanggal_selesai" 
-                                name="tanggal_selesai"
-                                value="{% if form_data.tanggal_selesai %}{{ form_data.tanggal_selesai }}{% elif periode %}{{ periode.tanggal_selesai|date:'Y-m-d' }}{% endif %}"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <div class="date-preview" id="datePreview" style="display: none;">
-                        <h6>
-                            <i class="fas fa-calendar-check"></i> Preview Periode
-                        </h6>
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <div>
-                                <strong id="previewStart">-</strong>
-                            </div>
-                            <div>
-                                <i class="fas fa-arrow-right text-muted"></i>
-                            </div>
-                            <div>
-                                <strong id="previewEnd">-</strong>
-                            </div>
-                            <div>
-                                <span class="badge bg-primary" id="previewDays">0 hari</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <label for="id_catatan" class="form-label">
-                        Catatan (Opsional)
-                    </label>
-                    <textarea 
-                        class="form-control" 
-                        id="id_catatan" 
-                        name="catatan"
-                        rows="4"
-                        placeholder="Tambahkan catatan atau informasi tambahan tentang periode ini..."
-                    >{% if form_data %}{{ form_data.catatan }}{% elif periode %}{{ periode.catatan }}{% endif %}</textarea>
-                    <small class="text-muted d-block mt-1">
-                        <i class="fas fa-info-circle"></i>
-                        Informasi tambahan yang perlu diketahui tentang periode ini
-                    </small>
-                </div>
-
-                <div class="btn-group-actions">
-                    <a href="{% url 'detail_mode_jam_kerja' mode.id %}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Batal
-                    </a>
-                    <button type="submit" class="btn btn-primary" id="btnSubmit">
-                        <i class="fas fa-save"></i>
-                        {% if periode %}Simpan Perubahan{% else %}Tambah Periode{% endif %}
-                    </button>
-                </div>
-            </form>
-        </div>
+            <!-- ACTIONS -->
+            <div class="btn-group-actions">
+                <a href="{% url 'detail_mode_jam_kerja' mode.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <button type="submit" class="btn btn-primary" id="btnSubmit">
+                    <i class="fas fa-save"></i>
+                    {% if periode %}Simpan Perubahan{% else %}Tambah Periode{% endif %}
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
@@ -350,15 +322,11 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const formHeader = document.getElementById('formHeader');
+    const modeColor = '{{ mode.warna|default:"#3B82F6" }}';
     const modeInfoBox = document.getElementById('modeInfoBox');
     const modeIcon = document.getElementById('modeIcon');
-    const modeColor = '{{ mode.warna|default:"#3B82F6" }}';
     
-    if (formHeader && modeColor) {
-        formHeader.style.background = `linear-gradient(135deg, ${modeColor}cc 0%, ${modeColor} 100%)`;
-    }
-    
+    // Apply mode color
     if (modeInfoBox && modeColor) {
         modeInfoBox.style.borderLeftColor = modeColor;
     }
@@ -406,11 +374,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (new Date(startDate) > new Date(endDate)) {
                 datePreview.classList.add('invalid');
-                previewDays.className = 'badge bg-danger';
+                previewDays.className = 'badge danger';
                 previewDays.textContent = 'Tanggal tidak valid!';
             } else {
                 datePreview.classList.remove('invalid');
-                previewDays.className = 'badge bg-primary';
+                previewDays.className = 'badge primary';
             }
         } else {
             datePreview.style.display = 'none';

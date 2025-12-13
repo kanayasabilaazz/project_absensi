@@ -183,6 +183,7 @@ urlpatterns = [
     path('api/pegawai/get-modes/', views.api_get_applicable_modes, name='api_get_applicable_modes'),
     path('api/pegawai/get-mesin-by-pegawai/', views.api_get_mesin_by_pegawai, name='api_get_mesin_by_pegawai'),
     path('api/pegawai/<int:pegawai_id>/mode-assignments/', views.api_get_mode_assignments, name='api_get_mode_assignments'),
+    path('pegawai/api/get-mesin-by-pegawai/', views.api_get_mesin_by_pegawai, name='api_get_mesin_by_pegawai'),
 
     # ============================================================
     # API - ABSENSI

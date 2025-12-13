@@ -1,223 +1,117 @@
 {% extends 'absensi_app/base.html' %}
-{% load widget_tweaks %}
 
 {% block title %}Export Data Absensi{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* ===== FILTER CARD ===== */
-    .filter-card {
-        background: white;
-        border-radius: var(--radius-sm);
-        padding: var(--space-4);
-        box-shadow: var(--shadow);
-        margin-bottom: var(--space-4);
-        border: 1px solid var(--gray-200);
-    }
-
-    .filter-card h5 {
-        font-size: var(--text-base);
-        font-weight: 600;
-        margin-bottom: var(--space-3);
-        color: var(--gray-900);
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-    }
-
-    .filter-card h5 i {
-        color: var(--primary);
-        font-size: var(--text-sm);
-    }
-
-    /* ===== DASHBOARD CARD ===== */
-    .dashboard-card {
-        background: white;
-        border-radius: var(--radius-sm);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-        margin-bottom: var(--space-4);
-    }
-
-    .dashboard-card-header {
-        background: var(--gray-800);
+    /* HEADER SECTION */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
         color: white;
-        padding: var(--space-3) var(--space-4);
-        border: none;
+        padding: var(--space-5);
+        border-radius: var(--radius);
+        margin-bottom: var(--space-6);
+        box-shadow: var(--shadow-lg);
     }
 
-    .dashboard-card-header h4 {
-        font-size: var(--text-base);
-        font-weight: 600;
-        margin: 0 0 var(--space-1) 0;
+    .page-header h4 {
+        margin: 0 0 var(--space-2) 0;
+        font-size: var(--text-xl);
+        font-weight: 700;
         display: flex;
         align-items: center;
         gap: var(--space-2);
     }
 
-    .dashboard-card-header p {
-        font-size: var(--text-xs);
+    .page-header p {
         margin: 0;
-        opacity: 0.9;
-    }
-
-    .dashboard-card-body {
-        padding: var(--space-4);
-    }
-
-    /* ===== FORM ELEMENTS ===== */
-    .form-control, .form-select {
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius-sm);
-        padding: 0 var(--space-3);
         font-size: var(--text-sm);
-        transition: all 0.2s;
-        height: 36px;
+        opacity: 0.95;
     }
 
-    .form-control:focus, .form-select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px var(--primary-light);
-        outline: none;
-    }
-
-    .form-label {
-        font-weight: 600;
-        font-size: var(--text-sm);
-        margin-bottom: var(--space-2);
-        color: var(--gray-700);
-        display: flex;
-        align-items: center;
-        gap: var(--space-1);
-    }
-
-    .form-label i {
-        color: var(--primary);
-        font-size: var(--text-xs);
-    }
-
-    small.text-muted {
-        font-size: var(--text-xs);
-        display: block;
-        margin-top: var(--space-1);
-        color: var(--gray-500);
-    }
-
-    /* ===== PERIODE SECTION ===== */
-    .periode-section {
+    /* FILTER SECTION */
+    .filter-section {
         background: var(--gray-50);
         border-radius: var(--radius-sm);
-        padding: var(--space-3);
-        margin-bottom: var(--space-3);
+        padding: var(--space-4);
+        margin-bottom: var(--space-4);
         border: 1px solid var(--gray-200);
     }
 
-    .btn-group {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    .section-title {
+        font-size: var(--text-base);
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: var(--space-3);
+        display: flex;
+        align-items: center;
         gap: var(--space-2);
-        width: 100%;
     }
 
-    .btn-group .btn-check {
+    .section-title i {
+        color: var(--primary);
+    }
+
+    /* PERIODE BUTTONS */
+    .periode-group {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: var(--space-2);
+        margin-bottom: var(--space-3);
+    }
+
+    .periode-btn {
+        position: relative;
+    }
+
+    .periode-btn input[type="radio"] {
         position: absolute;
         opacity: 0;
         pointer-events: none;
     }
 
-    .btn-group .btn-check + label {
-        padding: var(--space-2) var(--space-3);
+    .periode-btn label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-1);
+        height: 36px;
+        padding: 0 var(--space-3);
         font-size: var(--text-xs);
         font-weight: 600;
         border: 2px solid var(--gray-300);
         border-radius: var(--radius-sm);
         background: white;
         color: var(--gray-700);
+        cursor: pointer;
         transition: all 0.2s;
         text-align: center;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        height: 32px;
     }
 
-    .btn-group .btn-check:checked + label {
+    .periode-btn input:checked + label {
         background: var(--primary);
         color: white;
         border-color: var(--primary);
-        box-shadow: var(--shadow);
         transform: translateY(-1px);
+        box-shadow: var(--shadow);
     }
 
-    .btn-group .btn-check + label:hover {
+    .periode-btn label:hover {
         border-color: var(--primary);
         color: var(--primary);
-        transform: translateY(-1px);
     }
 
-    /* ===== BUTTONS ===== */
-    .btn {
-        padding: 0 var(--space-4);
-        height: 36px;
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: var(--text-sm);
-        transition: all 0.2s;
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-2);
-    }
-
-    .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--shadow);
-    }
-
-    .btn-info {
-        background: #0ea5e9;
+    .periode-btn input:checked + label:hover {
         color: white;
     }
 
-    .btn-info:hover {
-        background: #0284c7;
-    }
-
-    .btn-export {
-        width: 100%;
-        height: 40px;
-    }
-
-    .btn-export-csv {
-        background: var(--primary);
-        color: white;
-    }
-
-    .btn-export-csv:hover {
-        background: var(--primary-hover);
-    }
-
-    /* ===== CONTROL SECTION ===== */
-    .control-section {
-        background: var(--gray-50);
-        border-radius: var(--radius-sm);
-        padding: var(--space-3);
-        margin-bottom: var(--space-3);
-        border: 1px solid var(--gray-200);
-    }
-
-    /* ===== PREVIEW BOX ===== */
-    .preview-box {
+    /* PREVIEW SECTION */
+    .preview-section {
         display: none;
-        margin-top: var(--space-3);
+        margin-top: var(--space-4);
     }
 
-    .preview-box h6 {
+    .preview-title {
         font-size: var(--text-base);
         font-weight: 600;
         color: var(--gray-900);
@@ -227,149 +121,168 @@
         gap: var(--space-2);
     }
 
-    .preview-box h6 i {
+    .preview-title i {
         color: var(--primary);
-        font-size: var(--text-sm);
     }
 
-    /* ===== TABLE ===== */
-    .table-wrapper {
-        border: 1px solid var(--gray-200);
+    .info-box {
+        background: var(--success-light);
+        border-left: 4px solid var(--success);
+        padding: var(--space-3);
         border-radius: var(--radius-sm);
-        overflow: hidden;
-        box-shadow: var(--shadow);
-        max-height: 400px;
-        overflow-y: auto;
         margin-bottom: var(--space-3);
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
     }
 
-    .table {
-        margin-bottom: 0;
-        font-size: var(--text-sm);
-        width: 100%;
+    .info-box i {
+        color: var(--success);
+        font-size: var(--text-lg);
     }
 
-    .table thead th {
-        background: var(--gray-800);
-        color: white;
-        font-weight: 600;
-        padding: var(--space-2) var(--space-3);
-        font-size: var(--text-xs);
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        border: none;
-        white-space: nowrap;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-
-    .table tbody td {
-        padding: var(--space-2) var(--space-3);
-        vertical-align: middle;
-        border-bottom: 1px solid var(--gray-200);
+    .info-box-content strong {
+        display: block;
+        color: #065f46;
         font-size: var(--text-sm);
     }
 
-    .table tbody tr:hover {
-        background: var(--gray-50);
+    .info-box-content small {
+        color: #065f46;
+        font-size: var(--text-xs);
     }
 
-    /* ===== BADGES ===== */
-    .badge {
-        font-size: var(--text-xs);
-        padding: 2px var(--space-2);
+    .warning-box {
+        background: var(--warning-light);
+        border-left: 4px solid var(--warning);
+        padding: var(--space-3);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--space-3);
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+    }
+
+    .warning-box i {
+        color: var(--warning);
+        font-size: var(--text-lg);
+    }
+
+    .warning-box-content {
+        color: #92400e;
+        font-size: var(--text-sm);
+    }
+
+    /* EXPORT BUTTONS */
+    .export-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-3);
+        margin-top: var(--space-4);
+    }
+
+    .export-btn {
+        height: 48px;
+        padding: 0 var(--space-4);
+        font-size: var(--text-sm);
         font-weight: 600;
         border-radius: var(--radius-sm);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        color: white;
+        transition: all 0.2s;
     }
 
-    .badge-userid {
+    .export-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .export-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .export-btn-csv {
+        background: var(--primary);
+    }
+
+    .export-btn-csv:hover {
+        background: var(--primary-hover);
+    }
+
+    .export-btn-stats {
+        background: var(--success);
+    }
+
+    .export-btn-stats:hover {
+        background: #059669;
+    }
+
+    .export-btn-print {
+        background: #8b5cf6;
+    }
+
+    .export-btn-print:hover {
+        background: #7c3aed;
+    }
+
+    .btn-hint {
+        display: block;
+        margin-top: var(--space-1);
+        font-size: var(--text-xs);
+        color: var(--gray-500);
+        text-align: center;
+    }
+
+    /* BADGE */
+    .status-badge {
+        padding: 2px var(--space-2);
+        border-radius: var(--radius-sm);
+        font-size: var(--text-xs);
+        font-weight: 600;
+    }
+
+    .badge-success {
+        background: var(--success-light);
+        color: #065f46;
+    }
+
+    .badge-info {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .badge-warning {
+        background: var(--warning-light);
+        color: #92400e;
+    }
+
+    .badge-danger {
+        background: var(--danger-light);
+        color: #991b1b;
+    }
+
+    .userid-badge {
         background: var(--primary);
         color: white;
         padding: 2px var(--space-2);
         border-radius: var(--radius-sm);
         font-weight: 700;
         font-size: var(--text-xs);
-        display: inline-block;
     }
 
-    .badge.bg-success {
-        background: var(--success);
-        color: white;
-    }
-
-    .badge.bg-info {
-        background: #0ea5e9;
-        color: white;
-    }
-
-    .badge.bg-warning {
-        background: var(--warning);
-        color: white;
-    }
-
-    .badge.bg-danger {
-        background: var(--danger);
-        color: white;
-    }
-
-    /* ===== ALERTS ===== */
-    .alert {
-        padding: var(--space-3);
-        border-radius: var(--radius-sm);
-        margin-bottom: var(--space-3);
-        display: flex;
-        align-items: flex-start;
-        gap: var(--space-2);
-        font-size: var(--text-sm);
-        border: none;
-    }
-
-    .alert i {
-        font-size: var(--text-base);
-        flex-shrink: 0;
-        margin-top: 2px;
-    }
-
-    .alert-success {
-        background: var(--success-light);
-        color: #065f46;
-        border-left: 4px solid var(--success);
-    }
-
-    .alert-info {
-        background: #dbeafe;
-        color: #1e40af;
-        border-left: 4px solid var(--primary);
-    }
-
-    .alert-warning {
-        background: var(--warning-light);
-        color: #92400e;
-        border-left: 4px solid var(--warning);
-    }
-
-    /* ===== RESPONSIVE ===== */
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-        .filter-card,
-        .dashboard-card-header,
-        .dashboard-card-body {
-            padding: var(--space-3);
+        .periode-group {
+            grid-template-columns: repeat(2, 1fr);
         }
 
-        .btn-group {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .table thead th,
-        .table tbody td {
-            padding: var(--space-2);
-            font-size: var(--text-xs);
-        }
-    }
-
-    @media (max-width: 576px) {
-        .btn-group {
+        .export-grid {
             grid-template-columns: 1fr;
         }
     }
@@ -377,179 +290,168 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    
-    <div class="dashboard-card">
-        <div class="dashboard-card-header">
-            <h4>
-                <i class="fas fa-download"></i>
-                Export Data Absensi
-            </h4>
-            <p>Pilih filter dan format export yang diinginkan</p>
-        </div>
-    </div>
+<!-- HEADER -->
+<div class="page-header">
+    <h4><i class="fas fa-download"></i> Export Data Absensi</h4>
+    <p>Pilih filter dan format export yang diinginkan</p>
+</div>
 
-    <form method="get" id="exportForm">
-        
-        <div class="filter-card">
-            <h5>
-                <i class="fas fa-user-friends"></i>
-                Filter Pegawai
-            </h5>
+<form method="get" id="exportForm">
+    <!-- FILTER PEGAWAI -->
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-user-friends"></i> Filter Pegawai</h5>
+        </div>
+        <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">
-                        <i class="fas fa-user"></i>
-                        Pilih Pegawai 
-                    </label>
+                    <label class="form-label">Pilih Pegawai</label>
                     <select name="pegawai_id" class="form-select" id="pegawai_select">
                         <option value="">-- Semua Pegawai --</option>
                         {% for pegawai in pegawai_list %}
                         <option value="{{ pegawai.id }}">{{ pegawai.userid }} - {{ pegawai.nama_lengkap }}</option>
                         {% endfor %}
                     </select>
-                    <small class="text-muted">Kosongkan untuk export semua pegawai</small>
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">
-                        <i class="fas fa-building"></i>
-                        Pilih Departemen 
-                    </label>
+                    <label class="form-label">Pilih Departemen</label>
                     <select name="departemen" class="form-select" id="departemen_select">
                         <option value="">-- Semua Departemen --</option>
                         {% for dept in departemen_list %}
                         <option value="{{ dept.nama }}">{{ dept.nama }}</option>
                         {% endfor %}
                     </select>
-                    <small class="text-muted">Kosongkan untuk export semua departemen</small>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="filter-card">
-            <h5>
-                <i class="fas fa-calendar-alt"></i>
-                Filter Periode Waktu
-            </h5>
-            
-            <div class="periode-section">
-                <label class="form-label">Pilih Periode:</label>
-                <div class="btn-group" role="group">
-                    <input type="radio" class="btn-check" name="periode" id="periode_hari" value="hari_ini" autocomplete="off">
-                    <label class="btn" for="periode_hari">
-                        <i class="fas fa-calendar-day"></i>
-                        Hari Ini
-                    </label>
-
-                    <input type="radio" class="btn-check" name="periode" id="periode_minggu" value="minggu_ini" autocomplete="off">
-                    <label class="btn" for="periode_minggu">
-                        <i class="fas fa-calendar-week"></i>
-                        Minggu Ini
-                    </label>
-
-                    <input type="radio" class="btn-check" name="periode" id="periode_bulan" value="bulan_ini" autocomplete="off">
-                    <label class="btn" for="periode_bulan">
-                        <i class="fas fa-calendar"></i>
-                        Bulan Ini
-                    </label>
-
-                    <input type="radio" class="btn-check" name="periode" id="periode_tahun" value="tahun_ini" autocomplete="off">
-                    <label class="btn" for="periode_tahun">
-                        <i class="fas fa-calendar-alt"></i>
-                        Tahun Ini
-                    </label>
-
-                    <input type="radio" class="btn-check" name="periode" id="periode_custom" value="custom" autocomplete="off" checked>
-                    <label class="btn" for="periode_custom">
-                        <i class="fas fa-calendar-check"></i>
-                        Custom
-                    </label>
+    <!-- FILTER PERIODE -->
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-calendar-alt"></i> Filter Periode</h5>
+        </div>
+        <div class="card-body">
+            <div class="filter-section">
+                <div class="section-title">
+                    <i class="fas fa-calendar-check"></i>
+                    Pilih Periode
+                </div>
+                <div class="periode-group">
+                    <div class="periode-btn">
+                        <input type="radio" name="periode" id="periode_hari" value="hari_ini">
+                        <label for="periode_hari">
+                            <i class="fas fa-calendar-day"></i>
+                            Hari Ini
+                        </label>
+                    </div>
+                    <div class="periode-btn">
+                        <input type="radio" name="periode" id="periode_minggu" value="minggu_ini">
+                        <label for="periode_minggu">
+                            <i class="fas fa-calendar-week"></i>
+                            Minggu Ini
+                        </label>
+                    </div>
+                    <div class="periode-btn">
+                        <input type="radio" name="periode" id="periode_bulan" value="bulan_ini">
+                        <label for="periode_bulan">
+                            <i class="fas fa-calendar"></i>
+                            Bulan Ini
+                        </label>
+                    </div>
+                    <div class="periode-btn">
+                        <input type="radio" name="periode" id="periode_tahun" value="tahun_ini">
+                        <label for="periode_tahun">
+                            <i class="fas fa-calendar-alt"></i>
+                            Tahun Ini
+                        </label>
+                    </div>
+                    <div class="periode-btn">
+                        <input type="radio" name="periode" id="periode_custom" value="custom" checked>
+                        <label for="periode_custom">
+                            <i class="fas fa-calendar-check"></i>
+                            Custom
+                        </label>
+                    </div>
                 </div>
             </div>
 
             <div class="row g-3" id="custom_date_range">
                 <div class="col-md-6">
-                    <label class="form-label">
-                        <i class="fas fa-calendar"></i>
-                        Tanggal Mulai
-                    </label>
+                    <label class="form-label">Tanggal Mulai</label>
                     <input type="date" name="tanggal_mulai" class="form-control" id="tanggal_mulai">
                 </div>
-
                 <div class="col-md-6">
-                    <label class="form-label">
-                        <i class="fas fa-calendar"></i>
-                        Tanggal Akhir
-                    </label>
+                    <label class="form-label">Tanggal Akhir</label>
                     <input type="date" name="tanggal_akhir" class="form-control" id="tanggal_akhir">
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="dashboard-card">
-            <div class="dashboard-card-header">
-                <h4>
-                    <i class="fas fa-eye"></i>
-                    Preview & Export Data
-                </h4>
-                <p>Lihat preview data sebelum melakukan export</p>
+    <!-- PREVIEW & EXPORT -->
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-eye"></i> Preview & Export</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end mb-3">
+                <div class="col-md-8">
+                    <label class="form-label">Jumlah Data Preview</label>
+                    <select class="form-select" id="previewLimit">
+                        <option value="10">10 Data</option>
+                        <option value="25">25 Data</option>
+                        <option value="50" selected>50 Data</option>
+                        <option value="100">100 Data</option>
+                        <option value="all">Semua Data</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary w-100" id="btnPreview">
+                        <i class="fas fa-eye"></i> Preview Data
+                    </button>
+                </div>
             </div>
 
-            <div class="dashboard-card-body">
-
-                <div class="control-section">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-8">
-                            <label class="form-label">
-                                <i class="fas fa-list-ol"></i>
-                                Jumlah Data Preview
-                            </label>
-                            <select class="form-select" id="previewLimit">
-                                <option value="10">10 Data</option>
-                                <option value="25">25 Data</option>
-                                <option value="50" selected>50 Data</option>
-                                <option value="100">100 Data</option>
-                                <option value="200">200 Data</option>
-                                <option value="all">Semua Data</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <button type="button" class="btn btn-info w-100" id="btnPreview">
-                                <i class="fas fa-eye"></i>Preview Data
-                            </button>
-                        </div>
-                    </div>
+            <div class="preview-section" id="previewBox">
+                <div class="preview-title" id="previewTitle">
+                    <i class="fas fa-table"></i> Preview Data
                 </div>
+                <div id="previewContent"></div>
+            </div>
 
-                <div class="preview-box" id="previewBox">
-                    <h6 id="previewTitle">
-                        <i class="fas fa-table"></i>
-                        Preview Data:
-                    </h6>
-                    <div id="previewContent"></div>
+            <div class="export-grid">
+                <div>
+                    <button type="button" class="export-btn export-btn-csv" id="btnExportCSV">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </button>
                 </div>
-
-                <div class="row g-3 mt-2">
-                    <div class="col-md-12">
-                        <button type="button" class="btn btn-export btn-export-csv" id="btnExportCSV">
-                            <i class="fas fa-file-csv"></i>Export ke CSV (.csv)
-                        </button>
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle"></i>Format universal untuk semua aplikasi
-                        </small>
-                    </div>
+                <div>
+                    <button type="button" class="export-btn export-btn-stats" id="btnExportStats">
+                        <i class="fas fa-file-excel"></i> Export Statistik
+                    </button>
+                </div>
+                <div>
+                    <button type="button" class="export-btn export-btn-print" id="btnPrint">
+                        <i class="fas fa-print"></i> Print PDF
+                    </button>
                 </div>
             </div>
         </div>
-    </form>
-</div>
+    </div>
+</form>
+
+<div id="printArea"></div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
 <script>
 $(document).ready(function() {
-    
+    // PERIODE TOGGLE
     $('input[name="periode"]').change(function() {
         if ($(this).val() === 'custom') {
             $('#custom_date_range').slideDown();
@@ -559,6 +461,7 @@ $(document).ready(function() {
         }
     });
 
+    // PEGAWAI/DEPARTEMEN TOGGLE
     $('#pegawai_select').change(function() {
         if ($(this).val()) {
             $('#departemen_select').prop('disabled', true).val('');
@@ -575,6 +478,7 @@ $(document).ready(function() {
         }
     });
     
+    // PREVIEW DATA
     $('#btnPreview').click(function() {
         const formData = $('#exportForm').serialize();
         const previewLimit = $('#previewLimit').val();
@@ -584,24 +488,24 @@ $(document).ready(function() {
             method: 'GET',
             data: formData + '&limit=' + previewLimit,
             beforeSend: function() {
-                $('#btnPreview').html('<i class="fas fa-spinner fa-spin"></i>Loading...').prop('disabled', true);
+                $('#btnPreview').html('<i class="fas fa-spinner fa-spin"></i> Loading...').prop('disabled', true);
                 $('#previewBox').slideUp();
             },
             success: function(response) {
                 if (response.status === 'success') {
                     let limitText = previewLimit === 'all' ? 'Semua' : previewLimit;
-                    $('#previewTitle').html('<i class="fas fa-table"></i>Preview Data (' + limitText + ' dari ' + response.total + ' total):');
+                    $('#previewTitle').html('<i class="fas fa-table"></i> Preview Data (' + limitText + ' dari ' + response.total + ' total)');
                     
-                    let html = '<div class="alert alert-success">';
+                    let html = '<div class="info-box">';
                     html += '<i class="fas fa-check-circle"></i>';
-                    html += '<div>';
-                    html += '<strong>Total Data: ' + response.total + ' record</strong><br>';
-                    html += 'Ditampilkan: ' + response.preview.length + ' record';
+                    html += '<div class="info-box-content">';
+                    html += '<strong>Total Data: ' + response.total + ' record</strong>';
+                    html += '<small>Ditampilkan: ' + response.preview.length + ' record</small>';
                     html += '</div></div>';
                     
                     if (response.preview.length > 0) {
-                        html += '<div class="table-wrapper">';
-                        html += '<table class="table table-hover">';
+                        html += '<div class="table-responsive">';
+                        html += '<table class="table">';
                         html += '<thead><tr>';
                         html += '<th class="text-center">No</th>';
                         html += '<th>User ID</th>';
@@ -615,26 +519,20 @@ $(document).ready(function() {
                         response.preview.forEach(function(item, index) {
                             html += '<tr>';
                             html += '<td class="text-center">' + (index + 1) + '</td>';
-                            html += '<td><span class="badge-userid">' + item.userid + '</span></td>';
+                            html += '<td><span class="userid-badge">' + item.userid + '</span></td>';
                             html += '<td><strong>' + item.nama + '</strong></td>';
                             html += '<td>' + item.departemen + '</td>';
                             html += '<td>' + item.tanggal + '</td>';
                             html += '<td>' + item.shift + '</td>';
                             
                             let statusClass = 'secondary';
-                            
-                            if (item.status === 'Hadir') {
-                                statusClass = 'success';
-                            } else if (item.status === 'Sakit') {
-                                statusClass = 'info';
-                            } else if (item.status === 'Izin') {
-                                statusClass = 'warning';
-                            } else if (item.status === 'Absen') {
-                                statusClass = 'danger';
-                            }
+                            if (item.status === 'Hadir') statusClass = 'success';
+                            else if (item.status === 'Sakit') statusClass = 'info';
+                            else if (item.status === 'Izin') statusClass = 'warning';
+                            else if (item.status === 'Absen') statusClass = 'danger';
                             
                             html += '<td class="text-center">';
-                            html += '<span class="badge bg-' + statusClass + '">' + item.status + '</span>';
+                            html += '<span class="status-badge badge-' + statusClass + '">' + item.status + '</span>';
                             html += '</td></tr>';
                         });
                         
@@ -642,15 +540,15 @@ $(document).ready(function() {
                         
                         if (response.total > response.preview.length) {
                             let sisaData = response.total - response.preview.length;
-                            html += '<div class="alert alert-info">';
+                            html += '<div class="warning-box">';
                             html += '<i class="fas fa-info-circle"></i>';
-                            html += '<div><strong>Info:</strong> Masih ada <strong>' + sisaData + ' data lagi</strong> yang tidak ditampilkan.</div>';
+                            html += '<div class="warning-box-content"><strong>Info:</strong> Masih ada <strong>' + sisaData + ' data lagi</strong> yang tidak ditampilkan.</div>';
                             html += '</div>';
                         }
                     } else {
-                        html += '<div class="alert alert-warning">';
+                        html += '<div class="warning-box">';
                         html += '<i class="fas fa-exclamation-triangle"></i>';
-                        html += '<div><strong>Tidak ada data</strong> yang sesuai dengan filter.</div>';
+                        html += '<div class="warning-box-content"><strong>Tidak ada data</strong> yang sesuai dengan filter.</div>';
                         html += '</div>';
                     }
                     
@@ -660,19 +558,223 @@ $(document).ready(function() {
                     alert('Error: ' + response.msg);
                 }
             },
-            error: function(xhr) {
+            error: function() {
                 alert('Gagal mengambil preview data');
             },
             complete: function() {
-                $('#btnPreview').html('<i class="fas fa-eye"></i>Preview Data').prop('disabled', false);
+                $('#btnPreview').html('<i class="fas fa-eye"></i> Preview Data').prop('disabled', false);
             }
         });
     });
 
+    // EXPORT FUNCTIONS
     $('#btnExportCSV').click(function() {
         const formData = $('#exportForm').serialize();
         window.location.href = '{% url "export_absensi_csv_advanced" %}?' + formData;
     });
+
+    $('#btnExportStats').click(function() {
+        const formData = $('#exportForm').serialize();
+        window.location.href = '{% url "export_statistik_absensi" %}?' + formData;
+    });
+
+    $('#btnPrint').click(function() {
+        const formData = $('#exportForm').serialize();
+        const periode = $('input[name="periode"]:checked').val();
+        const tanggalMulai = $('#tanggal_mulai').val();
+        const tanggalAkhir = $('#tanggal_akhir').val();
+        
+        if (periode === 'custom' && (!tanggalMulai || !tanggalAkhir)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian',
+                text: 'Pilih tanggal mulai dan akhir terlebih dahulu!'
+            });
+            return;
+        }
+        
+        $.ajax({
+            url: '{% url "preview_export_data" %}',
+            method: 'GET',
+            data: formData + '&limit=all',
+            beforeSend: function() {
+                $('#btnPrint').html('<i class="fas fa-spinner fa-spin"></i> Membuat PDF...').prop('disabled', true);
+            },
+            success: function(response) {
+                if (response.status === 'success' && response.preview.length > 0) {
+                    generatePDF(response);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Tidak ada data untuk di-print!'
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Gagal mengambil data untuk print!'
+                });
+            },
+            complete: function() {
+                $('#btnPrint').html('<i class="fas fa-print"></i> Print PDF').prop('disabled', false);
+            }
+        });
+    });
+
+    function generatePDF(response) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+        const periode = $('input[name="periode"]:checked').next('label').text().trim();
+        const tanggalMulai = $('#tanggal_mulai').val();
+        const tanggalAkhir = $('#tanggal_akhir').val();
+        
+        let filterInfo = '';
+        if (tanggalMulai && tanggalAkhir) {
+            filterInfo = `${formatDate(tanggalMulai)} - ${formatDate(tanggalAkhir)}`;
+        } else {
+            filterInfo = periode;
+        }
+
+        let statusCount = { hadir: 0, sakit: 0, izin: 0, absen: 0 };
+        response.preview.forEach(function(item) {
+            const status = item.status.toLowerCase();
+            if (statusCount.hasOwnProperty(status)) statusCount[status]++;
+        });
+
+        const addHeader = function(data) {
+            const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
+            
+            doc.setDrawColor(31, 41, 55);
+            doc.setLineWidth(0.8);
+            doc.line(15, 10, 282, 10);
+            doc.setLineWidth(0.3);
+            doc.line(15, 11.5, 282, 11.5);
+            
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(31, 41, 55);
+            doc.text('SISTEM ABSENSI PEGAWAI', 148.5, 19, { align: 'center' });
+            
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(75, 85, 99);
+            doc.text('PT. Asia Tritunggal Jaya', 148.5, 24, { align: 'center' });
+            
+            doc.setFontSize(13);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(31, 41, 55);
+            doc.text('LAPORAN DATA KEHADIRAN PEGAWAI', 148.5, 31, { align: 'center' });
+            
+            doc.setDrawColor(31, 41, 55);
+            doc.setLineWidth(0.3);
+            doc.line(15, 34, 282, 34);
+            doc.setLineWidth(0.8);
+            doc.line(15, 35.5, 282, 35.5);
+            
+            if (pageNumber === 1) {
+                doc.setFillColor(249, 250, 251);
+                doc.setDrawColor(209, 213, 219);
+                doc.rect(15, 39, 267, 10, 'FD');
+                
+                doc.setFontSize(8.5);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(31, 41, 55);
+                doc.text('Periode:', 18, 44);
+                doc.setFont(undefined, 'normal');
+                doc.text(filterInfo, 38, 44);
+                
+                doc.setFont(undefined, 'bold');
+                doc.text('Total Data:', 200, 44);
+                doc.setFont(undefined, 'normal');
+                doc.text(`${response.total} record`, 225, 44);
+            }
+        };
+
+        const addFooter = function(data) {
+            const pageCount = doc.internal.getNumberOfPages();
+            const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
+            
+            doc.setDrawColor(209, 213, 219);
+            doc.setLineWidth(0.3);
+            doc.line(15, 195, 282, 195);
+            
+            doc.setFontSize(7);
+            doc.setTextColor(107, 114, 128);
+            doc.text('Sistem Absensi - Laporan dicetak otomatis', 15, 199);
+            
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(31, 41, 55);
+            doc.text(`Hal ${pageNumber}/${pageCount}`, 149, 199, { align: 'center' });
+        };
+
+        const tableData = response.preview.map((item, index) => [
+            index + 1,
+            item.userid,
+            item.nama,
+            item.departemen,
+            item.tanggal,
+            item.shift.split(' - ')[0] || '-',
+            item.shift.split(' - ')[1] || '-',
+            item.status
+        ]);
+
+        doc.autoTable({
+            head: [['NO', 'USER ID', 'NAMA', 'DEPT', 'TANGGAL', 'MASUK', 'PULANG', 'STATUS']],
+            body: tableData,
+            startY: 52,
+            theme: 'grid',
+            styles: {
+                fontSize: 8,
+                cellPadding: 2.5,
+                lineColor: [209, 213, 219],
+                lineWidth: 0.15,
+                textColor: [55, 65, 81]
+            },
+            headStyles: {
+                fillColor: [31, 41, 55],
+                textColor: [255, 255, 255],
+                fontSize: 8,
+                fontStyle: 'bold',
+                halign: 'center'
+            },
+            alternateRowStyles: {
+                fillColor: [249, 250, 251]
+            },
+            columnStyles: {
+                0: { halign: 'center', cellWidth: 11 },
+                1: { cellWidth: 23, fontStyle: 'bold' },
+                2: { cellWidth: 60, fontStyle: 'bold' },
+                3: { cellWidth: 20, halign: 'center' },
+                4: { cellWidth: 25, halign: 'center' },
+                5: { halign: 'center', cellWidth: 22 },
+                6: { halign: 'center', cellWidth: 22 },
+                7: { halign: 'center', cellWidth: 25, fontStyle: 'bold' }
+            },
+            margin: { top: 52, left: 15, right: 15, bottom: 38 },
+            didDrawPage: function(data) {
+                addHeader(data);
+                addFooter(data);
+            }
+        });
+
+        doc.autoPrint();
+        window.open(doc.output('bloburl'), '_blank');
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+        const parts = dateString.split('-');
+        if (parts.length === 3) {
+            return `${parts[2]} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
+        }
+        return dateString;
+    }
 });
 </script>
 {% endblock %}

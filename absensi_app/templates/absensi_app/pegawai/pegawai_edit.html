@@ -1,319 +1,191 @@
 {% extends 'absensi_app/base.html' %}
-{% load widget_tweaks %}
-{% load static %}
-
-{% block title %}Edit Pegawai - {{ pegawai.nama_lengkap }}{% endblock %}
+{% block title %}Edit Pegawai{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* ==================== FORM CARD ==================== */
-    .form-card {
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e5e7eb;
-        overflow: hidden;
-        margin-bottom: 2rem;
-    }
-
-    .form-card-header {
-        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-        color: white;
-        padding: 0.875rem 1.5rem;
-    }
-
-    .form-card-header h5 {
-        margin: 0;
-        font-size: 1.125rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .form-card-body {
-        padding: 1.25rem;
-    }
-
-    /* ==================== FORM SECTIONS ==================== */
+    /* === FORM SECTIONS === */
     .form-section {
-        margin-bottom: 1.25rem;
+        margin-bottom: var(--space-6);
+        padding-bottom: var(--space-6);
+        border-bottom: 1px solid var(--gray-200);
     }
 
-    .form-section:not(:last-child) {
-        padding-bottom: 1.25rem;
-        border-bottom: 2px solid #f3f4f6;
+    .form-section:last-child {
+        border-bottom: none;
     }
 
     .section-title {
-        font-size: 0.875rem;
+        font-size: var(--text-base);
         font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 0.875rem;
+        color: var(--gray-900);
+        margin-bottom: var(--space-4);
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: var(--space-2);
     }
 
     .section-title i {
-        color: #2563eb;
+        color: var(--primary);
     }
 
-    /* ==================== FORM CONTROLS ==================== */
-    .form-label {
-        font-weight: 600;
-        font-size: 0.75rem;
-        margin-bottom: 0.25rem;
-        color: #475569;
-        display: block;
-    }
-
-    .form-label .text-danger {
-        color: #dc2626;
-        margin-left: 0.25rem;
-    }
-
-    .form-label .text-muted {
-        color: #64748b;
-        font-weight: 500;
-    }
-
-    .form-control,
-    .form-select {
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        padding: 0.3rem 0.65rem;
-        font-size: 0.75rem;
-        transition: all 0.2s;
-        font-family: 'Inter', system-ui, sans-serif;
-        width: 100%;
-        background: white;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        outline: none;
-    }
-
-    .form-control:disabled {
-        background: #f9fafb;
-        cursor: not-allowed;
-    }
-
-    textarea.form-control {
-        resize: vertical;
-        min-height: 80px;
-    }
-
-    /* ==================== FORM ROW ==================== */
-    .form-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1.25rem;
-        margin-bottom: 1.25rem;
-    }
-
-    .form-group {
+    /* === MODE LIST === */
+    .mode-list {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    /* ==================== MODE CARDS ==================== */
-    .mode-list-container {
-        display: flex;
-        flex-direction: column;
-        gap: 0.8rem;
+        gap: var(--space-3);
     }
 
     .mode-card {
         background: white;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-sm);
         overflow: hidden;
         transition: all 0.2s;
     }
 
     .mode-card.completed {
-        border-color: #10b981;
-        background: rgba(16, 185, 129, 0.02);
+        border-color: var(--success);
     }
 
     .mode-card.active {
-        border-color: #2563eb;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        border-color: var(--primary);
+        box-shadow: var(--shadow);
     }
 
     .mode-header {
-        padding: 1rem 1.25rem;
+        padding: var(--space-4);
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        background: #f9fafb;
+        background: var(--gray-50);
         transition: all 0.2s;
     }
 
     .mode-header:hover {
-        background: #f3f4f6;
+        background: var(--gray-100);
     }
 
     .mode-header-left {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        flex: 1;
-    }
-
-    .mode-icon-wrapper {
-        width: 36px;
-        height: 36px;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
+        gap: var(--space-3);
     }
 
     .mode-name {
-        font-size: 0.875rem;
+        font-size: var(--text-sm);
         font-weight: 600;
-        color: #374151;
-        margin: 0;
+        color: var(--gray-900);
     }
 
     .mode-badge {
         display: inline-flex;
         align-items: center;
-        gap: 3px;
-        padding: 0.25rem 0.6rem;
+        gap: var(--space-1);
+        padding: var(--space-1) var(--space-2);
         border-radius: 12px;
-        font-size: 0.7rem;
+        font-size: var(--text-xs);
         font-weight: 600;
     }
 
     .mode-badge.completed {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10b981;
-        border: 1px solid rgba(16, 185, 129, 0.3);
+        background: var(--success-light);
+        color: #065f46;
     }
 
     .mode-badge.pending {
-        background: rgba(245, 158, 11, 0.1);
-        color: #f59e0b;
-        border: 1px solid rgba(245, 158, 11, 0.3);
+        background: var(--warning-light);
+        color: #92400e;
     }
 
     .mode-chevron {
         width: 24px;
         height: 24px;
         border-radius: 50%;
-        background: #d1d5db;
+        background: var(--gray-300);
         display: flex;
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
-        font-size: 0.65rem;
+        font-size: var(--text-xs);
     }
 
     .mode-card.active .mode-chevron {
-        background: #2563eb;
+        background: var(--primary);
         color: white;
         transform: rotate(180deg);
     }
 
     .mode-body {
         display: none;
-        padding: 1.25rem;
+        padding: var(--space-4);
         background: white;
-        border-top: 2px solid #f3f4f6;
+        border-top: 1px solid var(--gray-200);
     }
 
     .mode-card.active .mode-body {
         display: block;
     }
 
-    /* ==================== GROUP CARDS ==================== */
+    /* === GROUP GRID === */
     .group-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 0.8rem;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: var(--space-3);
     }
 
     .group-card {
         background: white;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-sm);
+        padding: var(--space-4);
         cursor: pointer;
-        transition: all 0.2s;
-        position: relative;
-    }
-
-    .group-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: #d1d5db;
         transition: all 0.2s;
     }
 
     .group-card:hover {
-        border-color: #2563eb;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
-        transform: translateY(-1px);
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
     }
 
     .group-card.selected {
-        border-color: #2563eb;
-        background: rgba(37, 99, 235, 0.03);
-    }
-
-    .group-card.selected::before {
-        background: #2563eb;
-        height: 3px;
+        border-color: var(--primary);
+        background: var(--primary-light);
     }
 
     .group-header {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 0.6rem;
+        align-items: center;
+        margin-bottom: var(--space-2);
     }
 
     .group-name {
-        font-size: 0.8rem;
+        font-size: var(--text-sm);
         font-weight: 600;
-        color: #1f2937;
-        margin: 0;
-        flex: 1;
+        color: var(--gray-900);
     }
 
     .group-check {
-        width: 18px;
-        height: 18px;
-        border: 2px solid #d1d5db;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--gray-300);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
-        flex-shrink: 0;
     }
 
     .group-card.selected .group-check {
-        background: #2563eb;
-        border-color: #2563eb;
+        background: var(--primary);
+        border-color: var(--primary);
         color: white;
     }
 
     .group-check i {
-        font-size: 0.6rem;
+        font-size: var(--text-xs);
         display: none;
     }
 
@@ -324,321 +196,228 @@
     .group-time {
         display: flex;
         align-items: center;
-        gap: 0.3rem;
+        gap: var(--space-2);
         font-family: 'Courier New', monospace;
-        font-size: 0.75rem;
+        font-size: var(--text-sm);
         font-weight: 600;
-        color: #1f2937;
-        padding: 0.3rem 0.5rem;
-        background: #f9fafb;
-        border-radius: 4px;
+        color: var(--gray-700);
+        padding: var(--space-2);
+        background: var(--gray-50);
+        border-radius: var(--radius-sm);
     }
 
-    .group-card.selected .group-time {
-        background: rgba(37, 99, 235, 0.08);
-        color: #2563eb;
-    }
-
-    /* ==================== ALERTS ==================== */
-    .alert {
-        border-radius: 6px;
-        padding: 1rem 1.5rem;
-        margin-bottom: 1.5rem;
+    /* === BUTTONS === */
+    .btn-group-actions {
         display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
-        border: 1px solid transparent;
-        font-weight: 500;
-    }
-
-    .alert-danger {
-        background: #fee2e2;
-        color: #991b1b;
-        border-color: #dc2626;
-    }
-
-    .alert-warning {
-        background: #fef3c7;
-        color: #92400e;
-        border-color: #f59e0b;
-    }
-
-    .alert-info {
-        background: #dbeafe;
-        color: #1e40af;
-        border-color: #3b82f6;
-    }
-
-    .alert i {
-        font-size: 0.875rem;
-    }
-
-    /* ==================== FORM ACTIONS ==================== */
-    .form-actions {
-        display: flex;
-        gap: 0.8rem;
-        padding-top: 1.5rem;
-        border-top: 2px solid #f3f4f6;
-        margin-top: 2rem;
-        flex-wrap: wrap;
-    }
-
-    .btn {
-        padding: 0.5rem 1.25rem;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-    }
-
-    .btn:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        text-decoration: none;
-    }
-
-    .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    .btn-primary {
-        background: #2563eb;
-        color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-        background: #1d4ed8;
+        gap: var(--space-3);
+        padding-top: var(--space-6);
+        border-top: 1px solid var(--gray-200);
     }
 
     .btn-secondary {
-        background: #6b7280;
+        background: var(--gray-500);
         color: white;
     }
 
     .btn-secondary:hover:not(:disabled) {
-        background: #4b5563;
+        background: var(--gray-700);
     }
 
-    .btn-danger {
-        background: #dc2626;
-        color: white;
-    }
-
-    .btn-danger:hover:not(:disabled) {
-        background: #b91c1c;
-    }
-
-    /* ==================== RESPONSIVE ==================== */
+    /* === RESPONSIVE === */
     @media (max-width: 768px) {
-        .form-card-body {
-            padding: 1.5rem;
-        }
-
-        .form-row {
+        .group-grid {
             grid-template-columns: 1fr;
         }
 
-        .form-actions {
+        .btn-group-actions {
             flex-direction: column;
         }
 
-        .btn {
+        .btn-group-actions .btn {
             width: 100%;
-            justify-content: center;
-        }
-
-        .group-grid {
-            grid-template-columns: 1fr;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="form-card">
-                <div class="form-card-header">
-                    <h5>
-                        <i class="fas fa-user-edit"></i>
-                        Edit Data Pegawai
-                    </h5>
+<div class="card">
+    <div class="card-header">
+        <h5>
+            <i class="fas fa-user-edit"></i>
+            Edit Data Pegawai
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <form method="POST" id="editPegawaiForm" data-pegawai-id="{{ pegawai.id }}">
+            {% csrf_token %}
+
+            <!-- DATA PRIBADI -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-id-card"></i>
+                    Data Pribadi
                 </div>
 
-                <div class="form-card-body">
-                    <form method="POST" id="editPegawaiForm" data-pegawai-id="{{ pegawai.id }}">
-                        {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">User ID</label>
+                        <input type="text" value="{{ pegawai.userid }}" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nama Lengkap <span style="color: var(--danger);">*</span></label>
+                        <input type="text" name="nama_lengkap" value="{{ pegawai.nama_lengkap }}" class="form-control" required>
+                    </div>
+                </div>
 
-                        <!-- DATA PRIBADI -->
-                        <div class="form-section">
-                            <h6 class="section-title">
-                                <i class="fas fa-id-card"></i>
-                                Data Pribadi
-                            </h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" value="{{ pegawai.email|default:'' }}" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nomor HP</label>
+                        <input type="text" name="nomor_hp" value="{{ pegawai.nomor_hp|default:'' }}" class="form-control">
+                    </div>
+                </div>
 
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="userid" class="form-label">User ID</label>
-                                    <input type="text" id="userid" value="{{ pegawai.userid }}" class="form-control" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label for="nama_lengkap" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
-                                    <input type="text" id="nama_lengkap" name="nama_lengkap" value="{{ pegawai.nama_lengkap }}" class="form-control" required>
-                                </div>
-                            </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tanggal Lahir</label>
+                        <input type="date" name="tanggal_lahir" value="{{ pegawai.tanggal_lahir|date:'Y-m-d' }}" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tanggal Bergabung</label>
+                        <input type="date" name="tanggal_bergabung" value="{{ pegawai.tanggal_bergabung|date:'Y-m-d' }}" class="form-control">
+                    </div>
+                </div>
 
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" id="email" name="email" value="{{ pegawai.email|default:'' }}" class="form-control">
-                                </div>
-                                <div class="form-group">
-                                    <label for="nomor_hp" class="form-label">Nomor HP</label>
-                                    <input type="text" id="nomor_hp" name="nomor_hp" value="{{ pegawai.nomor_hp|default:'' }}" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
-                                    <input type="date" id="tanggal_lahir" name="tanggal_lahir" value="{{ pegawai.tanggal_lahir|date:'Y-m-d' }}" class="form-control">
-                                </div>
-                                <div class="form-group">
-                                    <label for="tanggal_bergabung" class="form-label">Tanggal Bergabung</label>
-                                    <input type="date" id="tanggal_bergabung" name="tanggal_bergabung" value="{{ pegawai.tanggal_bergabung|date:'Y-m-d' }}" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="alamat" class="form-label">Alamat</label>
-                                    <textarea id="alamat" name="alamat" class="form-control">{{ pegawai.alamat|default:'' }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- ORGANISASI -->
-                        <div class="form-section">
-                            <h6 class="section-title">
-                                <i class="fas fa-sitemap"></i>
-                                Organisasi
-                            </h6>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="departemen" class="form-label">Departemen</label>
-                                    <select id="departemen" name="departemen" class="form-select">
-                                        <option value="">-- Pilih Departemen --</option>
-                                        {% for dept in departemen_list %}
-                                        <option value="{{ dept.id }}" {% if pegawai.departemen and pegawai.departemen.id == dept.id %}selected{% endif %}>{{ dept.nama }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="jabatan" class="form-label">Jabatan</label>
-                                    <select id="jabatan" name="jabatan" class="form-select">
-                                        <option value="">-- Pilih Jabatan --</option>
-                                        {% for jab in jabatan_list %}
-                                        <option value="{{ jab.id }}" {% if pegawai.jabatan and pegawai.jabatan.id == jab.id %}selected{% endif %}>{{ jab.nama }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="cabang" class="form-label">Cabang</label>
-                                    <select id="cabang" name="cabang" class="form-select">
-                                        <option value="">-- Pilih Cabang --</option>
-                                        {% for cab in cabang_list %}
-                                        <option value="{{ cab.id }}" {% if pegawai.cabang and pegawai.cabang.id == cab.id %}selected{% endif %}>{{ cab.nama }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="mesin" class="form-label">Mesin Absensi</label>
-                                    <select id="mesin" name="mesin" class="form-select">
-                                        <option value="">-- Pilih Mesin --</option>
-                                        {% for mesin in mesin_list %}
-                                        <option value="{{ mesin.id }}" {% if pegawai.mesin and pegawai.mesin.id == mesin.id %}selected{% endif %}>{{ mesin.nama }} ({{ mesin.ip_address }})</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- MODE JAM KERJA -->
-                        <div class="form-section">
-                            <h6 class="section-title">
-                                <i class="fas fa-clock"></i>
-                                Mode & Jam Kerja
-                            </h6>
-
-                            <div id="modeListContainer">
-                                <div style="text-align: center; padding: 2rem; color: #6b7280;">
-                                    <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem;"></i>
-                                    <p style="margin-top: 0.5rem; font-size: 0.875rem;">Memuat mode jam kerja...</p>
-                                </div>
-                            </div>
-
-                            <input type="hidden" id="modeAssignments" name="mode_assignments" value="{}">
-                        </div>
-
-                        <!-- STATUS PEGAWAI -->
-                        <div class="form-section">
-                            <h6 class="section-title">
-                                <i class="fas fa-toggle-on"></i>
-                                Status Pegawai
-                            </h6>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
-                                        <input type="checkbox" name="is_active" {% if pegawai.is_active %}checked{% endif %}>
-                                        Pegawai Aktif
-                                    </label>
-                                </div>
-                            </div>
-
-                            {% if not pegawai.is_active %}
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="tanggal_nonaktif" class="form-label">Tanggal Nonaktif</label>
-                                    <input type="date" id="tanggal_nonaktif" name="tanggal_nonaktif" value="{{ pegawai.tanggal_nonaktif|date:'Y-m-d' }}" class="form-control">
-                                </div>
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- FORM ACTIONS -->
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary" id="btnSubmit">
-                                <i class="fas fa-save"></i>
-                                Simpan Perubahan
-                            </button>
-                            <a href="{% url 'Pegawai_detail' pegawai.pk %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i>
-                                Kembali
-                            </a>
-                        </div>
-                    </form>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Alamat</label>
+                        <textarea name="alamat" class="form-control" rows="2">{{ pegawai.alamat|default:'' }}</textarea>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- ORGANISASI -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-sitemap"></i>
+                    Organisasi
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Departemen</label>
+                        <select name="departemen" class="form-select">
+                            <option value="">-- Pilih Departemen --</option>
+                            {% for dept in departemen_list %}
+                            <option value="{{ dept.id }}" {% if pegawai.departemen and pegawai.departemen.id == dept.id %}selected{% endif %}>
+                                {{ dept.nama }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Jabatan</label>
+                        <select name="jabatan" class="form-select">
+                            <option value="">-- Pilih Jabatan --</option>
+                            {% for jab in jabatan_list %}
+                            <option value="{{ jab.id }}" {% if pegawai.jabatan and pegawai.jabatan.id == jab.id %}selected{% endif %}>
+                                {{ jab.nama }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Cabang</label>
+                        <select name="cabang" class="form-select">
+                            <option value="">-- Pilih Cabang --</option>
+                            {% for cab in cabang_list %}
+                            <option value="{{ cab.id }}" {% if pegawai.cabang and pegawai.cabang.id == cab.id %}selected{% endif %}>
+                                {{ cab.nama }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Mesin Absensi</label>
+                        <input type="text" class="form-control" 
+                               value="{% if pegawai.mesin %}{{ pegawai.mesin.nama }} ({{ pegawai.mesin.ip_address }}){% else %}Belum di-assign{% endif %}" 
+                               readonly>
+                        <small style="color: var(--gray-500); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                            Mesin tidak dapat diubah setelah registrasi
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODE JAM KERJA -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-clock"></i>
+                    Mode & Jam Kerja
+                </div>
+
+                <div id="modeListContainer">
+                    <div style="text-align: center; padding: var(--space-8); color: var(--gray-500);">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p style="margin-top: var(--space-2);">Memuat data...</p>
+                    </div>
+                </div>
+
+                <input type="hidden" id="modeAssignments" name="mode_assignments" value="{}">
+            </div>
+
+            <!-- STATUS -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-toggle-on"></i>
+                    Status Pegawai
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_active" id="is_active" 
+                           {% if pegawai.is_active %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active">
+                        Pegawai Aktif
+                    </label>
+                </div>
+
+                {% if not pegawai.is_active %}
+                <div class="row g-3" style="margin-top: var(--space-3);">
+                    <div class="col-md-6">
+                        <label class="form-label">Tanggal Nonaktif</label>
+                        <input type="date" name="tanggal_nonaktif" value="{{ pegawai.tanggal_nonaktif|date:'Y-m-d' }}" class="form-control">
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="btn-group-actions">
+                <button type="submit" class="btn btn-primary" id="btnSubmit">
+                    <i class="fas fa-save"></i>
+                    Simpan Perubahan
+                </button>
+                <a href="{% url 'Pegawai_detail' pegawai.pk %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+{# Bagian JavaScript di dalam pegawai_edit.html #}
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const modeListContainer = document.getElementById('modeListContainer');
@@ -649,54 +428,71 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let modeAssignments = {};
 
+    // ✅ LOAD EXISTING ASSIGNMENTS SAAT FORM DIBUKA
     loadExistingAssignments();
 
     function loadExistingAssignments() {
-        fetch('/api/pegawai/' + pegawaiId + '/mode-assignments/')
+        console.log('📥 Loading mode assignments for pegawai:', pegawaiId);
+        
+        fetch(`/api/pegawai/${pegawaiId}/mode-assignments/`)
             .then(response => response.json())
             .then(data => {
+                console.log('✅ Received data:', data);
+                
                 if (data.status === 'success') {
+                    // ✅ INIT MODE ASSIGNMENTS DARI DATA EXISTING
                     data.modes.forEach(mode => {
                         if (mode.is_assigned && mode.assignment_data && mode.assignment_data.jadwal_per_hari) {
                             modeAssignments[mode.id] = {
                                 jadwal_per_hari: mode.assignment_data.jadwal_per_hari
                             };
+                            console.log(`✅ Pre-loaded: Mode ${mode.id} = ${JSON.stringify(modeAssignments[mode.id])}`);
                         }
                     });
+                    
+                    // ✅ UPDATE HIDDEN INPUT DENGAN DATA AWAL
                     modeAssignmentsInput.value = JSON.stringify(modeAssignments);
+                    console.log('📝 Updated hidden input:', modeAssignmentsInput.value);
+                    
                     renderModeList(data.modes);
                 } else {
                     showError('Gagal memuat data mode');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('❌ Error:', error);
                 showError('Terjadi kesalahan saat memuat data');
             });
     }
 
     function renderModeList(modes) {
-        let html = '<div class="mode-list-container">';
+        console.log('🎨 Rendering mode list with', modes.length, 'modes');
+        
+        let html = '<div class="mode-list">';
         modes.forEach(mode => {
             const isCompleted = mode.is_assigned;
-            const badgeHtml = isCompleted 
+            const badge = isCompleted 
                 ? '<span class="mode-badge completed"><i class="fas fa-check-circle"></i> Assigned</span>'
                 : '<span class="mode-badge pending"><i class="fas fa-clock"></i> Belum</span>';
-            html += '<div class="mode-card ' + (isCompleted ? 'completed' : '') + '" data-mode-id="' + mode.id + '">';
-            html += '  <div class="mode-header" data-toggle-mode="' + mode.id + '">';
-            html += '    <div class="mode-header-left">';
-            html += '      <div class="mode-icon-wrapper" style="background: ' + mode.warna + '20; color: ' + mode.warna + '"><i class="' + mode.icon + '"></i></div>';
-            html += '      <h6 class="mode-name">' + mode.nama + '</h6>';
-            html += '    </div>';
-            html += '    <div style="display: flex; align-items: center; gap: 0.8rem;">';
-            html += '      ' + badgeHtml;
-            html += '      <div class="mode-chevron"><i class="fas fa-chevron-down"></i></div>';
-            html += '    </div>';
-            html += '  </div>';
-            html += '  <div class="mode-body">';
-            html += '    <div style="text-align: center; color: #6b7280; padding: 1.5rem;"><i class="fas fa-spinner fa-spin"></i><p style="margin-top: 0.5rem; font-size: 0.875rem;">Memuat grup...</p></div>';
-            html += '  </div>';
-            html += '</div>';
+            
+            html += `
+                <div class="mode-card ${isCompleted ? 'completed' : ''}" data-mode-id="${mode.id}">
+                    <div class="mode-header" data-toggle-mode="${mode.id}">
+                        <div class="mode-header-left">
+                            <div class="mode-name">${mode.nama}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--space-2);">
+                            ${badge}
+                            <div class="mode-chevron"><i class="fas fa-chevron-down"></i></div>
+                        </div>
+                    </div>
+                    <div class="mode-body">
+                        <div style="text-align: center; padding: var(--space-4); color: var(--gray-500);">
+                            <i class="fas fa-spinner fa-spin"></i> Memuat jadwal...
+                        </div>
+                    </div>
+                </div>
+            `;
         });
         html += '</div>';
         modeListContainer.innerHTML = html;
@@ -704,21 +500,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function attachModeToggleListeners() {
-        document.querySelectorAll('[data-toggle-mode]').forEach(function(header) {
+        document.querySelectorAll('[data-toggle-mode]').forEach(header => {
             header.addEventListener('click', function() {
-                const modeId = parseInt(this.dataset.toggleMode);
-                toggleMode(modeId);
+                toggleMode(parseInt(this.dataset.toggleMode));
             });
         });
     }
 
     function toggleMode(modeId) {
-        const modeCard = document.querySelector('.mode-card[data-mode-id="' + modeId + '"]');
+        console.log('🔄 Toggle mode:', modeId);
+        
+        const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
         const modeBody = modeCard.querySelector('.mode-body');
         const wasActive = modeCard.classList.contains('active');
-        document.querySelectorAll('.mode-card').forEach(function(card) {
-            card.classList.remove('active');
-        });
+        
+        // Close all others
+        document.querySelectorAll('.mode-card').forEach(card => card.classList.remove('active'));
+        
         if (!wasActive) {
             modeCard.classList.add('active');
             if (modeBody.querySelector('.fa-spinner')) {
@@ -728,49 +526,72 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadJamKerjaGroups(modeId, modeBodyElement) {
-        fetch('/api/mode/' + modeId + '/get-jam-kerja-groups/')
+        console.log('📡 Loading jam kerja groups for mode:', modeId);
+        
+        fetch(`/api/mode/${modeId}/get-jam-kerja-groups/`)
             .then(response => response.json())
             .then(data => {
+                console.log('✅ Received groups:', data);
+                
                 if (data.status === 'success' && data.groups.length > 0) {
                     renderJamKerjaGroups(data.groups, modeId, modeBodyElement);
                 } else {
-                    modeBodyElement.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> ' + (data.msg || 'Tidak ada grup jam kerja') + '</div>';
+                    modeBodyElement.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> Tidak ada grup</div>';
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                modeBodyElement.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times-circle"></i> Gagal memuat grup</div>';
+                console.error('❌ Error:', error);
+                modeBodyElement.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times-circle"></i> Gagal memuat</div>';
             });
     }
 
     function renderJamKerjaGroups(groups, modeId, modeBodyElement) {
-        let html = '<div style="margin-bottom: 1rem;"><h6 style="font-weight: 600; margin: 0 0 0.3rem 0; font-size: 0.875rem;"><i class="fas fa-clock" style="color: #2563eb; margin-right: 0.4rem;"></i>Pilih Grup Jam Kerja</h6><p style="color: #6b7280; margin: 0; font-size: 0.75rem;">Klik salah satu grup</p></div>';
-        html += '<div class="group-grid">';
-        groups.forEach(function(group) {
+        console.log('🎨 Rendering', groups.length, 'groups for mode', modeId);
+        
+        let html = '<div class="group-grid">';
+        groups.forEach(group => {
+            // ✅ CEK APAKAH GROUP INI SUDAH DI-SELECT SEBELUMNYA
             const currentAssignment = modeAssignments[modeId];
             let isSelected = false;
+            
             if (currentAssignment && currentAssignment.jadwal_per_hari) {
-                const firstJadwalId = Object.values(currentAssignment.jadwal_per_hari)[0];
-                isSelected = firstJadwalId == group.id;
+                // ✅ CEK: Apakah group ini match dengan jadwal_per_hari yang tersimpan?
+                const assignedJadwalIds = Object.values(currentAssignment.jadwal_per_hari);
+                isSelected = assignedJadwalIds.includes(group.id);
+                
+                console.log(`Group ${group.id}: assigned_jadwals=${assignedJadwalIds}, match=${isSelected}`);
             }
+            
+            // ✅ BUILD JADWAL_PER_HARI DARI GROUP
             let jadwalPerHari = {};
             if (group.jadwal_per_hari && typeof group.jadwal_per_hari === 'object') {
                 jadwalPerHari = group.jadwal_per_hari;
             } else {
+                // Fallback: ambil semua jadwal dengan group_name yang sama
                 const jumlahHari = group.hari_kerja || 5;
                 for (let i = 0; i < jumlahHari && i < 7; i++) {
                     jadwalPerHari[i.toString()] = group.id.toString();
                 }
             }
-            const jadwalPerHariStr = JSON.stringify(jadwalPerHari).replace(/"/g, '&quot;');
-            const groupNamaEscaped = group.nama.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            html += '<div class="group-card ' + (isSelected ? 'selected' : '') + '" data-mode-id="' + modeId + '" data-group-id="' + group.id + '" data-group-nama="' + groupNamaEscaped + '" data-jadwal=\'' + jadwalPerHariStr + '\'>';
-            html += '  <div class="group-header"><h6 class="group-name">' + group.nama + '</h6><div class="group-check"><i class="fas fa-check"></i></div></div>';
-            html += '  <div class="group-time"><i class="fas fa-clock"></i><span>' + group.jam_masuk + ' - ' + group.jam_keluar + '</span></div>';
-            if (group.jam_istirahat) {
-                html += '  <div style="margin-top: 0.3rem; font-size: 0.7rem; color: #6b7280;"><i class="fas fa-coffee"></i> ' + group.jam_istirahat + '</div>';
-            }
-            html += '</div>';
+            
+            html += `
+                <div class="group-card ${isSelected ? 'selected' : ''}" 
+                     data-mode-id="${modeId}" 
+                     data-group-id="${group.id}" 
+                     data-jadwal='${JSON.stringify(jadwalPerHari)}'>
+                    <div class="group-header">
+                        <div class="group-name">${group.nama}</div>
+                        <div class="group-check"><i class="fas fa-check"></i></div>
+                    </div>
+                    <div class="group-time">
+                        <i class="fas fa-clock"></i>
+                        <span>${group.jam_masuk} - ${group.jam_keluar}</span>
+                    </div>
+                    <div style="font-size: 10px; color: var(--gray-500); margin-top: var(--space-2);">
+                        ${group.hari_kerja} hari kerja
+                    </div>
+                </div>
+            `;
         });
         html += '</div>';
         modeBodyElement.innerHTML = html;
@@ -778,54 +599,54 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function attachGroupSelectListeners(container) {
-        container.querySelectorAll('.group-card').forEach(function(card) {
+        container.querySelectorAll('.group-card').forEach(card => {
             card.addEventListener('click', function() {
                 const modeId = parseInt(this.dataset.modeId);
                 const groupId = parseInt(this.dataset.groupId);
-                const groupNama = this.dataset.groupNama;
                 const jadwalData = JSON.parse(this.dataset.jadwal);
-                selectGroup(modeId, groupId, groupNama, jadwalData);
+                selectGroup(modeId, groupId, jadwalData);
             });
         });
     }
 
-    function selectGroup(modeId, groupId, groupNama, jadwalPerHari) {
-        let jadwalData = {};
-        if (jadwalPerHari && typeof jadwalPerHari === 'object') {
-            jadwalData = jadwalPerHari;
-        } else {
-            jadwalData = {'0': groupId.toString(), '1': groupId.toString(), '2': groupId.toString(), '3': groupId.toString(), '4': groupId.toString()};
-        }
-        modeAssignments[modeId] = {jadwal_per_hari: jadwalData, group_id: groupId, group_nama: groupNama};
+    function selectGroup(modeId, groupId, jadwalPerHari) {
+        console.log(`✅ Selected: Mode ${modeId}, Group ${groupId}, Jadwal:`, jadwalPerHari);
+        
+        // ✅ SIMPAN KE modeAssignments
+        modeAssignments[modeId] = {
+            jadwal_per_hari: jadwalPerHari
+        };
+        
+        // ✅ UPDATE HIDDEN INPUT
         modeAssignmentsInput.value = JSON.stringify(modeAssignments);
-        updateModeStatus(modeId);
-        const modeCard = document.querySelector('.mode-card[data-mode-id="' + modeId + '"]');
-        if (modeCard) {
-            const cards = modeCard.querySelectorAll('.group-card');
-            cards.forEach(function(card) { card.classList.remove('selected'); });
-            const selectedCard = modeCard.querySelector('.group-card[data-group-id="' + groupId + '"]');
-            if (selectedCard) { selectedCard.classList.add('selected'); }
-        }
-    }
-
-    function updateModeStatus(modeId) {
-        const modeCard = document.querySelector('.mode-card[data-mode-id="' + modeId + '"]');
-        if (modeAssignments[modeId]) {
-            modeCard.classList.add('completed');
-            const badge = modeCard.querySelector('.mode-badge');
-            badge.className = 'mode-badge completed';
-            badge.innerHTML = '<i class="fas fa-check-circle"></i> Assigned';
-        }
+        console.log('📝 Updated hidden input:', modeAssignmentsInput.value);
+        
+        // ✅ UPDATE UI
+        const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
+        
+        // Tandai mode sebagai completed
+        modeCard.classList.add('completed');
+        const badge = modeCard.querySelector('.mode-badge');
+        badge.className = 'mode-badge completed';
+        badge.innerHTML = '<i class="fas fa-check-circle"></i> Assigned';
+        
+        // Unselect semua group, select yang dipilih
+        modeCard.querySelectorAll('.group-card').forEach(c => c.classList.remove('selected'));
+        modeCard.querySelector(`.group-card[data-group-id="${groupId}"]`).classList.add('selected');
     }
 
     function showError(message) {
-        modeListContainer.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ' + message + '</div>';
+        modeListContainer.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ${message}</div>`;
     }
 
+    // ✅ HANDLE FORM SUBMIT
     form.addEventListener('submit', function(e) {
+        // ✅ LOG DATA SEBELUM SUBMIT
+        console.log('📤 Form submitted!');
+        console.log('Mode assignments:', JSON.parse(modeAssignmentsInput.value || '{}'));
+        
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-        return true;
     });
 });
 </script>

@@ -4,201 +4,200 @@
 
 {% block extra_css %}
 <style>
-    .form-card {
-        background: white;
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--gray-200);
-        overflow: hidden;
-    }
+/* ===== FORM SECTIONS ===== */
+.form-section {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--gray-200);
+}
 
-    .form-card-header {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-        color: white;
-        padding: var(--spacing-lg) var(--spacing-xl);
-    }
+.form-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
 
-    .form-card-header h5 {
-        margin: 0;
-        font-size: var(--font-lg);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
+/* ===== FORM CHECK ===== */
+.form-check {
+    padding: var(--space-4);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+}
 
-    .form-card-body {
-        padding: var(--spacing-xl);
-    }
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    margin-top: 0;
+    cursor: pointer;
+    border: 2px solid var(--gray-300);
+}
 
-    .form-section {
-        margin-bottom: var(--spacing-xl);
-    }
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
 
+.form-check-label {
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.form-check-label strong {
+    display: block;
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: var(--space-1);
+}
+
+.form-check-label small {
+    color: var(--gray-600);
+    font-size: var(--text-sm);
+}
+
+/* ===== INFO TEXT ===== */
+.info-text {
+    color: var(--gray-600);
+    font-size: var(--text-sm);
+    margin-top: var(--space-1);
+    display: block;
+}
+
+/* ===== BUTTONS ===== */
+.btn-group-actions {
+    display: flex;
+    gap: var(--space-3);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--gray-200);
+}
+
+.btn-secondary {
+    background: var(--gray-500);
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--gray-700);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
     .btn-group-actions {
-        display: flex;
-        gap: var(--spacing-md);
-        padding-top: var(--spacing-lg);
-        border-top: 2px solid var(--gray-100);
-        margin-top: var(--spacing-xl);
+        flex-direction: column;
     }
 
-    .btn-secondary {
-        background: var(--gray-500);
-        color: white;
+    .btn-group-actions .btn {
+        width: 100%;
     }
-
-    .btn-secondary:hover:not(:disabled) {
-        background: var(--gray-600);
-        transform: translateY(-1px);
-    }
-
-    @media (max-width: 768px) {
-        .form-card-body {
-            padding: var(--spacing-lg);
-        }
-
-        .btn-group-actions {
-            flex-direction: column;
-        }
-
-        .btn-group-actions .btn {
-            width: 100%;
-        }
-    }
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="form-card">
-                <div class="form-card-header">
-                    <h5>
-                        <i class="fas fa-user-plus"></i>
-                        {{ judul }}
-                    </h5>
-                </div>
+<div class="card">
+    <div class="card-header">
+        <h5>
+            <i class="fas fa-user-plus"></i>
+            {{ judul }}
+        </h5>
+    </div>
 
-                <div class="form-card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Username <span class="text-danger">*</span></label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        name="username" 
-                                        required
-                                        placeholder="username_admin"
-                                    >
-                                    <small class="text-muted d-block mt-1">Untuk login ke sistem</small>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Email</label>
-                                    <input 
-                                        type="email" 
-                                        class="form-control" 
-                                        name="email"
-                                        placeholder="admin@perusahaan.com"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Nama Depan</label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        name="first_name"
-                                        placeholder="John"
-                                    >
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Nama Belakang</label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        name="last_name"
-                                        placeholder="Doe"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Password <span class="text-danger">*</span></label>
-                                    <input 
-                                        type="password" 
-                                        class="form-control" 
-                                        name="password" 
-                                        required
-                                        minlength="8"
-                                        placeholder="Minimal 8 karakter"
-                                    >
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Konfirmasi Password <span class="text-danger">*</span></label>
-                                    <input 
-                                        type="password" 
-                                        class="form-control" 
-                                        name="password_confirm" 
-                                        required
-                                        minlength="8"
-                                        placeholder="Ketik ulang password"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="form-check">
-                                <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    name="is_superuser" 
-                                    id="is_superuser"
-                                >
-                                <label class="form-check-label" for="is_superuser">
-                                    <strong>Super Admin</strong>
-                                    <br>
-                                    <small class="text-muted">
-                                        Super Admin memiliki akses penuh ke seluruh sistem termasuk kelola admin lain.
-                                    </small>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Catatan Role:</strong>
-                            <ul class="mb-0 mt-2">
-                                <li>Jika TIDAK dicentang: Admin biasa (kelola pegawai & absensi).</li>
-                                <li>Jika DICENTANG: Super Admin (akses penuh & pengaturan sistem).</li>
-                            </ul>
-                        </div>
-
-                        <div class="btn-group-actions">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Simpan Admin
-                            </button>
-                            <a href="{% url 'daftar_admin' %}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Batal
-                            </a>
-                        </div>
-                    </form>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- USERNAME & EMAIL -->
+            <div class="form-section">
+                <div class="row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="form-label">
+                            Username <span style="color: var(--danger);">*</span>
+                        </label>
+                        <input type="text" class="form-control" name="username" required
+                               placeholder="username_admin">
+                        <small class="info-text">Untuk login ke sistem</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email"
+                               placeholder="admin@perusahaan.com">
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- NAMA -->
+            <div class="form-section">
+                <div class="row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="form-label">Nama Depan</label>
+                        <input type="text" class="form-control" name="first_name"
+                               placeholder="John">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nama Belakang</label>
+                        <input type="text" class="form-control" name="last_name"
+                               placeholder="Doe">
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="form-section">
+                <div class="row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="form-label">
+                            Password <span style="color: var(--danger);">*</span>
+                        </label>
+                        <input type="password" class="form-control" name="password" required
+                               minlength="8" placeholder="Minimal 8 karakter">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Konfirmasi Password <span style="color: var(--danger);">*</span>
+                        </label>
+                        <input type="password" class="form-control" name="password_confirm" required
+                               minlength="8" placeholder="Ketik ulang password">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROLE -->
+            <div class="form-section">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_superuser" id="is_superuser">
+                    <label class="form-check-label" for="is_superuser">
+                        <strong>Super Admin</strong>
+                        <small>Super Admin memiliki akses penuh ke seluruh sistem termasuk kelola admin lain.</small>
+                    </label>
+                </div>
+            </div>
+
+            <!-- INFO -->
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>Catatan Role:</strong>
+                    <ul style="margin: var(--space-2) 0 0 var(--space-4); padding: 0;">
+                        <li>Jika TIDAK dicentang: Admin biasa (kelola pegawai & absensi).</li>
+                        <li>Jika DICENTANG: Super Admin (akses penuh & pengaturan sistem).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="btn-group-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Simpan Admin
+                </button>
+                <a href="{% url 'daftar_admin' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

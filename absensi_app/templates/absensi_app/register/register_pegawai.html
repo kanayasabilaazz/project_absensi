@@ -1,233 +1,69 @@
-
 {% extends 'absensi_app/base.html' %}
 {% load static %}
 
-{% block title %}Registrasi Pegawai dari Mesin{% endblock %}
+{% block title %}Registrasi Pegawai Manual{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* BASE VARIABLES - SESUAI BASE.HTML */
-    :root {
-        --primary: #3b82f6;
-        --primary-dark: #2563eb;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-        --gray-50: #f9fafb;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-300: #d1d5db;
-        --gray-400: #9ca3af;
-        --gray-500: #6b7280;
-        --gray-600: #4b5563;
-        --gray-700: #374151;
-        --gray-800: #1f2937;
-        --gray-900: #111827;
-        
-        --spacing-xs: 0.2rem;
-        --spacing-sm: 0.4rem;
-        --spacing-md: 0.6rem;
-        --spacing-lg: 0.8rem;
-        --spacing-xl: 1.2rem;
-        --spacing-2xl: 1.6rem;
-        
-        --font-xs: 0.55rem;
-        --font-sm: 0.65rem;
-        --font-base: 0.7rem;
-        --font-lg: 0.8rem;
-        --font-xl: 1rem;
-        --font-2xl: 1.2rem;
-        
-        --radius-sm: 0.3rem;
-        --radius-md: 0.4rem;
-        --radius-lg: 0.6rem;
-        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-        --shadow-md: 0 3px 10px rgba(0,0,0,0.08);
-        --shadow-lg: 0 8px 20px rgba(0,0,0,0.12);
-    }
-
-    .breadcrumb-white {
-        font-size: var(--font-sm);
-    }
-
-    .breadcrumb-white .breadcrumb-item {
-        color: rgba(255, 255, 255, 0.8);
-    }
-
-    .breadcrumb-white .breadcrumb-item + .breadcrumb-item::before {
-        color: rgba(255, 255, 255, 0.6);
-    }
-
-    .breadcrumb-white .breadcrumb-item a {
-        color: rgba(255, 255, 255, 0.9);
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-
-    .breadcrumb-white .breadcrumb-item a:hover {
+    /* PAGE HEADER */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
         color: white;
+        padding: var(--space-5);
+        border-radius: var(--radius);
+        margin-bottom: var(--space-6);
+        box-shadow: var(--shadow-lg);
     }
 
-    .breadcrumb-white .breadcrumb-item.active {
-        color: white;
-        font-weight: 500;
-    }
-
-    .dashboard-card {
-        background: white;
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-sm);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-    }
-
-    .dashboard-card-header {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-        color: white;
-        padding: var(--spacing-xl);
-        border: none;
-    }
-
-    .dashboard-card-header h4 {
-        font-size: var(--font-xl);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        margin: 0;
-    }
-
-    .dashboard-card-body {
-        padding: var(--spacing-xl);
-    }
-
-    .section-card {
-        background: white;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
-        margin-bottom: var(--spacing-xl);
-        overflow: hidden;
-    }
-
-    .section-card-header {
-        background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%);
-        padding: var(--spacing-lg);
-        border-bottom: 2px solid rgba(255,255,255,0.2);
-    }
-
-    .section-card-header h6 {
-        margin: 0;
-        font-size: var(--font-lg);
-        font-weight: 600;
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .section-card-body {
-        padding: var(--spacing-xl);
-    }
-
-    .form-label {
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: var(--spacing-sm);
-        font-size: var(--font-sm);
-    }
-
-    .form-control, .form-select {
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius-sm);
-        padding: 0.5rem var(--spacing-lg);
-        transition: all 0.2s;
-        font-size: var(--font-sm);
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-    }
-
-    .table-wrapper {
-        background: white;
-        border-radius: var(--radius-md);
-        overflow: hidden;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .table {
-        margin-bottom: 0 !important;
-        font-size: var(--font-sm);
-        width: 100% !important;
-    }
-
-    table.dataTable thead th {
-        border: 1px solid var(--gray-600) !important;
-        border-bottom: 2px solid var(--gray-600) !important;
-        background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%) !important;
-        color: white !important;
-        font-weight: 600;
-        padding: var(--spacing-md) var(--spacing-lg) !important;
-        font-size: var(--font-xs);
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-    }
-
-    table.dataTable tbody td {
-        padding: var(--spacing-md) var(--spacing-lg) !important;
-        vertical-align: middle;
-        border: 1px solid var(--gray-200) !important;
-        font-size: var(--font-sm);
-    }
-
-    table.dataTable tbody tr:hover {
-        background: var(--gray-50) !important;
-    }
-
-    .badge-userid {
-        background: var(--primary);
-        color: white;
-        padding: var(--spacing-xs) var(--spacing-md);
-        border-radius: var(--radius-sm);
+    .page-header h4 {
+        margin: 0 0 var(--space-2) 0;
+        font-size: var(--text-xl);
         font-weight: 700;
-        font-size: var(--font-xs);
-        font-family: 'Courier New', monospace;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
     }
 
+    .page-header p {
+        margin: 0;
+        font-size: var(--text-sm);
+        opacity: 0.95;
+    }
+
+    /* PROGRESS BAR */
     .progress-wrapper {
         background: white;
-        padding: var(--spacing-lg);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--spacing-xl);
-        border: 2px solid var(--gray-200);
+        padding: var(--space-4);
+        border-radius: var(--radius);
+        margin-bottom: var(--space-4);
+        border: 1px solid var(--gray-200);
     }
 
     .progress-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--space-3);
     }
 
     .progress-title {
         font-weight: 600;
+        font-size: var(--text-sm);
         color: var(--gray-800);
-        font-size: var(--font-base);
     }
 
     .progress-count {
         background: var(--gray-100);
-        padding: 0.2rem 0.6rem;
+        padding: var(--space-1) var(--space-3);
         border-radius: 12px;
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         font-weight: 600;
         color: var(--gray-700);
     }
 
     .progress-count.completed {
-        background: rgba(16, 185, 129, 0.1);
-        color: var(--success);
+        background: var(--success-light);
+        color: #065f46;
     }
 
     .progress-bar-custom {
@@ -235,168 +71,155 @@
         background: var(--gray-200);
         border-radius: 12px;
         overflow: hidden;
-        position: relative;
     }
 
     .progress-bar-fill {
         height: 100%;
         background: linear-gradient(90deg, var(--primary) 0%, #60a5fa 100%);
-        border-radius: 12px;
-        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: width 0.5s ease;
     }
 
-    .mode-list-container {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-md);
+    /* USER ID STATUS */
+    .userid-status {
+        margin-top: var(--space-2);
     }
 
+    .userid-status .alert {
+        margin-bottom: 0;
+        padding: var(--space-3);
+        border-radius: var(--radius-sm);
+        font-size: var(--text-sm);
+    }
+
+    /* MODE ACCORDION */
     .mode-card {
         background: white;
         border: 2px solid var(--gray-200);
-        border-radius: var(--radius-lg);
+        border-radius: var(--radius);
         overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: var(--space-3);
+        transition: all 0.2s;
     }
 
     .mode-card.completed {
         border-color: var(--success);
-        background: rgba(16, 185, 129, 0.02);
+        background: var(--success-light);
     }
 
     .mode-card.active {
         border-color: var(--primary);
-        box-shadow: 0 6px 12px rgba(59, 130, 246, 0.15);
+        box-shadow: var(--shadow-lg);
     }
 
     .mode-header {
-        padding: var(--spacing-lg);
+        padding: var(--space-4);
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: space-between;
         background: var(--gray-50);
         transition: all 0.2s;
-        user-select: none;
     }
 
     .mode-header:hover {
         background: var(--gray-100);
     }
 
-    .mode-card.completed .mode-header {
-        background: rgba(16, 185, 129, 0.05);
-    }
-
     .mode-card.active .mode-header {
-        background: rgba(59, 130, 246, 0.05);
+        background: var(--primary-light);
     }
 
     .mode-header-left {
         display: flex;
         align-items: center;
-        gap: var(--spacing-md);
+        gap: var(--space-3);
         flex: 1;
     }
 
     .mode-icon-wrapper {
-        width: 38px;
-        height: 38px;
-        border-radius: var(--radius-md);
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: var(--font-xl);
-        transition: all 0.3s;
+        font-size: var(--text-xl);
     }
 
-    .mode-info {
-        flex: 1;
-    }
-
-    .mode-name {
-        font-size: var(--font-base);
+    .mode-info h6 {
+        margin: 0 0 var(--space-1) 0;
         font-weight: 600;
-        color: var(--gray-800);
-        margin: 0 0 2px 0;
+        font-size: var(--text-sm);
+        color: var(--gray-900);
     }
 
-    .mode-description {
-        font-size: var(--font-xs);
+    .mode-info small {
         color: var(--gray-600);
-        margin: 0;
-    }
-
-    .mode-header-right {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
+        font-size: var(--text-xs);
     }
 
     .mode-badge {
+        padding: var(--space-1) var(--space-3);
+        border-radius: 12px;
+        font-size: var(--text-xs);
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
-        gap: 4px;
-        padding: 0.3rem 0.7rem;
-        border-radius: 12px;
-        font-size: var(--font-xs);
-        font-weight: 600;
+        gap: var(--space-1);
     }
 
     .mode-badge.pending {
-        background: rgba(245, 158, 11, 0.1);
-        color: var(--warning);
-        border: 1px solid rgba(245, 158, 11, 0.3);
+        background: var(--warning-light);
+        color: #92400e;
     }
 
     .mode-badge.completed {
-        background: rgba(16, 185, 129, 0.1);
-        color: var(--success);
-        border: 1px solid rgba(16, 185, 129, 0.3);
+        background: var(--success-light);
+        color: #065f46;
     }
 
     .mode-chevron {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         background: var(--gray-200);
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s;
-        font-size: var(--font-xs);
+        transition: all 0.2s;
+        font-size: var(--text-xs);
     }
 
     .mode-card.active .mode-chevron {
+        transform: rotate(180deg);
         background: var(--primary);
         color: white;
-        transform: rotate(180deg);
     }
 
     .mode-body {
         display: none;
-        padding: var(--spacing-xl);
-        background: white;
-        border-top: 2px solid var(--gray-100);
+        padding: var(--space-4);
+        border-top: 1px solid var(--gray-200);
     }
 
     .mode-card.active .mode-body {
         display: block;
     }
 
+    /* GROUP CARDS */
     .group-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: var(--spacing-md);
+        gap: var(--space-3);
     }
 
     .group-card {
         background: white;
         border: 2px solid var(--gray-200);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-lg);
+        border-radius: var(--radius);
+        padding: var(--space-3);
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.2s;
         position: relative;
     }
 
@@ -408,18 +231,18 @@
         right: 0;
         height: 3px;
         background: var(--gray-300);
-        transition: all 0.3s;
+        transition: all 0.2s;
     }
 
     .group-card:hover {
         border-color: var(--primary);
-        box-shadow: 0 6px 12px rgba(59, 130, 246, 0.15);
-        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+        transform: translateY(-2px);
     }
 
     .group-card.selected {
         border-color: var(--primary);
-        background: rgba(59, 130, 246, 0.05);
+        background: var(--primary-light);
     }
 
     .group-card.selected::before {
@@ -431,11 +254,11 @@
         display: flex;
         justify-content: space-between;
         align-items: start;
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--space-2);
     }
 
     .group-name {
-        font-size: var(--font-base);
+        font-size: var(--text-sm);
         font-weight: 600;
         color: var(--gray-800);
         margin: 0;
@@ -443,8 +266,8 @@
     }
 
     .group-check {
-        width: 22px;
-        height: 22px;
+        width: 20px;
+        height: 20px;
         border: 2px solid var(--gray-300);
         border-radius: 50%;
         display: flex;
@@ -460,7 +283,7 @@
     }
 
     .group-check i {
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         display: none;
     }
 
@@ -471,12 +294,12 @@
     .group-time {
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: var(--space-1);
         font-family: 'Courier New', monospace;
-        font-size: var(--font-sm);
+        font-size: var(--text-sm);
         font-weight: 600;
         color: var(--gray-900);
-        padding: 0.4rem 0.6rem;
+        padding: var(--space-1) var(--space-2);
         background: var(--gray-50);
         border-radius: var(--radius-sm);
     }
@@ -486,441 +309,283 @@
         color: var(--primary);
     }
 
+    /* SUMMARY BOX */
     .summary-box {
         background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
         border: 2px solid #bae6fd;
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
-        margin-top: var(--spacing-xl);
+        border-radius: var(--radius);
+        padding: var(--space-4);
+        margin-top: var(--space-4);
     }
 
     .summary-header {
         display: flex;
         align-items: center;
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-lg);
-        padding-bottom: var(--spacing-md);
+        gap: var(--space-3);
+        margin-bottom: var(--space-4);
+        padding-bottom: var(--space-3);
         border-bottom: 2px solid rgba(59, 130, 246, 0.2);
     }
 
     .summary-icon {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         background: var(--primary);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: var(--font-xl);
+        font-size: var(--text-lg);
     }
 
     .summary-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: var(--spacing-md);
+        gap: var(--space-3);
     }
 
     .summary-item {
         background: white;
-        padding: var(--spacing-md);
+        padding: var(--space-3);
         border-radius: var(--radius-sm);
-        border: 1px solid rgba(59, 130, 246, 0.1);
     }
 
     .summary-label {
-        font-size: var(--font-xs);
+        font-size: var(--text-xs);
         color: var(--gray-600);
         font-weight: 500;
         display: block;
-        margin-bottom: 2px;
+        margin-bottom: var(--space-1);
     }
 
     .summary-value {
-        font-size: var(--font-base);
+        font-size: var(--text-sm);
         font-weight: 600;
         color: var(--gray-900);
-        display: block;
     }
 
-    .btn {
-        padding: 0.5rem var(--spacing-xl);
-        font-size: var(--font-sm);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        border: none;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-primary {
-        background: var(--primary);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--primary-dark);
-        color: white;
-    }
-
-    .btn-light {
-        background: white;
-        color: var(--primary);
-    }
-
-    .btn-light:hover {
-        background: rgba(255, 255, 255, 0.9);
-        color: var(--primary-dark);
-    }
-
-    .loading-spinner, .empty-state {
-        text-align: center;
-        padding: var(--spacing-xl);
-        color: var(--gray-500);
-    }
-
-    .loading-spinner i, .empty-state i {
-        font-size: var(--font-2xl);
-        margin-bottom: var(--spacing-md);
-    }
-
-    .alert {
-        border-radius: var(--radius-sm);
-        padding: var(--spacing-md) var(--spacing-lg);
-        margin-bottom: var(--spacing-md);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        font-size: var(--font-sm);
-    }
-
-    .alert-info {
-        background: #dbeafe;
-        border: 1px solid #3b82f6;
-        color: #1e3a8a;
-    }
-
-    .modal-header {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-        color: white;
-        border: none;
-    }
-
-    .modal-header .btn-close {
-        filter: brightness(0) invert(1);
-    }
-
-    .modal-body .card {
-        border: 1px solid var(--gray-200);
-        border-radius: var(--radius-sm);
-    }
-
-    .modal-body .card-header {
-        background: var(--gray-50);
-        border-bottom: 1px solid var(--gray-200);
-        font-weight: 600;
-        font-size: var(--font-sm);
-    }
-
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-        .dashboard-card-header {
-            padding: var(--spacing-lg);
-        }
-
-        .dashboard-card-body {
-            padding: var(--spacing-lg);
-        }
-
-        .mode-header {
-            padding: var(--spacing-md);
-        }
-
         .group-grid {
             grid-template-columns: 1fr;
         }
 
-        .mode-icon-wrapper {
-            width: 32px;
-            height: 32px;
-            font-size: var(--font-lg);
+        .summary-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="dashboard-card">
-        <!-- HEADER -->
-        <div class="dashboard-card-header">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-                <div>
-                    <h4>
-                        <i class="fas fa-user-plus"></i>
-                        Registrasi Pegawai Manual
-                    </h4>
-                </div>
-                <div>
-                    <a href="{% url 'daftar_Pegawai' %}" class="btn btn-outline-light">
-                        <i class="fas fa-arrow-left"></i>
-                        Kembali
-                    </a>
-                </div>
-            </div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-white mb-0">
-                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'daftar_Pegawai' %}">Pegawai</a></li>
-                    <li class="breadcrumb-item active">Registrasi Manual</li>
-                </ol>
-            </nav>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h4>
+                <i class="fas fa-user-plus"></i>
+                Registrasi Pegawai Manual
+            </h4>
+            <p>Daftarkan pegawai baru dengan input manual tanpa mesin fingerprint</p>
         </div>
-
-        <div class="dashboard-card-body">
-            <form method="post" id="formRegister">
-                {% csrf_token %}
-
-                <!-- ========================================
-                     STEP 1: DATA PRIBADI
-                ======================================== -->
-                <div class="section-card">
-                    <div class="section-card-header">
-                        <h6>
-                            <i class="fas fa-user"></i>
-                            Step 1: Data Pribadi
-                        </h6>
-                    </div>
-                    <div class="section-card-body">
-                        <div class="row">
-                            <div class="col-12 mb-3">
-                                <label for="id_nama_lengkap" class="form-label">
-                                    Nama Lengkap <span class="text-danger">*</span>
-                                </label>
-                                {{ form.nama_lengkap }}
-                                {% if form.nama_lengkap.errors %}
-                                    <div class="text-danger small mt-1">
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        {{ form.nama_lengkap.errors }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_email" class="form-label">Email</label>
-                                <input 
-                                    type="email" 
-                                    class="form-control" 
-                                    id="id_email" 
-                                    name="email"
-                                    placeholder="contoh@email.com"
-                                    autocomplete="off"
-                                >
-                                <small class="text-muted d-block mt-1">Opsional</small>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="id_tanggal_lahir" class="form-label">Tanggal Lahir</label>
-                                {{ form.tanggal_lahir }}
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_nomor_hp" class="form-label">Nomor HP</label>
-                                {{ form.nomor_hp }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="id_alamat" class="form-label">Alamat</label>
-                                {{ form.alamat }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ========================================
-                     STEP 2: DATA KEPEGAWAIAN
-                ======================================== -->
-                <div class="section-card">
-                    <div class="section-card-header">
-                        <h6>
-                            <i class="fas fa-briefcase"></i>
-                            Step 2: Data Kepegawaian
-                        </h6>
-                    </div>
-                    <div class="section-card-body">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="id_departemen" class="form-label">
-                                    Departemen <span class="text-danger">*</span>
-                                </label>
-                                {{ form.departemen }}
-                                <small class="text-muted d-block mt-1">
-                                    <i class="fas fa-info-circle"></i> 
-                                    Akan menentukan User ID & jam kerja
-                                </small>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="id_jabatan" class="form-label">
-                                    Jabatan <span class="text-danger">*</span>
-                                </label>
-                                {{ form.jabatan }}
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="id_tanggal_bergabung" class="form-label">
-                                    Tanggal Bergabung <span class="text-danger">*</span>
-                                </label>
-                                {{ form.tanggal_bergabung }}
-                            </div>
-                        </div>
-
-                        <!-- AUTO-GENERATED USER ID -->
-                        <div class="row">
-                            <div class="col-12">
-                                <label for="userid" class="form-label">
-                                    User ID <span class="text-danger">*</span>
-                                </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    id="userid" 
-                                    name="userid"
-                                    placeholder="Pilih departemen untuk generate User ID"
-                                    required
-                                    readonly
-                                >
-                                <small class="text-muted d-block mt-1">
-                                    <i class="fas fa-magic"></i> 
-                                    User ID akan digenerate otomatis
-                                </small>
-                                <div id="userIdStatus" class="mt-2"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ========================================
-                     STEP 3: MODE & JAM KERJA ASSIGNMENT
-                ======================================== -->
-                <div class="section-card">
-                    <div class="section-card-header">
-                        <h6>
-                            <i class="fas fa-clock"></i>
-                            Step 3: Assignment Mode & Jam Kerja
-                        </h6>
-                    </div>
-                    <div class="section-card-body">
-                        <!-- PROGRESS TRACKER -->
-                        <div class="progress-wrapper">
-                            <div class="progress-header">
-                                <span class="progress-title">
-                                    <i class="fas fa-tasks me-2"></i>
-                                    Progress Assignment
-                                </span>
-                                <span class="progress-count" id="progressCount">
-                                    0 / 0 Mode
-                                </span>
-                            </div>
-                            <div class="progress-bar-custom">
-                                <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
-                            </div>
-                        </div>
-
-                        <!-- MODE LIST CONTAINER -->
-                        <div id="modeListContainer">
-                            <div class="empty-state">
-                                <i class="fas fa-building"></i>
-                                <p class="mb-0">Pilih departemen terlebih dahulu untuk melihat mode & jam kerja</p>
-                            </div>
-                        </div>
-
-                        <!-- HIDDEN INPUT -->
-                        <input type="hidden" id="modeAssignments" name="mode_assignments" value="{}">
-                    </div>
-                </div>
-
-                <!-- ========================================
-                     SUMMARY BOX
-                ======================================== -->
-                <div id="summaryBox" class="summary-box" style="display: none;">
-                    <div class="summary-header">
-                        <div class="summary-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="summary-header-text">
-                            <h5>Ringkasan Registrasi</h5>
-                            <p>Pastikan data sudah benar sebelum disimpan</p>
-                        </div>
-                    </div>
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <span class="summary-label">User ID</span>
-                            <span class="summary-value" id="summaryUserId">-</span>
-                        </div>
-                        <div class="summary-item">
-<span class="summary-label">Nama Lengkap</span>
-<span class="summary-value" id="summaryNama">-</span>
-</div>
-<div class="summary-item">
-<span class="summary-label">Departemen</span>
-<span class="summary-value" id="summaryDepartemen">-</span>
-</div>
-<div class="summary-item">
-<span class="summary-label">Jabatan</span>
-<span class="summary-value" id="summaryJabatan">-</span>
-</div>
-<div class="summary-item">
-<span class="summary-label">Mode Selesai</span>
-<span class="summary-value" id="summaryModeCount">0 Mode</span>
-</div>
-<div class="summary-item">
-<span class="summary-label">Status</span>
-<span class="summary-value text-success" id="summaryStatus">
-<i class="fas fa-check-circle me-1"></i>
-Siap Disimpan
-</span>
-</div>
-</div>
-</div>
-            <!-- ========================================
-                 FORM ERRORS
-            ======================================== -->
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-
-            <!-- ========================================
-                 SUBMIT BUTTONS
-            ======================================== -->
-            <div class="d-flex gap-3 justify-content-end mt-4">
-                <a href="{% url 'daftar_Pegawai' %}" class="btn btn-secondary btn-lg">
-                    <i class="fas fa-times me-2"></i>
-                    Batal
-                </a>
-                <button type="submit" class="btn btn-primary btn-lg" id="btnSubmit">
-                    <i class="fas fa-save me-2"></i>
-                    Simpan Data Pegawai
-                </button>
-            </div>
-        </form>
+        <a href="{% url 'daftar_Pegawai' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Kembali
+        </a>
     </div>
 </div>
-</div>
+
+<form method="post" id="formRegister">
+    {% csrf_token %}
+
+    <!-- Step 1: Data Pribadi -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-user"></i> Step 1: Data Pribadi</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="id_nama_lengkap" class="form-label">
+                    Nama Lengkap <span style="color: var(--danger);">*</span>
+                </label>
+                {{ form.nama_lengkap }}
+                {% if form.nama_lengkap.errors %}
+                    <small style="color: var(--danger); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                        {{ form.nama_lengkap.errors }}
+                    </small>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="id_email" name="email" placeholder="contoh@email.com">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="id_tanggal_lahir" class="form-label">Tanggal Lahir</label>
+                    {{ form.tanggal_lahir }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_nomor_hp" class="form-label">Nomor HP</label>
+                    {{ form.nomor_hp }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="id_alamat" class="form-label">Alamat</label>
+                    {{ form.alamat }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Data Kepegawaian -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-briefcase"></i> Step 2: Data Kepegawaian</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="id_departemen" class="form-label">
+                        Departemen <span style="color: var(--danger);">*</span>
+                    </label>
+                    {{ form.departemen }}
+                    <small class="form-text text-muted">
+                        <i class="fas fa-info-circle"></i> 
+                        Akan menentukan User ID & jam kerja
+                    </small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_jabatan" class="form-label">
+                        Jabatan <span style="color: var(--danger);">*</span>
+                    </label>
+                    {{ form.jabatan }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_tanggal_bergabung" class="form-label">
+                        Tanggal Bergabung <span style="color: var(--danger);">*</span>
+                    </label>
+                    {{ form.tanggal_bergabung }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label for="userid" class="form-label">
+                        User ID <span style="color: var(--danger);">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="userid" name="userid" 
+                           placeholder="Pilih departemen untuk generate User ID" required readonly>
+                    <small class="form-text text-muted">
+                        <i class="fas fa-magic"></i> 
+                        User ID akan digenerate otomatis
+                    </small>
+                    <div id="userIdStatus" class="userid-status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Mode & Jam Kerja Assignment -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-clock"></i> Step 3: Assignment Mode & Jam Kerja</h5>
+        </div>
+        <div class="card-body">
+            <div class="progress-wrapper">
+                <div class="progress-header">
+                    <span class="progress-title">
+                        <i class="fas fa-tasks"></i>
+                        Progress Assignment
+                    </span>
+                    <span class="progress-count" id="progressCount">0 / 0 Mode</span>
+                </div>
+                <div class="progress-bar-custom">
+                    <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="modeListContainer">
+                <p class="text-center text-muted" style="padding: var(--space-8);">
+                    <i class="fas fa-building"></i><br>
+                    Pilih departemen terlebih dahulu untuk melihat mode & jam kerja
+                </p>
+            </div>
+
+            <input type="hidden" id="modeAssignments" name="mode_assignments" value="{}">
+        </div>
+    </div>
+
+    <!-- Summary Box -->
+    <div id="summaryBox" class="summary-box" style="display: none;">
+        <div class="summary-header">
+            <div class="summary-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <h6 style="margin: 0 0 var(--space-1) 0; font-size: var(--text-sm); font-weight: 600;">Ringkasan Registrasi</h6>
+                <p style="margin: 0; font-size: var(--text-xs); color: var(--gray-600);">Pastikan data sudah benar sebelum disimpan</p>
+            </div>
+        </div>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <span class="summary-label">User ID</span>
+                <span class="summary-value" id="summaryUserId">-</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Nama Lengkap</span>
+                <span class="summary-value" id="summaryNama">-</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Departemen</span>
+                <span class="summary-value" id="summaryDepartemen">-</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Jabatan</span>
+                <span class="summary-value" id="summaryJabatan">-</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Mode Selesai</span>
+                <span class="summary-value" id="summaryModeCount">0 Mode</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Status</span>
+                <span class="summary-value text-success" id="summaryStatus">
+                    <i class="fas fa-check-circle"></i>
+                    Siap Disimpan
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Errors -->
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <!-- Submit Buttons -->
+    <div class="d-flex gap-3 justify-content-end mt-4">
+        <a href="{% url 'daftar_Pegawai' %}" class="btn btn-secondary">
+            <i class="fas fa-times"></i>
+            Batal
+        </a>
+        <button type="submit" class="btn btn-primary" id="btnSubmit">
+            <i class="fas fa-save"></i>
+            Simpan Data Pegawai
+        </button>
+    </div>
+</form>
 {% endblock %}
+
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ==================== GLOBAL ELEMENTS ====================
     const departemenSelect = document.getElementById('id_departemen');
     const jabatanSelect = document.getElementById('id_jabatan');
     const userIdInput = document.getElementById('userid');
@@ -933,13 +598,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressBar = document.getElementById('progressBar');
     const progressCount = document.getElementById('progressCount');
 
-    // ==================== STATE ====================
     let selectedDepartemenId = null;
     let allModesData = [];
-    let modeAssignments = {}; // {mode_id: {group_id: X, group_nama: Y}}
+    let modeAssignments = {};
     let totalModes = 0;
 
-    // ==================== DEPARTEMEN CHANGE ====================
     departemenSelect.addEventListener('change', function() {
         selectedDepartemenId = this.value;
         
@@ -948,31 +611,26 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Generate User ID
         generateUserID(selectedDepartemenId);
-        
-        // Load Modes
         loadModes(selectedDepartemenId);
     });
 
-    // ==================== RESET UI ====================
     function resetUI() {
         userIdInput.value = '';
         userIdStatus.innerHTML = '';
         modeListContainer.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-building"></i>
-                <p class="mb-0">Pilih departemen terlebih dahulu untuk melihat mode & jam kerja</p>
-            </div>
+            <p class="text-center text-muted" style="padding: var(--space-8);">
+                <i class="fas fa-building"></i><br>
+                Pilih departemen terlebih dahulu untuk melihat mode & jam kerja
+            </p>
         `;
         summaryBox.style.display = 'none';
         modeAssignments = {};
         updateProgress();
     }
 
-    // ==================== GENERATE USER ID ====================
     function generateUserID(departemenId) {
-        showStatus('info', '<i class="fas fa-spinner fa-spin me-2"></i>Generate User ID...');
+        showStatus('info', '<i class="fas fa-spinner fa-spin"></i> Generate User ID...');
 
         fetch(`/api/pegawai/generate-userid/?departemen_id=${departemenId}`)
             .then(response => response.json())
@@ -981,7 +639,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     userIdInput.value = data.userid;
                     showStatus('success', 
                         `✅ ${data.msg}<br>` +
-                        `<small class="text-muted"><i class="fas fa-users me-1"></i>Total pegawai: ${data.total_pegawai} orang</small>`
+                        `<small class="text-muted"><i class="fas fa-users"></i> Total pegawai: ${data.total_pegawai} orang</small>`
                     );
                     updateSummary();
                 } else {
@@ -996,13 +654,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // ==================== LOAD MODES ====================
     function loadModes(departemenId) {
         modeListContainer.innerHTML = `
-            <div class="loading-spinner">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p class="mb-0">Memuat mode jam kerja...</p>
-            </div>
+            <p class="text-center" style="padding: var(--space-8);">
+                <i class="fas fa-spinner fa-spin"></i><br>
+                Memuat mode jam kerja...
+            </p>
         `;
 
         fetch(`/api/pegawai/get-modes/?departemen_id=${departemenId}`)
@@ -1015,27 +672,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     updateProgress();
                 } else {
                     modeListContainer.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-exclamation-triangle text-warning"></i>
-                            <p class="mb-0">Tidak ada mode tersedia untuk departemen ini</p>
-                        </div>
+                        <p class="text-center text-muted" style="padding: var(--space-8);">
+                            <i class="fas fa-exclamation-triangle text-warning"></i><br>
+                            Tidak ada mode tersedia untuk departemen ini
+                        </p>
                     `;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 modeListContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-times-circle text-danger"></i>
-                        <p class="mb-0">Gagal memuat mode</p>
-                    </div>
+                    <p class="text-center text-danger" style="padding: var(--space-8);">
+                        <i class="fas fa-times-circle"></i><br>
+                        Gagal memuat mode
+                    </p>
                 `;
             });
     }
 
-    // ==================== RENDER MODE LIST ====================
     function renderModeList(modes, departemenId) {
-        let html = '<div class="mode-list-container">';
+        let html = '';
 
         modes.forEach(mode => {
             const isCompleted = modeAssignments[mode.id] !== undefined;
@@ -1051,14 +707,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <i class="${mode.icon}"></i>
                             </div>
                             <div class="mode-info">
-                                <h6 class="mode-name">
-                                    ${mode.nama}
-                                    ${mode.is_default ? '<span class="badge bg-warning text-dark ms-2">Default</span>' : ''}
-                                </h6>
-                                <p class="mode-description">Kode: ${mode.kode} | Prioritas: ${mode.priority}</p>
+                                <h6>${mode.nama}</h6>
+                                <small>Kode: ${mode.kode} | Prioritas: ${mode.priority}</small>
                             </div>
                         </div>
-                        <div class="mode-header-right">
+                        <div class="d-flex align-items-center gap-2">
                             ${badgeHtml}
                             <div class="mode-chevron">
                                 <i class="fas fa-chevron-down"></i>
@@ -1066,257 +719,156 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     <div class="mode-body">
-                        <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            <p class="mb-0">Memuat grup jam kerja...</p>
+                        <p class="text-center"><i class="fas fa-spinner fa-spin"></i> Memuat grup jam kerja...</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        modeListContainer.innerHTML = html;
+    }
+
+    window.toggleMode = function(modeId) {
+        const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
+        if (!modeCard) return;
+        
+        const modeBody = modeCard.querySelector('.mode-body');
+        const wasActive = modeCard.classList.contains('active');
+
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.classList.remove('active');
+        });
+
+        if (!wasActive) {
+            modeCard.classList.add('active');
+            
+            if (modeBody.querySelector('.fa-spinner')) {
+                loadJamKerjaGroups(modeId, modeBody);
+            }
+        }
+    };
+
+    function loadJamKerjaGroups(modeId, modeBodyElement) {
+        fetch(`/api/mode/${modeId}/get-jam-kerja-groups/`)
+            .then(response => response.json())
+            .then(response => {
+                if (response.status === 'success' && response.groups && response.groups.length > 0) {
+                    renderJamKerjaGroups(response.groups, modeId, modeBodyElement, response.mode);
+                } else {
+                    const errorMsg = response.msg || `Tidak ada grup jam kerja untuk mode ini`;
+                    modeBodyElement.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle"></i>
+                            ${errorMsg}
                         </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                modeBodyElement.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle"></i>
+                        Gagal memuat grup jam kerja
+                    </div>
+                `;
+            });
+    }
+
+    function renderJamKerjaGroups(groups, modeId, modeBodyElement, modeData) {
+        let html = `
+            <div class="mb-3">
+                <h6 style="font-size: var(--text-sm); font-weight: 600;">
+                    <i class="fas fa-clock text-primary"></i>
+                    Pilih Grup Jam Kerja untuk Mode ${modeData.nama}
+                </h6>
+                <p class="text-muted mb-3" style="font-size: var(--text-xs);">Klik salah satu grup jam kerja di bawah ini</p>
+            </div>
+            <div class="group-grid">
+        `;
+
+        groups.forEach(group => {
+            const isSelected = modeAssignments[modeId]?.group_id === group.id;
+            
+            let jadwalPerHari = {};
+            if (group.jadwal_per_hari && typeof group.jadwal_per_hari === 'object') {
+                jadwalPerHari = group.jadwal_per_hari;
+            } else {
+                const jumlahHari = group.hari_kerja || 5;
+                for (let i = 0; i < jumlahHari && i < 7; i++) {
+                    jadwalPerHari[i.toString()] = group.id.toString();
+                }
+            }
+            
+            html += `
+                <div class="group-card ${isSelected ? 'selected' : ''}" 
+                     onclick='selectGroup(${modeId}, ${group.id}, "${group.nama}", ${JSON.stringify(jadwalPerHari)})'>
+                    <div class="group-header">
+                        <h6 class="group-name">${group.nama}</h6>
+                        <div class="group-check">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                    <div class="group-time">
+                        <i class="fas fa-clock"></i>
+                        <span>${group.jam_masuk} - ${group.jam_keluar}</span>
                     </div>
                 </div>
             `;
         });
 
         html += '</div>';
-        modeListContainer.innerHTML = html;
+        modeBodyElement.innerHTML = html;
     }
 
-// ==================== TOGGLE MODE ====================
-window.toggleMode = function(modeId) {
-    console.log('🔄 Toggle mode:', modeId);
-    
-    const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
-    if (!modeCard) {
-        console.error('❌ Mode card not found:', modeId);
-        return;
-    }
-    
-    const modeBody = modeCard.querySelector('.mode-body');
-    const wasActive = modeCard.classList.contains('active');
-
-    // Close all
-    document.querySelectorAll('.mode-card').forEach(card => {
-        card.classList.remove('active');
-    });
-
-    // Open clicked if wasn't active
-    if (!wasActive) {
-        modeCard.classList.add('active');
+    window.selectGroup = function(modeId, groupId, groupNama, jadwalPerHari) {
+        let jadwalData = {};
         
-        // Load groups if not loaded
-        if (modeBody.querySelector('.loading-spinner')) {
-            loadJamKerjaGroups(modeId, modeBody);
+        if (jadwalPerHari && typeof jadwalPerHari === 'object') {
+            jadwalData = jadwalPerHari;
+        } else {
+            jadwalData = {
+                senin: groupId.toString(),
+                selasa: groupId.toString(),
+                rabu: groupId.toString(),
+                kamis: groupId.toString(),
+                jumat: groupId.toString(),
+                sabtu: null,
+                minggu: null
+            };
         }
-    }
-};
-// ==================== LOAD JAM KERJA GROUPS ====================
-function loadJamKerjaGroups(modeId, modeBodyElement) {
-    console.log('🔍 Loading groups for mode:', modeId);
-    
-    // Convert to DOM element jika jQuery
-    const $modeBody = modeBodyElement instanceof jQuery ? modeBodyElement[0] : modeBodyElement;
-    
-    // Set loading state
-    $modeBody.innerHTML = `
-        <div class="loading-spinner">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p class="mb-0">Memuat grup jam kerja...</p>
-        </div>
-    `;
-    
-    fetch(`/api/mode/${modeId}/get-jam-kerja-groups/`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(response => {
-            console.log('✅ Jam Kerja Groups Response:', response);
-            
-            if (response.status === 'success' && response.groups && response.groups.length > 0) {
-                renderJamKerjaGroups(response.groups, modeId, $modeBody, response.mode);
-            } else {
-                const errorMsg = response.msg || `Tidak ada grup jam kerja untuk mode ini`;
-                $modeBody.innerHTML = `
-                    <div class="alert alert-warning">
-                        <i class="fas fa-info-circle me-2"></i>
-                        ${errorMsg}
-                    </div>
-                `;
-            }
-        })
-        .catch(error => {
-            console.error('❌ Error loading jam kerja groups:', error);
-            
-            $modeBody.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-times-circle me-2"></i>
-                    <strong>Error:</strong> ${error.message}
-                    <br><small>Mode ID: ${modeId}</small>
-                </div>
-            `;
-        });
-}
-// ==================== RENDER JAM KERJA GROUPS ====================
-// ========================================
-
-function renderJamKerjaGroups(groups, modeId, modeBodyElement, modeData) {
-    console.log('🎨 Rendering groups:', groups);
-    
-    let html = `
-        <div class="mb-3">
-            <h6 class="fw-bold">
-                <i class="fas fa-clock text-primary"></i>
-                Pilih Grup Jam Kerja untuk Mode ${modeData.nama}
-            </h6>
-            <p class="text-muted mb-0">Klik salah satu grup jam kerja di bawah ini</p>
-        </div>
-        <div class="group-grid">
-    `;
-
-    groups.forEach(group => {
-        const isSelected = modeAssignments[modeId]?.group_id === group.id;
         
-        // ✅ Build jadwal_per_hari dari response backend
-        let jadwalPerHari = {};
+        modeAssignments[modeId] = {
+            jadwal_per_hari: jadwalData,
+            group_id: groupId,
+            group_nama: groupNama
+        };
         
-        // PRIORITAS 1: Gunakan jadwal_per_hari dari backend (jika ada)
-        if (group.jadwal_per_hari && typeof group.jadwal_per_hari === 'object') {
-            jadwalPerHari = group.jadwal_per_hari;
-            console.log('✅ Using jadwal_per_hari from backend:', jadwalPerHari);
-        }
-        // PRIORITAS 2: Build dari hari_kerja_list (jika ada)
-        else if (group.hari_kerja_list && Array.isArray(group.hari_kerja_list)) {
-            const hariNames = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
+        modeAssignmentsInput.value = JSON.stringify(modeAssignments);
+        
+        updateModeStatus(modeId);
+        updateProgress();
+        updateSummary();
+        
+        const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
+        if (modeCard) {
+            const cards = modeCard.querySelectorAll('.group-card');
             
-            group.hari_kerja_list.forEach(hari => {
-                const hariIndex = hariNames.indexOf(hari.toLowerCase());
-                if (hariIndex !== -1) {
-                    jadwalPerHari[hariIndex.toString()] = group.id.toString();
-                }
+            cards.forEach(card => {
+                card.classList.remove('selected');
             });
             
-            console.log('✅ Built jadwal_per_hari from hari_kerja_list:', jadwalPerHari);
-        }
-        // FALLBACK 3: Gunakan hari_kerja count (default Senin-Jumat)
-        else {
-            const jumlahHari = group.hari_kerja || 5;
+            const selectedCard = Array.from(cards).find(card => {
+                const onclickAttr = card.getAttribute('onclick');
+                return onclickAttr && onclickAttr.includes(`, ${groupId},`);
+            });
             
-            for (let i = 0; i < jumlahHari && i < 7; i++) {
-                jadwalPerHari[i.toString()] = group.id.toString();
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
             }
-            
-            console.log('✅ Built jadwal_per_hari from hari_kerja count:', jadwalPerHari);
         }
-        
-        html += `
-            <div class="group-card ${isSelected ? 'selected' : ''}" 
-                 onclick='selectGroup(${modeId}, ${group.id}, "${group.nama}", ${JSON.stringify(jadwalPerHari)})'>
-                <div class="group-header">
-                    <h6 class="group-name">${group.nama}</h6>
-                    <div class="group-check">
-                        <i class="fas fa-check"></i>
-                    </div>
-                </div>
-                <div class="group-details mt-2">
-                    <div class="group-time mb-2">
-                        <i class="fas fa-clock"></i>
-                        <span>${group.jam_masuk} - ${group.jam_keluar}</span>
-                    </div>
-        `;
-        
-        if (group.jam_istirahat) {
-            html += `
-                <div class="group-meta-item mb-1">
-                    <i class="fas fa-coffee text-muted"></i>
-                    <small class="text-muted">Istirahat: ${group.jam_istirahat}</small>
-                </div>
-            `;
-        }
-        
-        html += `
-                    <div class="group-meta-item">
-                        <i class="fas fa-calendar-check text-primary"></i>
-                        <small>${group.hari_kerja} hari kerja</small>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-
-    html += '</div>';
-    modeBodyElement.innerHTML = html;
-}
-// ==================== SELECT GROUP ====================
-window.selectGroup = function(modeId, groupId, groupNama, jadwalPerHari) {
-    // ✅ FIX: Simpan dengan format jadwal_per_hari yang lengkap
-    console.log('🔍 selectGroup called:', {
-        modeId,
-        groupId,
-        groupNama,
-        jadwalPerHari
-    });
-    
-    // Validasi jadwal_per_hari
-    let jadwalData = {};
-    
-    if (jadwalPerHari && typeof jadwalPerHari === 'object') {
-        jadwalData = jadwalPerHari;
-    } else {
-        // Fallback: semua hari kerja pakai shift group ini
-        console.warn('⚠️ jadwalPerHari tidak valid, gunakan default');
-        jadwalData = {
-            senin: groupId.toString(),
-            selasa: groupId.toString(),
-            rabu: groupId.toString(),
-            kamis: groupId.toString(),
-            jumat: groupId.toString(),
-            sabtu: null,
-            minggu: null
-        };
-    }
-    
-    // ✅ Save assignment dengan format BENAR untuk backend
-    modeAssignments[modeId] = {
-        jadwal_per_hari: jadwalData,  // ← YANG INI PENTING untuk backend!
-        group_id: groupId,             // ← Tambahan untuk tracking UI
-        group_nama: groupNama          // ← Tambahan untuk display
     };
-    
-    // Update hidden input
-    modeAssignmentsInput.value = JSON.stringify(modeAssignments);
-    
-    console.log('✅ Mode Assignment Saved:', {
-        mode_id: modeId,
-        assignment: modeAssignments[modeId],
-        full_json: modeAssignmentsInput.value
-    });
-    
-    // Update UI
-    updateModeStatus(modeId);
-    updateProgress();
-    updateSummary();
-    
-    // Update group cards selection
-    const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
-    if (modeCard) {
-        const cards = modeCard.querySelectorAll('.group-card');
-        
-        cards.forEach(card => {
-            card.classList.remove('selected');
-        });
-        
-        // Find and select the clicked card
-        const selectedCard = Array.from(cards).find(card => {
-            const onclickAttr = card.getAttribute('onclick');
-            return onclickAttr && onclickAttr.includes(`, ${groupId},`);
-        });
-        
-        if (selectedCard) {
-            selectedCard.classList.add('selected');
-        }
-    }
-};
-    // ==================== UPDATE MODE STATUS ====================
+
     function updateModeStatus(modeId) {
         const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
         
@@ -1329,7 +881,6 @@ window.selectGroup = function(modeId, groupId, groupNama, jadwalPerHari) {
         }
     }
 
-    // ==================== UPDATE PROGRESS ====================
     function updateProgress() {
         const completed = Object.keys(modeAssignments).length;
         const percentage = totalModes > 0 ? (completed / totalModes) * 100 : 0;
@@ -1344,7 +895,6 @@ window.selectGroup = function(modeId, groupId, groupNama, jadwalPerHari) {
         }
     }
 
-    // ==================== UPDATE SUMMARY ====================
     function updateSummary() {
         const namaLengkap = document.getElementById('id_nama_lengkap').value;
         const departemenText = departemenSelect.options[departemenSelect.selectedIndex]?.text || '-';
@@ -1363,7 +913,6 @@ window.selectGroup = function(modeId, groupId, groupNama, jadwalPerHari) {
         }
     }
 
-    // ==================== SHOW STATUS ====================
     function showStatus(type, message) {
         const alertClass = {
             'success': 'alert-success',
@@ -1373,7 +922,7 @@ window.selectGroup = function(modeId, groupId, groupNama, jadwalPerHari) {
         }[type] || 'alert-info';
         
         userIdStatus.innerHTML = `
-            <div class="alert ${alertClass} mb-0" role="alert">
+            <div class="alert ${alertClass}">
                 ${message}
             </div>
         `;
@@ -1385,7 +934,6 @@ window.selectGroup = function(modeId, groupId, groupNama, jadwalPerHari) {
         }
     }
 
-    // ==================== FORM SUBMIT VALIDATION ====================
     formRegister.addEventListener('submit', function(e) {
         const namaLengkap = document.getElementById('id_nama_lengkap').value.trim();
         const departemen = departemenSelect.value;
@@ -1393,7 +941,6 @@ window.selectGroup = function(modeId, groupId, groupNama, jadwalPerHari) {
         const tanggalBergabung = document.getElementById('id_tanggal_bergabung').value;
         const completedModes = Object.keys(modeAssignments).length;
         
-        // Validation
         if (!userIdInput.value) {
             e.preventDefault();
             alert('❌ User ID belum digenerate! Pilih departemen terlebih dahulu.');
@@ -1413,7 +960,6 @@ window.selectGroup = function(modeId, groupId, groupNama, jadwalPerHari) {
             return false;
         }
 
-        // Confirmation
         const confirmed = confirm(
             `Simpan data pegawai?\n\n` +
             `User ID: ${userIdInput.value}\n` +
@@ -1428,16 +974,13 @@ window.selectGroup = function(modeId, groupId, groupNama, jadwalPerHari) {
             return false;
         }
 
-        // Disable submit button
         btnSubmit.disabled = true;
-        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan Data...';
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan Data...';
     });
 
-    // ==================== AUTO-UPDATE SUMMARY ====================
     document.getElementById('id_nama_lengkap').addEventListener('input', updateSummary);
     jabatanSelect.addEventListener('change', updateSummary);
 
-    // ==================== INIT: Set Tanggal Bergabung ====================
     const tanggalBergabungInput = document.getElementById('id_tanggal_bergabung');
     if (tanggalBergabungInput && !tanggalBergabungInput.value) {
         const today = new Date().toISOString().split('T')[0];

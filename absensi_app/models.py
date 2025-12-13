@@ -267,7 +267,96 @@ class ModeJamKerjaJadwal(models.Model):
     def __str__(self):
         hari_nama = dict(self.HARI_CHOICES)[self.hari]
         return f"{self.mode.nama} - {self.group_name} ({hari_nama})"
-
+    
+    def get_duration_formatted(self):
+        """
+        Hitung durasi kerja (jam_masuk - jam_keluar - istirahat)
+        
+        Returns:
+            str: Format "8j 30m" atau None jika data tidak lengkap
+        """
+        if not self.jam_masuk or not self.jam_keluar:
+            return None
+        
+        from datetime import datetime, timedelta
+        
+        # Buat datetime dummy untuk kalkulasi
+        today = datetime.today().date()
+        
+        dt_masuk = datetime.combine(today, self.jam_masuk)
+        dt_keluar = datetime.combine(today, self.jam_keluar)
+        
+        # Handle cross-day (jam keluar < jam masuk)
+        if dt_keluar < dt_masuk:
+            dt_keluar += timedelta(days=1)
+        
+        # Hitung durasi kerja
+        durasi_kerja = dt_keluar - dt_masuk
+        
+        # Kurangi waktu istirahat jika ada
+        if self.jam_istirahat_keluar and self.jam_istirahat_masuk:
+            dt_istirahat_keluar = datetime.combine(today, self.jam_istirahat_keluar)
+            dt_istirahat_masuk = datetime.combine(today, self.jam_istirahat_masuk)
+            
+            # Handle cross-day untuk istirahat
+            if dt_istirahat_masuk < dt_istirahat_keluar:
+                dt_istirahat_masuk += timedelta(days=1)
+            
+            durasi_istirahat = dt_istirahat_masuk - dt_istirahat_keluar
+            durasi_kerja -= durasi_istirahat
+        
+        # Convert ke total menit
+        total_minutes = int(durasi_kerja.total_seconds() / 60)
+        
+        if total_minutes <= 0:
+            return None
+        
+        # Format output
+        hours = total_minutes // 60
+        minutes = total_minutes % 60
+        
+        if minutes > 0:
+            return f"{hours}j {minutes}m"
+        else:
+            return f"{hours}j"
+    
+    def get_duration_minutes(self):
+        """
+        Hitung durasi dalam menit (untuk kalkulasi)
+        
+        Returns:
+            int: Total menit kerja atau 0 jika data tidak lengkap
+        """
+        if not self.jam_masuk or not self.jam_keluar:
+            return 0
+        
+        from datetime import datetime, timedelta
+        
+        today = datetime.today().date()
+        
+        dt_masuk = datetime.combine(today, self.jam_masuk)
+        dt_keluar = datetime.combine(today, self.jam_keluar)
+        
+        # Handle cross-day
+        if dt_keluar < dt_masuk:
+            dt_keluar += timedelta(days=1)
+        
+        durasi_kerja = dt_keluar - dt_masuk
+        
+        # Kurangi istirahat
+        if self.jam_istirahat_keluar and self.jam_istirahat_masuk:
+            dt_istirahat_keluar = datetime.combine(today, self.jam_istirahat_keluar)
+            dt_istirahat_masuk = datetime.combine(today, self.jam_istirahat_masuk)
+            
+            if dt_istirahat_masuk < dt_istirahat_keluar:
+                dt_istirahat_masuk += timedelta(days=1)
+            
+            durasi_istirahat = dt_istirahat_masuk - dt_istirahat_keluar
+            durasi_kerja -= durasi_istirahat
+        
+        total_minutes = int(durasi_kerja.total_seconds() / 60)
+        
+        return max(0, total_minutes)
 
 class ModeJamKerjaPeriode(models.Model):
     """Periode aktif untuk mode tertentu"""
