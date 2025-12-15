@@ -416,8 +416,6 @@
 {% endblock %}
 
 {% block extra_js %}
-{# Bagian JavaScript di dalam pegawai_edit.html #}
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const modeListContainer = document.getElementById('modeListContainer');
@@ -428,31 +426,37 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let modeAssignments = {};
 
-    // ✅ LOAD EXISTING ASSIGNMENTS SAAT FORM DIBUKA
+    console.log('\n' + '='.repeat(60));
+    console.log('🚀 EDIT PEGAWAI - INITIALIZATION');
+    console.log('='.repeat(60));
+    console.log('Pegawai ID:', pegawaiId);
+    
+    // ✅ LOAD EXISTING ASSIGNMENTS
     loadExistingAssignments();
 
     function loadExistingAssignments() {
-        console.log('📥 Loading mode assignments for pegawai:', pegawaiId);
+        console.log('\n📥 Loading existing assignments...');
         
         fetch(`/api/pegawai/${pegawaiId}/mode-assignments/`)
             .then(response => response.json())
             .then(data => {
-                console.log('✅ Received data:', data);
+                console.log('✅ API Response:', data);
                 
                 if (data.status === 'success') {
-                    // ✅ INIT MODE ASSIGNMENTS DARI DATA EXISTING
+                    // ✅ INIT modeAssignments DARI EXISTING DATA
                     data.modes.forEach(mode => {
                         if (mode.is_assigned && mode.assignment_data && mode.assignment_data.jadwal_per_hari) {
                             modeAssignments[mode.id] = {
                                 jadwal_per_hari: mode.assignment_data.jadwal_per_hari
                             };
-                            console.log(`✅ Pre-loaded: Mode ${mode.id} = ${JSON.stringify(modeAssignments[mode.id])}`);
+                            console.log(`  ✅ Pre-loaded Mode ${mode.id}:`, modeAssignments[mode.id]);
+                            console.log(`     Total hari:`, Object.keys(mode.assignment_data.jadwal_per_hari).length);
                         }
                     });
                     
-                    // ✅ UPDATE HIDDEN INPUT DENGAN DATA AWAL
+                    // ✅ UPDATE HIDDEN INPUT
                     modeAssignmentsInput.value = JSON.stringify(modeAssignments);
-                    console.log('📝 Updated hidden input:', modeAssignmentsInput.value);
+                    console.log('\n📝 Initial modeAssignments:', modeAssignmentsInput.value);
                     
                     renderModeList(data.modes);
                 } else {
@@ -460,13 +464,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('❌ Error:', error);
+                console.error('❌ Error loading assignments:', error);
                 showError('Terjadi kesalahan saat memuat data');
             });
     }
 
     function renderModeList(modes) {
-        console.log('🎨 Rendering mode list with', modes.length, 'modes');
+        console.log('\n🎨 Rendering', modes.length, 'modes');
         
         let html = '<div class="mode-list">';
         modes.forEach(mode => {
@@ -496,7 +500,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         html += '</div>';
         modeListContainer.innerHTML = html;
+        
         attachModeToggleListeners();
+        console.log('✅ Mode list rendered');
     }
 
     function attachModeToggleListeners() {
@@ -508,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function toggleMode(modeId) {
-        console.log('🔄 Toggle mode:', modeId);
+        console.log('\n🔄 Toggle mode:', modeId);
         
         const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
         const modeBody = modeCard.querySelector('.mode-body');
@@ -526,12 +532,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadJamKerjaGroups(modeId, modeBodyElement) {
-        console.log('📡 Loading jam kerja groups for mode:', modeId);
+        console.log('\n📡 Loading groups for mode:', modeId);
         
         fetch(`/api/mode/${modeId}/get-jam-kerja-groups/`)
             .then(response => response.json())
             .then(data => {
-                console.log('✅ Received groups:', data);
+                console.log('✅ Groups received:', data);
                 
                 if (data.status === 'success' && data.groups.length > 0) {
                     renderJamKerjaGroups(data.groups, modeId, modeBodyElement);
@@ -540,39 +546,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('❌ Error:', error);
+                console.error('❌ Error loading groups:', error);
                 modeBodyElement.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times-circle"></i> Gagal memuat</div>';
             });
     }
 
     function renderJamKerjaGroups(groups, modeId, modeBodyElement) {
-        console.log('🎨 Rendering', groups.length, 'groups for mode', modeId);
+        console.log('\n🎨 Rendering', groups.length, 'groups for mode', modeId);
         
         let html = '<div class="group-grid">';
+        
         groups.forEach(group => {
-            // ✅ CEK APAKAH GROUP INI SUDAH DI-SELECT SEBELUMNYA
+            // ✅ CEK APAKAH GROUP INI SUDAH SELECTED
             const currentAssignment = modeAssignments[modeId];
             let isSelected = false;
             
             if (currentAssignment && currentAssignment.jadwal_per_hari) {
-                // ✅ CEK: Apakah group ini match dengan jadwal_per_hari yang tersimpan?
                 const assignedJadwalIds = Object.values(currentAssignment.jadwal_per_hari);
                 isSelected = assignedJadwalIds.includes(group.id);
-                
-                console.log(`Group ${group.id}: assigned_jadwals=${assignedJadwalIds}, match=${isSelected}`);
             }
             
-            // ✅ BUILD JADWAL_PER_HARI DARI GROUP
+            // ✅ BUILD jadwal_per_hari LENGKAP
             let jadwalPerHari = {};
-            if (group.jadwal_per_hari && typeof group.jadwal_per_hari === 'object') {
+            
+            if (group.jadwal && Array.isArray(group.jadwal) && group.jadwal.length > 0) {
+                // ✅ BUILD dari array jadwal
+                group.jadwal.forEach(j => {
+                    jadwalPerHari[j.hari.toString()] = j.jadwal_id;
+                });
+            } else if (group.jadwal_per_hari && typeof group.jadwal_per_hari === 'object') {
+                // ✅ Sudah ada jadwal_per_hari
                 jadwalPerHari = group.jadwal_per_hari;
             } else {
-                // Fallback: ambil semua jadwal dengan group_name yang sama
+                // ❌ FALLBACK (tidak ideal)
+                console.warn(`⚠️ Group ${group.nama} tidak ada jadwal!`);
                 const jumlahHari = group.hari_kerja || 5;
                 for (let i = 0; i < jumlahHari && i < 7; i++) {
-                    jadwalPerHari[i.toString()] = group.id.toString();
+                    jadwalPerHari[i.toString()] = group.id;
                 }
             }
+            
+            console.log(`  Group ${group.nama}:`, jadwalPerHari, `(${Object.keys(jadwalPerHari).length} hari)`);
             
             html += `
                 <div class="group-card ${isSelected ? 'selected' : ''}" 
@@ -593,8 +607,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
         });
+        
         html += '</div>';
         modeBodyElement.innerHTML = html;
+        
         attachGroupSelectListeners(modeBodyElement);
     }
 
@@ -610,44 +626,73 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function selectGroup(modeId, groupId, jadwalPerHari) {
-        console.log(`✅ Selected: Mode ${modeId}, Group ${groupId}, Jadwal:`, jadwalPerHari);
+        console.log('\n✅ GROUP SELECTED');
+        console.log('  Mode ID:', modeId);
+        console.log('  Group ID:', groupId);
+        console.log('  Jadwal:', jadwalPerHari);
+        console.log('  Total hari:', Object.keys(jadwalPerHari).length);
         
-        // ✅ SIMPAN KE modeAssignments
+        // ✅ SIMPAN ke modeAssignments
         modeAssignments[modeId] = {
             jadwal_per_hari: jadwalPerHari
         };
         
-        // ✅ UPDATE HIDDEN INPUT
+        // ✅ UPDATE hidden input
         modeAssignmentsInput.value = JSON.stringify(modeAssignments);
-        console.log('📝 Updated hidden input:', modeAssignmentsInput.value);
+        console.log('\n📝 Updated modeAssignments:', modeAssignmentsInput.value);
         
         // ✅ UPDATE UI
         const modeCard = document.querySelector(`.mode-card[data-mode-id="${modeId}"]`);
         
-        // Tandai mode sebagai completed
+        // Mark as completed
         modeCard.classList.add('completed');
         const badge = modeCard.querySelector('.mode-badge');
         badge.className = 'mode-badge completed';
         badge.innerHTML = '<i class="fas fa-check-circle"></i> Assigned';
         
-        // Unselect semua group, select yang dipilih
+        // Unselect all, select current
         modeCard.querySelectorAll('.group-card').forEach(c => c.classList.remove('selected'));
         modeCard.querySelector(`.group-card[data-group-id="${groupId}"]`).classList.add('selected');
+        
+        console.log('✅ UI updated');
     }
 
     function showError(message) {
         modeListContainer.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ${message}</div>`;
     }
 
-    // ✅ HANDLE FORM SUBMIT
+    // ✅ FORM SUBMIT HANDLER
     form.addEventListener('submit', function(e) {
-        // ✅ LOG DATA SEBELUM SUBMIT
-        console.log('📤 Form submitted!');
-        console.log('Mode assignments:', JSON.parse(modeAssignmentsInput.value || '{}'));
+        console.log('\n' + '='.repeat(60));
+        console.log('📤 FORM SUBMIT');
+        console.log('='.repeat(60));
+        
+        const finalAssignments = JSON.parse(modeAssignmentsInput.value || '{}');
+        
+        console.log('Total modes:', Object.keys(finalAssignments).length);
+        
+        for (const [modeId, data] of Object.entries(finalAssignments)) {
+            console.log(`\nMode ${modeId}:`);
+            console.log('  jadwal_per_hari:', data.jadwal_per_hari);
+            console.log('  Total hari:', Object.keys(data.jadwal_per_hari || {}).length);
+        }
+        
+        // ✅ VALIDASI: Warn jika kosong
+        if (Object.keys(finalAssignments).length === 0) {
+            console.warn('⚠️ WARNING: No modes selected!');
+            alert('⚠️ WARNING: Tidak ada mode yang dipilih!\n\nData pribadi & organisasi akan disimpan, tapi mode jam kerja tidak berubah.');
+        }
+        
+        console.log('\n✅ Submitting form...');
+        console.log('='.repeat(60) + '\n');
         
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
     });
+    
+    console.log('='.repeat(60));
+    console.log('✅ INITIALIZATION COMPLETE');
+    console.log('='.repeat(60) + '\n');
 });
 </script>
 {% endblock %}

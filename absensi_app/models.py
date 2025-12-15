@@ -244,11 +244,11 @@ class ModeJamKerjaJadwal(models.Model):
     jam_istirahat_keluar = models.TimeField(null=True, blank=True)
     jam_istirahat_masuk = models.TimeField(null=True, blank=True)
     toleransi_terlambat = models.IntegerField(
-        default=15, 
+        default=5, 
         verbose_name="Toleransi Terlambat (menit)"
     )
     toleransi_pulang_cepat = models.IntegerField(
-        default=15, 
+        default=1, 
         verbose_name="Toleransi Pulang Cepat (menit)"
     )
     urutan = models.IntegerField(default=1, verbose_name="Urutan Shift")

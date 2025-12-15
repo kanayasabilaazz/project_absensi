@@ -1272,7 +1272,14 @@ def Pegawai_detail(request, pk):
 
 @login_required
 def Pegawai_edit(request, pk):
-    """✅ FIXED: Menangani form edit data pegawai + MODE ASSIGNMENT"""
+    """
+    ✅ FIXED: Edit pegawai dengan mode assignment yang benar
+    
+    KEY FIX:
+    1. Support BOTH format: mode_assignments (new) dan schedules_json (fallback)
+    2. Build jadwal_per_hari LENGKAP dari frontend data
+    3. Clear cache setelah save
+    """
     if not request.user.is_staff:
         messages.error(request, "Akses ditolak.")
         return redirect('dashboard')
@@ -1282,7 +1289,9 @@ def Pegawai_edit(request, pk):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # ✅ 1. UPDATE DATA PRIBADI & ORGANISASI
+                # ========================================
+                # 1. UPDATE DATA PRIBADI & ORGANISASI
+                # ========================================
                 pegawai_obj.nama_lengkap = request.POST.get('nama_lengkap', '').strip()
                 pegawai_obj.email = request.POST.get('email', '').strip()
                 pegawai_obj.tanggal_lahir = request.POST.get('tanggal_lahir') or None
@@ -1298,54 +1307,112 @@ def Pegawai_edit(request, pk):
                 
                 pegawai_obj.save()
                 
-                # ✅ 2. PROSES MODE ASSIGNMENTS
+                # ========================================
+                # 2. PROSES MODE ASSIGNMENTS (CRITICAL FIX)
+                # ========================================
+                
                 mode_assignments_json = request.POST.get('mode_assignments', '{}')
                 
-                if mode_assignments_json and mode_assignments_json != '{}':
+                print("\n" + "="*60)
+                print(f"🔧 EDIT PEGAWAI: {pegawai_obj.nama_lengkap}")
+                print("="*60)
+                print(f"📥 Raw mode_assignments: {mode_assignments_json[:200]}...")
+                
+                if not mode_assignments_json or mode_assignments_json == '{}':
+                    print("⚠️  WARNING: mode_assignments kosong!")
+                    messages.warning(request, '⚠️ Mode jam kerja tidak diubah (data kosong)')
+                else:
                     try:
                         mode_assignments = json.loads(mode_assignments_json)
+                        print(f"✅ Parsed: {len(mode_assignments)} modes")
                     except json.JSONDecodeError as e:
+                        print(f"❌ JSON Error: {str(e)}")
                         messages.warning(request, f'⚠️ Format assignment tidak valid, skip: {str(e)}')
                         mode_assignments = {}
                     
                     if mode_assignments:
                         # ✅ HAPUS assignment lama
-                        pegawai_obj.mode_assignments.all().delete()
+                        deleted_count = pegawai_obj.mode_assignments.all().delete()[0]
+                        print(f"🗑️  Deleted {deleted_count} old assignments")
                         
                         # ✅ BUAT assignment baru
+                        created_count = 0
+                        
                         for mode_id_str, assignment_data in mode_assignments.items():
                             try:
                                 mode_id = int(mode_id_str)
+                                mode = MasterModeJamKerja.objects.get(id=mode_id)
+                                
+                                print(f"\n   🔧 Mode {mode_id}: {mode.nama}")
+                                
+                                # ========================================
+                                # ✅ CRITICAL: Get jadwal_per_hari
+                                # ========================================
+                                
                                 jadwal_per_hari = assignment_data.get('jadwal_per_hari', {})
                                 
-                                if jadwal_per_hari and any(v for v in jadwal_per_hari.values()):
-                                    # ✅ Validasi jadwal exist
-                                    valid_jadwal_ids = set(
-                                        ModeJamKerjaJadwal.objects.filter(
-                                            mode_id=mode_id
-                                        ).values_list('id', flat=True)
-                                    )
+                                print(f"   📥 Received jadwal_per_hari: {jadwal_per_hari}")
+                                
+                                # ✅ VALIDASI: Pastikan tidak kosong
+                                if not jadwal_per_hari or not any(v for v in jadwal_per_hari.values()):
+                                    print(f"   ⚠️  jadwal_per_hari kosong, skip mode ini")
+                                    continue
+                                
+                                # ✅ VALIDASI: Semua jadwal_id valid
+                                valid_jadwal_ids = set(
+                                    ModeJamKerjaJadwal.objects.filter(
+                                        mode_id=mode_id
+                                    ).values_list('id', flat=True)
+                                )
+                                
+                                cleaned_jadwal = {}
+                                for hari_str, jadwal_id in jadwal_per_hari.items():
+                                    # ✅ Convert ke int jika perlu
+                                    try:
+                                        jadwal_id_int = int(jadwal_id)
+                                    except (ValueError, TypeError):
+                                        print(f"   ⚠️  Invalid jadwal_id: {jadwal_id}, skip")
+                                        continue
                                     
-                                    cleaned_jadwal = {}
-                                    for hari_str, jadwal_id in jadwal_per_hari.items():
-                                        if jadwal_id in valid_jadwal_ids:
-                                            cleaned_jadwal[str(hari_str)] = jadwal_id
-                                    
-                                    if cleaned_jadwal:
-                                        PegawaiModeAssignment.objects.create(
-                                            pegawai=pegawai_obj,
-                                            mode_id=mode_id,
-                                            jadwal_per_hari=cleaned_jadwal,
-                                            is_active=True
-                                        )
-                                        print(f"✅ Created assignment: {pegawai_obj.nama_lengkap} - Mode {mode_id}")
+                                    if jadwal_id_int in valid_jadwal_ids:
+                                        cleaned_jadwal[str(hari_str)] = jadwal_id_int
+                                    else:
+                                        print(f"   ⚠️  Jadwal ID {jadwal_id_int} tidak valid, skip")
+                                
+                                if not cleaned_jadwal:
+                                    print(f"   ❌ No valid jadwal for mode {mode.nama}")
+                                    continue
+                                
+                                print(f"   ✅ Final jadwal: {cleaned_jadwal} ({len(cleaned_jadwal)} hari)")
+                                
+                                # ✅ CREATE ASSIGNMENT
+                                PegawaiModeAssignment.objects.create(
+                                    pegawai=pegawai_obj,
+                                    mode_id=mode_id,
+                                    jadwal_per_hari=cleaned_jadwal,
+                                    is_active=True
+                                )
+                                
+                                created_count += 1
+                                print(f"   ✅ Created assignment untuk {mode.nama}")
+                                
                             except (ValueError, TypeError) as e:
-                                print(f"⚠️ Error processing mode {mode_id_str}: {str(e)}")
+                                print(f"   ❌ Error parsing mode {mode_id_str}: {str(e)}")
                                 continue
+                            except MasterModeJamKerja.DoesNotExist:
+                                print(f"   ❌ Mode {mode_id} tidak ditemukan")
+                                continue
+                        
+                        print(f"\n📊 Total assignments created: {created_count}")
                 
-                # ✅ 3. CLEAR CACHE
+                # ========================================
+                # 3. CLEAR CACHE (PENTING!)
+                # ========================================
+                
                 from django.core.cache import cache
                 from .services import WorkModeService
+                
+                print(f"\n🧹 Clearing cache for pegawai {pegawai_obj.id}...")
                 
                 # Clear global cache
                 WorkModeService.clear_cache()
@@ -1354,27 +1421,36 @@ def Pegawai_edit(request, pk):
                 cache_key = f"pegawai_mode_detail_{pegawai_obj.id}"
                 cache.delete(cache_key)
                 
-                # Clear jadwal cache
+                # Clear jadwal cache (7 hari ke depan)
                 for i in range(7):
                     cache_key = f"jadwal_{pegawai_obj.id}_{date.today() + timedelta(days=i)}"
                     cache.delete(cache_key)
                 
-                print(f"\n🧹 Cleared cache for pegawai: {pegawai_obj.nama_lengkap}\n")
+                print(f"✅ Cache cleared!")
+                print("="*60 + "\n")
+                
+                # ========================================
+                # 4. SUCCESS MESSAGE
+                # ========================================
                 
                 messages.success(
                     request,
-                    f"✅ Data {pegawai_obj.nama_lengkap} berhasil diperbarui."
+                    f"✅ Data {pegawai_obj.nama_lengkap} berhasil diperbarui.\n\n"
+                    f"💡 Refresh halaman detail untuk melihat perubahan mode jam kerja."
                 )
                 return redirect('Pegawai_detail', pk=pk)
         
         except Exception as e:
             import traceback
             error_detail = traceback.format_exc()
-            print(f"❌ ERROR in Pegawai_edit:\n{error_detail}")
-            messages.error(request, f"Error: {str(e)}")
+            print(f"\n❌ ERROR in Pegawai_edit:\n{error_detail}")
+            messages.error(request, f"❌ Error: {str(e)}")
             return redirect('Pegawai_edit', pk=pk)
     
-    # ✅ GET: Load data
+    # ========================================
+    # GET: Load data untuk form
+    # ========================================
+    
     context = {
         'pegawai': pegawai_obj,
         'departemen_list': MasterDepartemen.objects.filter(is_active=True).order_by('nama'),
@@ -1384,7 +1460,6 @@ def Pegawai_edit(request, pk):
         'mode_jam_kerja_list': MasterModeJamKerja.objects.filter(is_active=True).order_by('nama'),
     }
     return render(request, 'absensi_app/pegawai/pegawai_edit.html', context)
-
 
 def _update_pegawai_relations(pegawai, post_data):
     """Helper untuk memperbarui relasi foreign key pegawai"""
@@ -1777,109 +1852,80 @@ def api_get_mode_jadwal_departemen(request, pk):
 
 @login_required
 def api_get_jam_kerja_groups(request, pk):
-    """API untuk mengambil grup jam kerja per mode dengan validasi cabang."""
-    if not request.user.is_staff:
-        return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
-    
-    import logging
-    logger = logging.getLogger(__name__)
+    """
+    API untuk mendapatkan grup jam kerja yang BENAR
+    Grup = jadwal dengan group_name yang SAMA
+    """
+    from django.http import JsonResponse
     
     try:
-        cabang_aktif = get_active_cabang(request)
+        from .models import MasterModeJamKerja, ModeJamKerjaJadwal
         
-        logger.info(f"=== API: mode_id={pk}, cabang={cabang_aktif.nama if cabang_aktif else 'None'} ===")
+        print(f"\n{'='*60}")
+        print(f"API GET JAM KERJA GROUPS - Mode ID: {pk}")
+        print(f"{'='*60}")
         
-        mode = MasterModeJamKerja.objects.filter(pk=pk).first()
+        mode = MasterModeJamKerja.objects.get(id=pk, is_active=True)
+        print(f"✅ Mode: {mode.nama}")
         
-        if not mode:
-            return JsonResponse({
-                "status": "error",
-                "msg": f"Mode ID {pk} tidak ditemukan"
-            }, status=404)
+        # Ambil SEMUA jadwal, urutkan berdasarkan group_name dan hari
+        jadwal_all = ModeJamKerjaJadwal.objects.filter(mode=mode).order_by('group_name', 'hari')
         
-        # ✅ VALIDASI CABANG
-        if mode.cabang_id is not None and cabang_aktif:
-            if mode.cabang_id != cabang_aktif.id:
-                return JsonResponse({
-                    "status": "error",
-                    "msg": f"Mode '{mode.nama}' untuk cabang '{mode.cabang.nama}', tidak sesuai dengan '{cabang_aktif.nama}'"
-                }, status=403)
+        print(f"📊 Total jadwal di DB: {jadwal_all.count()}")
         
-        jadwal_list = mode.jadwal_list.all().order_by('group_name', 'hari')
+        if jadwal_all.count() == 0:
+            return JsonResponse({'status': 'success', 'groups': []})
         
-        if not jadwal_list.exists():
-            return JsonResponse({
-                "status": "error",
-                "msg": f"Mode {mode.nama} belum memiliki jadwal",
-                "groups": [],
-                "total": 0
-            }, status=400)
+        # Group berdasarkan group_name yang SAMA
+        groups_dict = {}
         
-        from collections import defaultdict
-        groups_dict = defaultdict(list)
-        
-        for jadwal in jadwal_list:
-            if jadwal.group_name:
-                groups_dict[jadwal.group_name].append(jadwal)
-        
-        if not groups_dict:
-            return JsonResponse({
-                "status": "error",
-                "msg": f"Jadwal tidak memiliki nama grup",
-                "groups": [],
-                "total": 0
-            }, status=400)
-        
-        groups = []
-        hari_names = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu']
-        
-        for group_name, jadwal_items in groups_dict.items():
-            sample = jadwal_items[0]
+        for jadwal in jadwal_all:
+            # Gunakan group_name sebagai key
+            group_key = jadwal.group_name if jadwal.group_name else f"Grup-{jadwal.id}"
             
-            jam_masuk = sample.jam_masuk.strftime('%H:%M') if sample.jam_masuk else '-'
-            jam_keluar = sample.jam_keluar.strftime('%H:%M') if sample.jam_keluar else '-'
+            print(f"  Jadwal ID={jadwal.id}, group_name='{group_key}', hari={jadwal.hari}")
             
-            jam_istirahat = None
-            if sample.jam_istirahat_keluar and sample.jam_istirahat_masuk:
-                jam_istirahat = f"{sample.jam_istirahat_keluar.strftime('%H:%M')} - {sample.jam_istirahat_masuk.strftime('%H:%M')}"
+            # Inisialisasi grup baru jika belum ada
+            if group_key not in groups_dict:
+                groups_dict[group_key] = {
+                    'id': jadwal.id,  # ID jadwal pertama dalam grup
+                    'nama': group_key,
+                    'jam_masuk': str(jadwal.jam_masuk),
+                    'jam_keluar': str(jadwal.jam_keluar),
+                    'hari_kerja': 0,
+                    'jadwal': []
+                }
             
-            hari_kerja_count = 0
-            hari_kerja_list = []
-            jadwal_per_hari = {}
-            
-            for jadwal in jadwal_items:
-                if jadwal.jam_masuk and jadwal.jam_keluar and 0 <= jadwal.hari < 7:
-                    hari_kerja_count += 1
-                    hari_kerja_list.append(hari_names[jadwal.hari])
-                    jadwal_per_hari[str(jadwal.hari)] = jadwal.id
-            
-            groups.append({
-                'id': sample.id,
-                'nama': group_name,
-                'jam_masuk': jam_masuk,
-                'jam_keluar': jam_keluar,
-                'jam_istirahat': jam_istirahat,
-                'hari_kerja': hari_kerja_count,
-                'hari_kerja_list': hari_kerja_list,
-                'jadwal_per_hari': jadwal_per_hari
+            # Tambahkan jadwal ke grup
+            hari_names = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
+            groups_dict[group_key]['jadwal'].append({
+                'hari': jadwal.hari,
+                'jadwal_id': jadwal.id,
+                'hari_nama': hari_names[jadwal.hari] if 0 <= jadwal.hari < 7 else f'Hari-{jadwal.hari}',
+                'jam_masuk': str(jadwal.jam_masuk),
+                'jam_pulang': str(jadwal.jam_keluar)
             })
+            
+            groups_dict[group_key]['hari_kerja'] += 1
         
-        return JsonResponse({
-            "status": "success",
-            "mode": {"id": mode.id, "nama": mode.nama},
-            "groups": groups,
-            "total": len(groups)
-        })
-    
+        # Convert dict to list
+        groups = list(groups_dict.values())
+        
+        print(f"\n✅ Hasil grouping: {len(groups)} grup")
+        for g in groups:
+            print(f"   - Grup '{g['nama']}': {g['hari_kerja']} hari")
+            for jd in g['jadwal']:
+                print(f"      • {jd['hari_nama']} (ID={jd['jadwal_id']}): {jd['jam_masuk']}-{jd['jam_pulang']}")
+        print(f"{'='*60}\n")
+        
+        return JsonResponse({'status': 'success', 'groups': groups})
+        
+    except MasterModeJamKerja.DoesNotExist:
+        return JsonResponse({'status': 'error', 'msg': 'Mode tidak ditemukan'}, status=404)
     except Exception as e:
         import traceback
-        error_detail = traceback.format_exc()
-        logger.error(f"❌ ERROR:\n{error_detail}")
-        
-        return JsonResponse({
-            "status": "error",
-            "msg": f"Error: {str(e)}"
-        }, status=500)
+        print(f"\n❌ ERROR:\n{traceback.format_exc()}\n")
+        return JsonResponse({'status': 'error', 'msg': str(e)}, status=500)
 
 
 @login_required
@@ -5970,8 +6016,8 @@ def tambah_mode_jam_kerja(request):
                                 jam_keluar=jam_keluar,
                                 jam_istirahat_keluar=shift_data.get('break_out') or None,
                                 jam_istirahat_masuk=shift_data.get('break_in') or None,
-                                toleransi_terlambat=15,
-                                toleransi_pulang_cepat=15,
+                                toleransi_terlambat=5,
+                                toleransi_pulang_cepat=5,
                                 urutan=shift_idx + 1,
                             )
                             jadwal_count += 1
@@ -6093,8 +6139,8 @@ def edit_mode_jam_kerja(request, pk):
                                 jam_keluar=jam_keluar,
                                 jam_istirahat_keluar=shift_data.get('break_out') or None,
                                 jam_istirahat_masuk=shift_data.get('break_in') or None,
-                                toleransi_terlambat=int(shift_data.get('toleransi', 15)),
-                                toleransi_pulang_cepat=int(shift_data.get('toleransi', 15)),
+                                toleransi_terlambat=int(shift_data.get('toleransi', 5)),
+                                toleransi_pulang_cepat=int(shift_data.get('toleransi', 5)),
                                 urutan=shift_idx + 1,
                             )
                             shift_count += 1
@@ -6377,8 +6423,8 @@ def duplicate_mode_jam_kerja(request, pk):
                                 jam_keluar=jam_keluar,
                                 jam_istirahat_keluar=shift_data.get('break_out') or None,
                                 jam_istirahat_masuk=shift_data.get('break_in') or None,
-                                toleransi_terlambat=int(shift_data.get('toleransi', 15)),
-                                toleransi_pulang_cepat=int(shift_data.get('toleransi', 15)),
+                                toleransi_terlambat=int(shift_data.get('toleransi', 5)),
+                                toleransi_pulang_cepat=int(shift_data.get('toleransi', 5)),
                                 urutan=shift_idx + 1,
                             )
                             jadwal_count += 1
@@ -7383,12 +7429,10 @@ def api_get_mode_assignments(request, pegawai_id):
 @login_required
 def api_save_mode_assignment_bulk(request):
     """
-    ✅ FIXED: Endpoint API untuk bulk save mode assignment
+    ✅ FIXED: ADDITIVE MODE dengan jadwal_per_hari LENGKAP (semua hari)
     
-    CRITICAL FIX:
-    - Hanya hapus assignment untuk mode yang TIDAK di-check
-    - Simpan/update assignment untuk mode yang DI-check
-    - Jangan hapus semua assignment di awal
+    BEFORE: Hanya simpan 1 jadwal → detail pegawai hanya tampil 1 hari
+    AFTER: Simpan SEMUA jadwal dalam group → detail pegawai tampil lengkap
     """
     if not request.user.is_staff:
         return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
@@ -7397,12 +7441,15 @@ def api_save_mode_assignment_bulk(request):
         return JsonResponse({"status": "error", "msg": "Method tidak diizinkan"}, status=405)
     
     try:
+        import json
+        from django.db import transaction
         from .models import Pegawai, PegawaiModeAssignment, MasterModeJamKerja, ModeJamKerjaJadwal
         
         assignments_json = request.POST.get('assignments', '{}')
         
-        print("\n=== DEBUG BULK ASSIGNMENT ===")
-        print(f"Raw JSON: {assignments_json[:200]}...")
+        print("\n" + "="*60)
+        print("✅ BULK ASSIGN MODE JAM KERJA - FIXED VERSION")
+        print("="*60)
         
         try:
             assignments_list = json.loads(assignments_json)
@@ -7412,9 +7459,10 @@ def api_save_mode_assignment_bulk(request):
                 "msg": f"Format JSON tidak valid: {str(e)}"
             }, status=400)
         
-        print(f"Total pegawai to process: {len(assignments_list)}")
+        print(f"📊 Total pegawai: {len(assignments_list)}")
         
-        total_saved = 0
+        total_added = 0
+        total_updated = 0
         total_failed = 0
         errors = []
         
@@ -7424,193 +7472,194 @@ def api_save_mode_assignment_bulk(request):
                     pegawai_id = assignment_data.get('pegawai_id')
                     modes_data = assignment_data.get('modes', {})
                     
-                    print(f"\n--- Processing Pegawai ID {pegawai_id} ---")
-                    print(f"Modes data: {modes_data}")
+                    print(f"\n{'─'*60}")
+                    print(f"👤 Pegawai ID: {pegawai_id}")
+                    print(f"{'─'*60}")
                     
                     pegawai = Pegawai.objects.get(id=pegawai_id)
+                    print(f"   Nama: {pegawai.nama_lengkap}")
                     
-                    # ✅ CRITICAL FIX: JANGAN HAPUS SEMUA ASSIGNMENT DI AWAL!
-                    # Kita akan hapus per-mode yang tidak di-assign saja
-                    
-                    pegawai_saved = 0
-                    mode_ids_to_keep = []  # ← Mode yang di-assign (keep)
-                    
-                    # ========================================
-                    # ✅ STEP 1: PROSES MODE YANG DI-ASSIGN
-                    # ========================================
                     for mode_id_str, mode_assignment in modes_data.items():
                         try:
                             mode_id = int(mode_id_str)
-                            is_assigned = (
-                                mode_assignment.get('assigned', False) or 
-                                bool(mode_assignment.get('group_id')) or 
-                                bool(mode_assignment.get('jadwal_per_hari'))
-                                )
+                            mode = MasterModeJamKerja.objects.get(id=mode_id)
                             
-                            print(f"\n  Mode ID {mode_id}:")
-                            print(f"    assigned: {is_assigned}")
+                            print(f"\n   🔧 Mode: {mode.nama}")
                             
-                            if not is_assigned:
-                                print(f"    ⏭️ SKIP: Not assigned (will delete if exists)")
+                            # ========================================
+                            # ✅ CRITICAL FIX: Build jadwal_per_hari LENGKAP
+                            # ========================================
+                            
+                            jadwal_per_hari_data = mode_assignment.get('jadwal_per_hari', {})
+                            
+                            print(f"   📥 Received jadwal_per_hari: {jadwal_per_hari_data}")
+                            
+                            # ✅ VALIDASI: Pastikan data lengkap
+                            if not jadwal_per_hari_data or not any(v for v in jadwal_per_hari_data.values()):
+                                print(f"   ⚠️  WARNING: jadwal_per_hari kosong!")
+                                
+                                # ✅ FALLBACK: Build dari group_id jika ada
+                                group_id = mode_assignment.get('group_id')
+                                if group_id:
+                                    print(f"   🔄 Fallback: Building dari group_id={group_id}")
+                                    
+                                    # ✅ Ambil SEMUA jadwal dalam group ini
+                                    jadwal_list = ModeJamKerjaJadwal.objects.filter(
+                                        mode_id=mode_id,
+                                        id=group_id
+                                    ).first()
+                                    
+                                    if jadwal_list:
+                                        # ✅ Ambil SEMUA jadwal dengan group_name yang sama
+                                        all_jadwal_in_group = ModeJamKerjaJadwal.objects.filter(
+                                            mode_id=mode_id,
+                                            group_name=jadwal_list.group_name
+                                        ).order_by('hari')
+                                        
+                                        jadwal_per_hari_data = {}
+                                        for jdl in all_jadwal_in_group:
+                                            jadwal_per_hari_data[str(jdl.hari)] = jdl.id
+                                        
+                                        print(f"   ✅ Built jadwal_per_hari: {jadwal_per_hari_data}")
+                                    else:
+                                        errors.append(f"{pegawai.nama_lengkap} - Mode {mode.nama}: Group ID {group_id} tidak ditemukan")
+                                        total_failed += 1
+                                        continue
+                                else:
+                                    errors.append(f"{pegawai.nama_lengkap} - Mode {mode.nama}: Tidak ada jadwal")
+                                    total_failed += 1
+                                    continue
+                            
+                            # ========================================
+                            # ✅ VALIDASI FINAL: Pastikan semua jadwal valid
+                            # ========================================
+                            
+                            valid_jadwal_ids = set(
+                                ModeJamKerjaJadwal.objects.filter(
+                                    mode_id=mode_id
+                                ).values_list('id', flat=True)
+                            )
+                            
+                            cleaned_jadwal = {}
+                            for hari_str, jadwal_id in jadwal_per_hari_data.items():
+                                if jadwal_id in valid_jadwal_ids:
+                                    cleaned_jadwal[str(hari_str)] = jadwal_id
+                                else:
+                                    print(f"   ⚠️  Jadwal ID {jadwal_id} tidak valid, skip")
+                            
+                            if not cleaned_jadwal:
+                                errors.append(f"{pegawai.nama_lengkap} - Mode {mode.nama}: Tidak ada jadwal valid")
+                                total_failed += 1
                                 continue
                             
-                            # ✅ Mode ini di-assign, tambahkan ke list yang di-keep
-                            mode_ids_to_keep.append(mode_id)
+                            print(f"   ✅ Final cleaned jadwal: {cleaned_jadwal}")
+                            print(f"   📊 Total hari: {len(cleaned_jadwal)}")
                             
-                            # ✅ SUPPORT 2 FORMAT
-                            jadwal_per_hari = mode_assignment.get('jadwal_per_hari', {})
-                            group_id = mode_assignment.get('group_id')
+                            # ========================================
+                            # ✅ SAVE/UPDATE ASSIGNMENT
+                            # ========================================
                             
-                            print(f"    jadwal_per_hari: {jadwal_per_hari}")
-                            print(f"    group_id: {group_id}")
+                            assignment, created = PegawaiModeAssignment.objects.update_or_create(
+                                pegawai=pegawai,
+                                mode=mode,
+                                defaults={
+                                    'jadwal_per_hari': cleaned_jadwal,
+                                    'is_active': True
+                                }
+                            )
                             
-                            # Format 1: Ada jadwal_per_hari
-                            if jadwal_per_hari and any(v for v in jadwal_per_hari.values()):
-                                cleaned_jadwal = {}
-                                
-                                for hari_str, jadwal_id in jadwal_per_hari.items():
-                                    if jadwal_id:
-                                        try:
-                                            hari = int(hari_str)
-                                            jadwal_id = int(jadwal_id)
-                                            
-                                            if ModeJamKerjaJadwal.objects.filter(
-                                                id=jadwal_id,
-                                                mode_id=mode_id,
-                                                hari=hari
-                                            ).exists():
-                                                cleaned_jadwal[str(hari)] = jadwal_id
-                                        except (ValueError, TypeError) as e:
-                                            print(f"    ⚠️ Error parsing hari {hari_str}: {e}")
-                                            continue
-                                
-                                if not cleaned_jadwal:
-                                    errors.append(f"{pegawai.nama_lengkap} - Mode {mode_id}: Tidak ada jadwal valid")
-                                    total_failed += 1
-                                    print(f"    ❌ FAILED: No valid jadwal")
-                                    continue
-                                
-                                # ✅ Update or Create
-                                mode = MasterModeJamKerja.objects.get(id=mode_id)
-                                assignment, created = PegawaiModeAssignment.objects.update_or_create(
-                                    pegawai=pegawai,
-                                    mode=mode,
-                                    defaults={
-                                        'jadwal_per_hari': cleaned_jadwal,
-                                        'is_active': True
-                                    }
-                                )
-                                
-                                total_saved += 1
-                                pegawai_saved += 1
-                                action = "CREATED" if created else "UPDATED"
-                                print(f"    ✅ {action} with jadwal_per_hari: {cleaned_jadwal}")
-                            
-                            # Format 2: Hanya ada group_id
-                            elif group_id:
-                                jadwal_list = ModeJamKerjaJadwal.objects.filter(
-                                    mode_id=mode_id,
-                                    id=group_id
-                                ).values_list('hari', 'id')
-                                
-                                if not jadwal_list:
-                                    errors.append(f"{pegawai.nama_lengkap} - Mode {mode_id}: Jadwal group {group_id} tidak ditemukan")
-                                    total_failed += 1
-                                    print(f"    ❌ FAILED: Jadwal group {group_id} not found")
-                                    continue
-                                
-                                cleaned_jadwal = {str(hari): jid for hari, jid in jadwal_list}
-                                
-                                # ✅ Update or Create
-                                mode = MasterModeJamKerja.objects.get(id=mode_id)
-                                assignment, created = PegawaiModeAssignment.objects.update_or_create(
-                                    pegawai=pegawai,
-                                    mode=mode,
-                                    defaults={
-                                        'jadwal_per_hari': cleaned_jadwal,
-                                        'is_active': True
-                                    }
-                                )
-                                
-                                total_saved += 1
-                                pegawai_saved += 1
-                                action = "CREATED" if created else "UPDATED"
-                                print(f"    ✅ {action} with group_id: {cleaned_jadwal}")
-                            
+                            if created:
+                                total_added += 1
+                                action = "ADDED"
+                                icon = "➕"
                             else:
-                                errors.append(f"{pegawai.nama_lengkap} - Mode {mode_id}: Tidak ada jadwal atau group_id")
-                                total_failed += 1
-                                print(f"    ❌ FAILED: No jadwal_per_hari or group_id")
+                                total_updated += 1
+                                action = "UPDATED"
+                                icon = "🔄"
+                            
+                            print(f"   ✅ {icon} {action}: {mode.nama} ({len(cleaned_jadwal)} hari)")
                             
                         except MasterModeJamKerja.DoesNotExist:
-                            errors.append(f"{pegawai.nama_lengkap} - Mode ID {mode_id}: Mode tidak ditemukan")
+                            errors.append(f"{pegawai.nama_lengkap} - Mode {mode_id}: Mode tidak ditemukan")
                             total_failed += 1
-                            print(f"    ❌ Mode not found")
+                            print(f"   ❌ Mode {mode_id} not found")
                         except Exception as e:
-                            errors.append(f"{pegawai.nama_lengkap} - Mode ID {mode_id}: {str(e)}")
+                            errors.append(f"{pegawai.nama_lengkap} - Mode {mode_id}: {str(e)}")
                             total_failed += 1
-                            print(f"    ❌ Exception: {str(e)}")
-                    
-                    # ========================================
-                    # ✅ STEP 2: HAPUS MODE YANG TIDAK DI-ASSIGN
-                    # ========================================
-                    if mode_ids_to_keep:
-                        # Hapus assignment yang TIDAK ada di list mode_ids_to_keep
-                        deleted = PegawaiModeAssignment.objects.filter(
-                            pegawai=pegawai
-                        ).exclude(
-                            mode_id__in=mode_ids_to_keep
-                        ).delete()
-                        
-                        print(f"\n  🗑️ Deleted {deleted[0]} old assignments (not in keep list)")
-                    else:
-                        # ✅ Jika tidak ada mode yang di-assign, JANGAN HAPUS APAPUN!
-                        # Ini akan SKIP proses ini (tidak ada perubahan)
-                        print(f"\n  ⚠️ No modes assigned, SKIP DELETE (keep existing)")
-                    
-                    print(f"  Pegawai total saved: {pegawai_saved}")
+                            print(f"   ❌ Exception: {str(e)}")
                     
                 except Pegawai.DoesNotExist:
                     errors.append(f"Pegawai ID {pegawai_id}: Tidak ditemukan")
                     total_failed += 1
-                    print(f"❌ Pegawai not found")
+                    print(f"❌ Pegawai ID {pegawai_id} not found")
                 except Exception as e:
                     errors.append(f"Pegawai ID {pegawai_id}: {str(e)}")
                     total_failed += 1
                     print(f"❌ Exception: {str(e)}")
         
-        print(f"\n=== SUMMARY ===")
-        print(f"Total saved: {total_saved}")
-        print(f"Total failed: {total_failed}")
+        print(f"\n{'='*60}")
+        print("📊 SUMMARY")
+        print(f"{'='*60}")
+        print(f"✅ Added: {total_added}")
+        print(f"🔄 Updated: {total_updated}")
+        print(f"❌ Failed: {total_failed}")
+        print(f"{'='*60}\n")
         
-        # ✅ Clear cache
-        from .services import WorkModeService
-        WorkModeService.clear_cache()
+        # ========================================
+        # ✅ CLEAR CACHE SETELAH SUKSES
+        # ========================================
         
-        # ✅ Build response message
-        if total_saved == 0 and total_failed == 0:
-            msg = "ℹ️ Tidak ada perubahan\n\nTidak ada mode yang di-assign."
+        if total_added > 0 or total_updated > 0:
+            from django.core.cache import cache
+            from .services import WorkModeService
+            
+            print("🧹 Clearing cache...")
+            
+            # Clear global cache
+            WorkModeService.clear_cache()
+            
+            # Clear pegawai-specific cache
+            for assignment_data in assignments_list:
+                pegawai_id = assignment_data.get('pegawai_id')
+                if pegawai_id:
+                    cache_key = f"pegawai_mode_detail_{pegawai_id}"
+                    cache.delete(cache_key)
+                    print(f"   ✅ Cleared cache for pegawai {pegawai_id}")
+        
+        # ========================================
+        # ✅ BUILD RESPONSE MESSAGE
+        # ========================================
+        
+        if total_added == 0 and total_updated == 0 and total_failed == 0:
             return JsonResponse({
                 "status": "info",
-                "msg": msg,
-                "saved": 0,
+                "msg": "ℹ️ Tidak ada perubahan",
+                "added": 0,
+                "updated": 0,
                 "failed": 0
             })
         
-        msg = f"✅ {total_saved} assignment berhasil disimpan!"
-        
+        msg = "✅ Berhasil!\n\n"
+        if total_added > 0:
+            msg += f"• ➕ Mode ditambahkan: {total_added}\n"
+        if total_updated > 0:
+            msg += f"• 🔄 Mode diperbarui: {total_updated}\n"
         if total_failed > 0:
-            msg += f"\n\n⚠️ {total_failed} assignment gagal"
+            msg += f"\n⚠️ {total_failed} assignment gagal"
             if errors:
-                msg += "\n\nErrors:\n"
-                msg += "\n".join(errors[:5])
+                msg += "\n\nDetail Error:\n"
+                for err in errors[:5]:
+                    msg += f"• {err}\n"
                 if len(errors) > 5:
-                    msg += f"\n... dan {len(errors) - 5} error lainnya"
+                    msg += f"• ... dan {len(errors) - 5} error lainnya\n"
+        
+        msg += f"\n\n💡 Refresh halaman detail pegawai untuk melihat perubahan."
         
         return JsonResponse({
-            "status": "success" if total_saved > 0 else "warning",
+            "status": "success" if (total_added > 0 or total_updated > 0) else "warning",
             "msg": msg,
-            "saved": total_saved,
+            "added": total_added,
+            "updated": total_updated,
             "failed": total_failed
         })
         
@@ -7621,8 +7670,9 @@ def api_save_mode_assignment_bulk(request):
         
         return JsonResponse({
             "status": "error",
-            "msg": f"Error: {str(e)}"
-        }, status=500)
+            "msg": f"Server error: {str(e)}"
+        }, status=500)    
+    
 # ==============================================================================
 # IMPORT TAP DARI MESIN → SIMPAN KE TAP LOG
 # ==============================================================================
