@@ -6,8 +6,8 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <style>
-    /* ===== PAGE HEADER ===== */
-    .page-header {
+    /* ===== PROFILE HEADER ===== */
+    .profile-header {
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
         color: white;
         padding: var(--space-5);
@@ -16,95 +16,111 @@
         box-shadow: var(--shadow-lg);
     }
 
-    .page-header-content {
+    .profile-header-content {
         display: flex;
         align-items: center;
         gap: var(--space-4);
     }
 
-    .page-header-icon {
+    .profile-avatar {
         width: 56px;
         height: 56px;
         background: rgba(255, 255, 255, 0.2);
-        border-radius: var(--radius-sm);
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: var(--text-2xl);
+        font-weight: 700;
+        border: 3px solid rgba(255, 255, 255, 0.3);
         flex-shrink: 0;
     }
 
-    .page-header-info h4 {
+    .profile-info {
+        flex: 1;
+    }
+
+    .profile-info h4 {
         margin: 0 0 var(--space-2) 0;
         font-size: var(--text-xl);
         font-weight: 700;
     }
 
-    .page-header-meta {
+    .profile-meta {
         display: flex;
         gap: var(--space-4);
-        margin-top: var(--space-2);
         flex-wrap: wrap;
-    }
-
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
         font-size: var(--text-sm);
         opacity: 0.95;
     }
 
-    /* ===== STATS GRID ===== */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--space-4);
-        margin-bottom: var(--space-6);
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: var(--radius);
-        padding: var(--space-5);
-        box-shadow: var(--shadow);
-        border: 1px solid var(--gray-200);
-        transition: all 0.2s;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: var(--radius-sm);
+    .profile-meta-item {
         display: flex;
         align-items: center;
-        justify-content: center;
-        font-size: var(--text-xl);
-        color: white;
-        margin-bottom: var(--space-3);
+        gap: var(--space-2);
     }
 
-    .stat-value {
+    /* ===== STATS GRID ===== */
+    .stats-grid {
+        display: flex;
+        gap: var(--space-3);
+        margin-bottom: var(--space-6);
+        flex-wrap: wrap;
+    }
+
+    .stats-card {
+        background: white;
+        padding: var(--space-4);
+        border-radius: var(--radius-sm);
+        box-shadow: none;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+        display: inline-block;
+        min-width: 120px;
+    }
+
+    .stats-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .stats-card.active {
+        border-color: var(--primary);
+        background: white;
+    }
+
+    .stats-card i {
+        font-size: 1.5rem;
+        margin-bottom: var(--space-1);
+        display: none;
+    }
+
+    .stats-card .number {
         font-size: var(--text-2xl);
         font-weight: 700;
+        margin: 0;
         color: var(--gray-900);
-        margin-bottom: var(--space-1);
     }
 
-    .stat-label {
+    .stats-card .label {
         font-size: var(--text-xs);
         color: var(--gray-600);
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
+        text-transform: capitalize;
+        font-weight: 500;
+        letter-spacing: 0;
+        margin-top: var(--space-1);
     }
 
-    /* ===== BADGES ===== */
+    .stats-card.primary .number { color: var(--primary); }
+
+    .stats-card.success .number { color: var(--success); }
+
+    .stats-card.warning .number { color: var(--warning); }
+
+    .stats-card.info .number { color: #8b5cf6; }
+
     .sesi-badge {
         background: var(--primary);
         color: white;
@@ -125,6 +141,47 @@
         display: inline-flex;
         align-items: center;
         gap: 2px;
+        margin-top: var(--space-1);
+    }
+
+    /* ===== TABLE RESPONSIVE FIX ===== */
+    .table-responsive {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        width: 100% !important;
+        table-layout: auto;
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        white-space: nowrap;
+        background: #f8f9fa;
+        font-weight: 600;
+        padding: var(--space-3);
+        text-align: center;
+        border-bottom: 2px solid var(--gray-300);
+        vertical-align: middle;
+    }
+
+    .table tbody td {
+        padding: var(--space-3);
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    .dataTables_wrapper .dataTables_info {
+        display: none;
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+        display: none;
     }
 
     /* ===== MODAL ===== */
@@ -179,15 +236,115 @@
         display: block;
     }
 
+    /* ===== PAGINATION ===== */
+    .custom-pagination {
+        display: flex;
+        gap: var(--space-1);
+        justify-content: center;
+        padding: var(--space-4) 0;
+        list-style: none;
+        margin: 0;
+    }
+
+    .page-btn {
+        background: white;
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: var(--space-2) var(--space-3);
+        font-weight: 600;
+        font-size: var(--text-sm);
+        cursor: pointer;
+        min-width: 36px;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .page-btn:hover:not(.disabled):not(.active) {
+        background: var(--gray-100);
+        border-color: var(--gray-400);
+    }
+
+    .page-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
     /* ===== RESPONSIVE ===== */
+    @media (max-width: 1200px) {
+        .table thead th,
+        .table tbody td {
+            padding: var(--space-2);
+            font-size: var(--text-sm);
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem !important;
+            font-size: var(--text-sm) !important;
+        }
+    }
+
+    @media (max-width: 1200px) {
+        .table thead th,
+        .table tbody td {
+            padding: var(--space-2);
+            font-size: var(--text-sm);
+        }
+
+        .sesi-badge {
+            padding: var(--space-1) var(--space-2);
+            font-size: var(--text-xs);
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem !important;
+            font-size: var(--text-sm) !important;
+        }
+    }
+
     @media (max-width: 768px) {
-        .page-header-content {
+        .profile-header-content {
             flex-direction: column;
             text-align: center;
         }
 
+        .profile-meta {
+            justify-content: center;
+        }
+
         .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .table {
+            min-width: 900px;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: var(--space-2);
+            font-size: var(--text-xs);
+        }
+
+        .sesi-badge {
+            padding: 2px var(--space-2);
+            font-size: var(--text-xs);
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.7rem !important;
+        }
+
+        .d-flex.gap-2 {
+            gap: var(--space-1) !important;
         }
 
         .cross-day-info-dates {
@@ -197,87 +354,90 @@
 
     @media (max-width: 576px) {
         .stats-grid {
-            grid-template-columns: 1fr;
+            gap: var(--space-2);
+        }
+
+        .stats-card {
+            min-width: 100px;
+            padding: var(--space-3);
+        }
+
+        .table {
+            min-width: 800px;
+            font-size: var(--text-xs);
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: var(--space-1);
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Page Header -->
-<div class="page-header">
-    <div class="page-header-content">
-        <div class="page-header-icon">
-            <i class="fas fa-user-circle"></i>
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="profile-header-content">
+        <div class="profile-avatar">
+            {{ pegawai.nama_lengkap|slice:":1"|upper }}
         </div>
-        <div class="page-header-info flex-grow-1">
+        <div class="profile-info">
             <h4>{{ pegawai.nama_lengkap }}</h4>
-            <div class="page-header-meta">
-                <div class="meta-item">
-                    <i class="fas fa-id-badge"></i>
+            <div class="profile-meta">
+                <div class="profile-meta-item">
+                    <i class="fas fa-id-card"></i>
                     <span>{{ pegawai.userid }}</span>
                 </div>
                 {% if pegawai.departemen %}
-                <div class="meta-item">
+                <div class="profile-meta-item">
                     <i class="fas fa-building"></i>
                     <span>{{ pegawai.departemen.nama }}</span>
                 </div>
                 {% endif %}
                 {% if pegawai.jabatan %}
-                <div class="meta-item">
+                <div class="profile-meta-item">
                     <i class="fas fa-briefcase"></i>
                     <span>{{ pegawai.jabatan.nama }}</span>
                 </div>
                 {% endif %}
             </div>
         </div>
-        <a href="{% url 'riwayat_sesi_absensi' %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i>
-            Kembali
-        </a>
     </div>
 </div>
 
 <!-- Stats Grid -->
 <div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon" style="background: var(--primary);">
-            <i class="fas fa-calendar-check"></i>
-        </div>
-        <div class="stat-value">{{ total_sesi }}</div>
-        <div class="stat-label">Total Sesi</div>
+    <div class="stats-card primary">
+        <i class="fas fa-calendar-check"></i>
+        <div class="number">{{ total_sesi }}</div>
+        <div class="label">Total Sesi</div>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-icon" style="background: var(--success);">
-            <i class="fas fa-calendar-day"></i>
-        </div>
-        <div class="stat-value">{{ total_hari_kerja }}</div>
-        <div class="stat-label">Hari Kerja</div>
+    <div class="stats-card success">
+        <i class="fas fa-calendar-day"></i>
+        <div class="number">{{ total_hari_kerja }}</div>
+        <div class="label">Hari Kerja</div>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-icon" style="background: var(--warning);">
-            <i class="fas fa-layer-group"></i>
-        </div>
-        <div class="stat-value">
+    <div class="stats-card warning">
+        <i class="fas fa-layer-group"></i>
+        <div class="number">
             {% if total_hari_kerja > 0 %}
-            {{ total_sesi|floatformat:1 }} / {{ total_hari_kerja }}
+            {{ total_sesi|floatformat:1 }}/{{ total_hari_kerja }}
             {% else %}
             0
             {% endif %}
         </div>
-        <div class="stat-label">Rata-rata Sesi/Hari</div>
+        <div class="label">Rata-rata Sesi/Hari</div>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-icon" style="background: #8b5cf6;">
-            <i class="fas fa-calendar-alt"></i>
+    <div class="stats-card info">
+        <i class="fas fa-calendar-alt"></i>
+        <div class="number" style="font-size: var(--text-lg);">
+            {{ tanggal_mulai|date:"d M" }}<br><small style="font-size: var(--text-xs); color: var(--gray-600);">s/d {{ tanggal_akhir|date:"d M Y" }}</small>
         </div>
-        <div class="stat-value" style="font-size: var(--text-lg);">
-            {{ tanggal_mulai|date:"d M" }} - {{ tanggal_akhir|date:"d M Y" }}
-        </div>
-        <div class="stat-label">Periode</div>
+        <div class="label">Periode</div>
     </div>
 </div>
 
@@ -288,15 +448,15 @@
     </div>
     <div class="card-body">
         <form method="get" class="row g-3">
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <label class="form-label">Tanggal Mulai</label>
                 <input type="date" name="tanggal_mulai" class="form-control" value="{{ tanggal_mulai|date:'Y-m-d' }}">
             </div>
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <label class="form-label">Tanggal Akhir</label>
                 <input type="date" name="tanggal_akhir" class="form-control" value="{{ tanggal_akhir|date:'Y-m-d' }}">
             </div>
-            <div class="col-md-2 d-flex align-items-end">
+            <div class="col-md-4 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="fas fa-search"></i>
                     Cari
@@ -310,7 +470,18 @@
 <div class="card">
     <div class="card-header">
         <h5><i class="fas fa-table"></i> Data Riwayat Sesi</h5>
+        <div class="d-flex align-items-center gap-2">
+            <label style="margin: 0; font-size: var(--text-sm); font-weight: 600;">Tampilkan:</label>
+            <select class="form-select" id="entriesSelect" style="width: auto; padding: var(--space-2) var(--space-3);">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="-1" selected>Semua</option>
+            </select>
+        </div>
     </div>
+
     <div class="card-body">
         <div class="table-responsive">
             <table class="table" id="sesiTable">
@@ -332,12 +503,12 @@
                         <tr>
                             <td class="text-center"><strong>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</strong></td>
                             <td class="text-center" data-order="{{ sesi.tanggal_mulai|date:'Y-m-d' }}">
-                                {{ sesi.tanggal_mulai|date:"d M Y" }}
+                                <div>{{ sesi.tanggal_mulai|date:"d M Y" }}</div>
                                 {% if sesi.is_cross_day %}
                                     <span class="cross-day-badge" title="Shift Malam Lintas Hari">
                                         <i class="fas fa-moon"></i> Cross
                                     </span>
-                                    <div style="font-size: 10px; color: var(--gray-600); margin-top: 2px;">
+                                    <div style="font-size: 10px; color: var(--gray-600);">
                                         s/d {{ sesi.tanggal_selesai|date:"d M Y" }}
                                     </div>
                                 {% endif %}
@@ -347,21 +518,21 @@
                             </td>
                             <td class="text-center">
                                 {% if sesi.tap_masuk_pertama %}
-                                    <strong style="color: var(--success);">{{ sesi.tap_masuk_pertama|date:"H:i" }}</strong>
+                                    <strong>{{ sesi.tap_masuk_pertama|date:"H:i" }}</strong>
                                 {% else %}
                                     <span class="badge badge-secondary">-</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
                                 {% if sesi.tap_pulang_terakhir %}
-                                    <strong style="color: var(--danger);">{{ sesi.tap_pulang_terakhir|date:"H:i" }}</strong>
+                                    <strong>{{ sesi.tap_pulang_terakhir|date:"H:i" }}</strong>
                                 {% else %}
                                     <span class="badge badge-secondary">-</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
                                 {% if sesi.durasi_kerja_menit %}
-                                    <strong style="color: var(--primary);">{{ sesi.get_durasi_formatted }}</strong>
+                                    <strong>{{ sesi.get_durasi_formatted }}</strong>
                                 {% else %}
                                     <span class="badge badge-secondary">-</span>
                                 {% endif %}
@@ -399,9 +570,13 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="custom-pagination" id="customPagination"></div>
     </div>
+
     <div class="card-footer">
-        Total: <strong>{{ total_sesi }}</strong> Sesi
+        Total: <strong id="totalSesi">{{ total_sesi }}</strong> Sesi
+        <span id="showingInfo" style="color: var(--gray-600); margin-left: var(--space-3);">Menampilkan semua data</span>
     </div>
 </div>
 
@@ -432,28 +607,91 @@
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 <script>
 $(document).ready(function() {
-    $('#sesiTable').DataTable({
+    let table;
+
+    function updateShowingInfo() {
+        const info = table.page.info();
+        const showingInfo = $('#showingInfo');
+        
+        if (info.recordsDisplay === info.recordsTotal && info.length === -1) {
+            showingInfo.text('Menampilkan semua data');
+        } else if (info.length === -1) {
+            showingInfo.text('Menampilkan semua data');
+        } else {
+            showingInfo.text('Menampilkan ' + (info.start + 1) + '-' + info.end + ' dari ' + info.recordsDisplay + ' data');
+        }
+    }
+
+    function renderCustomPagination() {
+        const info = table.page.info();
+        const current = info.page;
+        const total = info.pages;
+        const pagination = $('#customPagination');
+
+        if (total <= 1) {
+            pagination.hide();
+            updateShowingInfo();
+            return;
+        }
+
+        pagination.show();
+        let html = '';
+
+        html += current === 0 ?
+            '<button class="page-btn disabled" disabled>Prev</button>' :
+            '<button class="page-btn" onclick="changePage(' + (current - 1) + ')">Prev</button>';
+
+        let start = Math.max(0, current - 2);
+        let end = Math.min(total - 1, current + 2);
+
+        if (current <= 2) end = Math.min(4, total - 1);
+        if (current >= total - 3) start = Math.max(0, total - 5);
+
+        for (let i = start; i <= end; i++) {
+            html += i === current ?
+                '<button class="page-btn active">' + (i + 1) + '</button>' :
+                '<button class="page-btn" onclick="changePage(' + i + ')">' + (i + 1) + '</button>';
+        }
+
+        html += current === total - 1 ?
+            '<button class="page-btn disabled" disabled>Next</button>' :
+            '<button class="page-btn" onclick="changePage(' + (current + 1) + ')">Next</button>';
+
+        pagination.html(html);
+        updateShowingInfo();
+    }
+
+    window.changePage = function(page) {
+        table.page(page).draw('page');
+    }
+
+    table = $('#sesiTable').DataTable({
         paging: true,
-        pageLength: 25,
-        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
+        pageLength: -1,
+        lengthChange: false,
         ordering: true,
         searching: false,
-        info: true,
+        info: false,
+        scrollX: false,
+        dom: 'rt',
         order: [[1, 'desc']],
-        language: {
-            sInfo: "Menampilkan _START_ - _END_ dari _TOTAL_",
-            sInfoEmpty: "Menampilkan 0 - 0 dari 0",
-            sLengthMenu: "Tampilkan _MENU_",
-            sZeroRecords: "Tidak ada data",
-            oPaginate: {
-                sPrevious: "←",
-                sNext: "→"
-            }
-        },
         columnDefs: [
             { orderable: false, targets: [7] }
-        ]
+        ],
+        language: {
+            emptyTable: 'Tidak ada data'
+        },
+        drawCallback: function() {
+            renderCustomPagination();
+        }
     });
+
+    $('#entriesSelect').on('change', function() {
+        const value = parseInt($(this).val());
+        table.page.len(value).draw();
+    });
+
+    renderCustomPagination();
 });
 
 function getCookie(name) {

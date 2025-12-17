@@ -6,9 +6,36 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <style>
-    /* ===== BREADCRUMB ===== */
+    /* PAGE HEADER */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+        color: white;
+        padding: var(--space-5);
+        border-radius: var(--radius);
+        margin-bottom: var(--space-6);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .page-header h4 {
+        margin: 0 0 var(--space-2) 0;
+        font-size: var(--text-xl);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .page-header p {
+        margin: 0;
+        font-size: var(--text-sm);
+        opacity: 0.95;
+    }
+
     .breadcrumb-white {
         font-size: var(--text-xs);
+        margin-top: var(--space-3);
         margin-bottom: 0;
     }
 
@@ -37,59 +64,18 @@
         font-weight: 600;
     }
 
-    /* ===== MAIN CARD ===== */
-    .dashboard-card {
-        background: white;
-        border-radius: var(--radius-sm);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-        margin-bottom: var(--space-4);
-    }
-
-    .dashboard-card-header {
-        background: var(--gray-800);
+    /* BADGES */
+    .badge-userid {
+        background: var(--primary);
         color: white;
-        padding: var(--space-3) var(--space-4);
-        border: none;
-    }
-
-    .dashboard-card-header h4 {
-        font-size: var(--text-base);
-        font-weight: 600;
-        margin: 0 0 var(--space-1) 0;
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-    }
-
-    .dashboard-card-header p {
+        padding: 2px var(--space-2);
+        border-radius: var(--radius-sm);
+        font-weight: 700;
         font-size: var(--text-xs);
-        margin: 0;
-        opacity: 0.9;
+        font-family: 'Courier New', monospace;
     }
 
-    .dashboard-card-body {
-        padding: var(--space-4);
-    }
-
-    /* ===== SECTION TITLE ===== */
-    .section-title {
-        font-size: var(--text-sm);
-        font-weight: 600;
-        color: var(--gray-900);
-        margin-bottom: var(--space-3);
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-    }
-
-    .section-title i {
-        color: var(--primary);
-        font-size: var(--text-sm);
-    }
-
-    /* ===== MACHINE CARDS ===== */
+    /* MESIN CARDS */
     .mesin-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -177,86 +163,41 @@
         line-height: 1.2;
     }
 
-    /* ===== FILTER SECTION ===== */
-    .filter-card {
-        background: var(--gray-50);
-        border: 1px solid var(--gray-200);
+    /* PUNCH BADGES */
+    .punch-badge {
+        padding: 2px var(--space-2);
         border-radius: var(--radius-sm);
-        padding: var(--space-4);
-        margin-bottom: var(--space-4);
-    }
-
-    .form-label {
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: var(--space-2);
-        display: flex;
-        align-items: center;
-        gap: var(--space-1);
-        font-size: var(--text-sm);
-    }
-
-    .form-label i {
         font-size: var(--text-xs);
-        color: var(--primary);
-    }
-
-    .form-control {
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius-sm);
-        padding: 0 var(--space-3);
-        font-size: var(--text-sm);
-        transition: all 0.2s;
-        height: 36px;
-    }
-
-    .form-control:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px var(--primary-light);
-        outline: none;
-    }
-
-    /* ===== BUTTONS ===== */
-    .btn {
-        padding: 0 var(--space-4);
-        height: 36px;
-        font-size: var(--text-sm);
-        border-radius: var(--radius-sm);
         font-weight: 600;
-        border: none;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-2);
-        cursor: pointer;
+        display: inline-block;
+        white-space: nowrap;
+    }
+    
+    .punch-masuk { 
+        background: var(--success-light);
+        color: #059669;
+        border: 1px solid var(--success);
+    }
+    
+    .punch-keluar { 
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #3b82f6;
+    }
+    
+    .punch-istirahat-keluar { 
+        background: var(--warning-light);
+        color: #b45309;
+        border: 1px solid var(--warning);
+    }
+    
+    .punch-istirahat-masuk { 
+        background: #fed7aa;
+        color: #9a3412;
+        border: 1px solid #f97316;
     }
 
-    .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--shadow);
-    }
-
-    .btn-primary {
-        background: var(--primary);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--primary-hover);
-    }
-
-    .btn-light {
-        background: white;
-        color: var(--gray-700);
-        border: 1px solid var(--gray-300);
-    }
-
-    .btn-light:hover {
-        background: var(--gray-50);
-        color: var(--gray-900);
-    }
-
-    /* ===== STATS BADGES ===== */
+    /* STATS BADGES */
     .stats-container {
         display: flex;
         flex-wrap: wrap;
@@ -292,128 +233,7 @@
         font-size: var(--text-xs);
     }
 
-    /* ===== DATA TABLE ===== */
-    .table-wrapper {
-        background: white;
-        border-radius: var(--radius-sm);
-        overflow: hidden;
-        box-shadow: var(--shadow);
-        border: 1px solid var(--gray-200);
-    }
-
-    .table {
-        margin-bottom: 0 !important;
-        font-size: var(--text-sm);
-        width: 100% !important;
-    }
-
-    table.dataTable {
-        border-collapse: collapse !important;
-    }
-
-    table.dataTable thead th {
-        border: none !important;
-        background: var(--gray-800) !important;
-        color: white !important;
-        font-weight: 600;
-        padding: var(--space-2) var(--space-3) !important;
-        font-size: var(--text-xs);
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        white-space: nowrap;
-    }
-
-    table.dataTable tbody td {
-        padding: var(--space-2) var(--space-3) !important;
-        vertical-align: middle;
-        border-bottom: 1px solid var(--gray-200) !important;
-        background: white;
-        font-size: var(--text-sm);
-    }
-
-    table.dataTable tbody tr:hover {
-        background: var(--gray-50) !important;
-    }
-
-    table.dataTable tbody tr:last-child td {
-        border-bottom: none !important;
-    }
-
-    /* ===== PUNCH BADGES ===== */
-    .punch-badge {
-        padding: 2px var(--space-2);
-        border-radius: var(--radius-sm);
-        font-size: var(--text-xs);
-        font-weight: 600;
-        display: inline-block;
-        white-space: nowrap;
-    }
-    
-    .punch-masuk { 
-        background: var(--success-light);
-        color: #059669;
-        border: 1px solid var(--success);
-    }
-    
-    .punch-keluar { 
-        background: #dbeafe;
-        color: #1e40af;
-        border: 1px solid #3b82f6;
-    }
-    
-    .punch-istirahat-keluar { 
-        background: var(--warning-light);
-        color: #b45309;
-        border: 1px solid var(--warning);
-    }
-    
-    .punch-istirahat-masuk { 
-        background: #fed7aa;
-        color: #9a3412;
-        border: 1px solid #f97316;
-    }
-
-    /* ===== BADGE USER ID ===== */
-    .badge-userid {
-        background: var(--primary);
-        color: white;
-        padding: 2px var(--space-2);
-        border-radius: var(--radius-sm);
-        font-weight: 700;
-        font-size: var(--text-xs);
-        font-family: 'Courier New', monospace;
-        display: inline-block;
-    }
-
-    /* ===== EMPTY STATE ===== */
-    .empty-state {
-        background: var(--gray-50);
-        border: 2px dashed var(--gray-300);
-        border-radius: var(--radius-sm);
-        padding: var(--space-8);
-        text-align: center;
-    }
-
-    .empty-state i {
-        font-size: 40px;
-        color: var(--gray-300);
-        margin-bottom: var(--space-3);
-    }
-
-    .empty-state h6 {
-        color: var(--gray-600);
-        margin-bottom: var(--space-2);
-        font-size: var(--text-base);
-        font-weight: 600;
-    }
-
-    .empty-state p {
-        color: var(--gray-500);
-        margin: 0;
-        font-size: var(--text-sm);
-    }
-
-    /* ===== LOADING OVERLAY ===== */
+    /* LOADING OVERLAY */
     .loading-overlay {
         position: fixed;
         top: 0;
@@ -457,30 +277,78 @@
         font-size: var(--text-sm);
     }
 
-    /* ===== ALERT ===== */
-    .alert-warning {
-        background: var(--warning-light);
-        border: 1px solid var(--warning);
-        color: #92400e;
-        padding: var(--space-3);
+    /* EMPTY STATE */
+    .empty-state {
+        background: var(--gray-50);
+        border: 2px dashed var(--gray-300);
         border-radius: var(--radius-sm);
-        font-size: var(--text-sm);
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
+        padding: var(--space-8);
+        text-align: center;
     }
 
-    .alert-warning a {
-        color: #92400e;
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--gray-300);
+        margin-bottom: var(--space-3);
+    }
+
+    .empty-state h6 {
+        color: var(--gray-600);
+        margin-bottom: var(--space-2);
+        font-size: var(--text-base);
         font-weight: 600;
-        text-decoration: underline;
     }
 
-    /* ===== RESPONSIVE ===== */
+    .empty-state p {
+        color: var(--gray-500);
+        margin: 0;
+        font-size: var(--text-sm);
+    }
+
+    /* PAGINATION */
+    .custom-pagination {
+        display: flex;
+        gap: var(--space-1);
+        justify-content: center;
+        padding: var(--space-4) 0;
+        list-style: none;
+        margin: 0;
+    }
+
+    .page-btn {
+        background: white;
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: var(--space-2) var(--space-3);
+        font-weight: 600;
+        font-size: var(--text-sm);
+        cursor: pointer;
+        min-width: 36px;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .page-btn:hover:not(.disabled):not(.active) {
+        background: var(--gray-100);
+        border-color: var(--gray-400);
+    }
+
+    .page-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-        .dashboard-card-header,
-        .dashboard-card-body {
-            padding: var(--space-3);
+        .page-header h4 {
+            font-size: var(--text-lg);
         }
 
         .mesin-grid {
@@ -495,173 +363,185 @@
         .stats-container {
             flex-direction: column;
         }
-
-        .btn {
-            width: 100%;
-            justify-content: center;
-        }
     }
 
     @media (max-width: 576px) {
         .mesin-grid {
             grid-template-columns: 1fr;
         }
-
-        .mesin-card {
-            min-height: 100px;
-        }
-
-        .table thead th,
-        .table tbody td {
-            padding: var(--space-1) var(--space-2) !important;
-            font-size: var(--text-xs);
-        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="dashboard-card">
-        <div class="dashboard-card-header">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
-                <div>
-                    <h4>
-                        <i class="fas fa-desktop"></i>
-                        Monitor Mesin Absensi
-                    </h4>
-                    <p>Pantau dan kelola data dari mesin fingerprint</p>
-                </div>
-                <a href="{% url 'dashboard' %}" class="btn btn-light">
-                    <i class="fas fa-arrow-left"></i>
-                    Kembali
-                </a>
-            </div>
-
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-white mb-0">
-                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Monitor Mesin</li>
-                </ol>
-            </nav>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+            <h4>
+                <i class="fas fa-desktop"></i>
+                MONITOR MESIN ABSENSI
+            </h4>
+            <p>Pantau dan kelola data dari mesin fingerprint</p>
         </div>
+        <a href="{% url 'dashboard' %}" class="btn btn-light" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+            <i class="fas fa-arrow-left"></i>
+            Kembali
+        </a>
+    </div>
 
-        <div class="dashboard-card-body">
-            <div class="mb-4">
-                <h6 class="section-title">
-                    <i class="fas fa-server"></i>
-                    Pilih Mesin Fingerprint
-                </h6>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-white">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Monitor Mesin</li>
+        </ol>
+    </nav>
+</div>
 
-                {% if mesin_list %}
-                <div class="mesin-grid">
-                    <div class="mesin-card all-machines" id="allMachinesCard" onclick="selectAllMachines(this)">
-                        <i class="fas fa-server mesin-card-icon"></i>
-                        <h6>Semua Mesin</h6>
-                        <small>Gabungan data</small>
-                        <small>
-                            <i class="fas fa-database"></i>
-                            {{ mesin_list.count }} mesin
-                        </small>
-                    </div>
-
-                    {% for mesin in mesin_list %}
-                    <div class="mesin-card" onclick="selectMesin('{{ mesin.id }}', '{{ mesin.nama }}', '{{ mesin.ip_address }}', this)">
-                        <i class="fas fa-fingerprint mesin-card-icon"></i>
-                        <h6>{{ mesin.nama }}</h6>
-                        <small>{{ mesin.cabang.nama }}</small>
-                        <small>
-                            <i class="fas fa-network-wired"></i>
-                            {{ mesin.ip_address }}
-                        </small>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div>
-                        Belum ada mesin yang terdaftar. 
-                        <a href="{% url 'tambah_mesin' %}">Tambahkan mesin</a> terlebih dahulu.
-                    </div>
-                </div>
-                {% endif %}
+<!-- Pilih Mesin Section -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-server"></i> Pilih Mesin Fingerprint</h5>
+    </div>
+    <div class="card-body">
+        {% if mesin_list %}
+        <div class="mesin-grid">
+            <div class="mesin-card all-machines" id="allMachinesCard" onclick="selectAllMachines(this)">
+                <i class="fas fa-server mesin-card-icon"></i>
+                <h6>Semua Mesin</h6>
+                <small>Gabungan data</small>
+                <small>
+                    <i class="fas fa-database"></i>
+                    {{ mesin_list.count }} mesin
+                </small>
             </div>
 
-            <div id="filterSection" style="display: none;">
-                <div class="filter-card">
-                    <div class="row align-items-end g-2">
-                        <div class="col-md-4">
-                            <label class="form-label">
-                                <i class="fas fa-calendar"></i>
-                                Tanggal Mulai
-                            </label>
-                            <input type="date" id="tanggalMulai" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">
-                                <i class="fas fa-calendar"></i>
-                                Tanggal Akhir
-                            </label>
-                            <input type="date" id="tanggalAkhir" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <button onclick="loadData()" class="btn btn-primary w-100">
-                                <i class="fas fa-search"></i>
-                                Tampilkan Data
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            {% for mesin in mesin_list %}
+            <div class="mesin-card" onclick="selectMesin('{{ mesin.id }}', '{{ mesin.nama }}', '{{ mesin.ip_address }}', this)">
+                <i class="fas fa-fingerprint mesin-card-icon"></i>
+                <h6>{{ mesin.nama }}</h6>
+                <small>{{ mesin.cabang.nama }}</small>
+                <small>
+                    <i class="fas fa-network-wired"></i>
+                    {{ mesin.ip_address }}
+                </small>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            Belum ada mesin yang terdaftar. 
+            <a href="{% url 'tambah_mesin' %}" style="font-weight: 600;">Tambahkan mesin</a> terlebih dahulu.
+        </div>
+        {% endif %}
+    </div>
+</div>
 
-                <div id="summaryInfo" class="stats-container" style="display: none;">
-                    <span class="stats-badge">
-                        <i class="fas fa-table"></i>
-                        Total: <span id="totalRecords">0</span>
-                    </span>
-                    <span class="stats-badge success">
-                        <i class="fas fa-users"></i>
-                        Users: <span id="totalUsers">0</span>
-                    </span>
-                    <span class="stats-badge info">
-                        <i class="fas fa-calendar-day"></i>
-                        Days: <span id="totalDays">0</span>
-                    </span>
-                    <span class="badge bg-secondary">
-                        <i class="fas fa-clock"></i>
-                        Update: <span id="lastUpdate">-</span>
-                    </span>
+<!-- Filter Section -->
+<div id="filterSection" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-filter"></i> Filter Periode</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <label class="form-label">Tanggal Mulai</label>
+                    <input type="date" id="tanggalMulai" class="form-control">
                 </div>
-
-                <div class="table-wrapper" id="dataTableWrapper" style="display: none;">
-                    <table class="table table-hover" id="dataTable">
-                        <thead>
-                            <tr>
-                                <th class="text-center">No</th>
-                                <th class="text-center">User ID</th>
-                                <th>Nama</th>
-                                <th class="text-center">Departemen</th>
-                                <th class="text-center">Tanggal</th>
-                                <th class="text-center">Waktu</th>
-                                <th class="text-center">Punch Type</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center">Mesin</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dataTableBody"></tbody>
-                    </table>
+                <div class="col-md-5">
+                    <label class="form-label">Tanggal Akhir</label>
+                    <input type="date" id="tanggalAkhir" class="form-control">
                 </div>
-
-                <div id="emptyMessage" class="empty-state" style="display: none;">
-                    <i class="fas fa-inbox"></i>
-                    <h6>Tidak ada data</h6>
-                    <p>Tidak ada data untuk periode ini</p>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button onclick="loadData()" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i>
+                        Tampilkan
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Table Section -->
+<div class="card" id="tableSection" style="display: none;">
+    <div class="card-header">
+        <h5><i class="fas fa-table"></i> Data Mesin Absensi</h5>
+        <div class="d-flex align-items-center gap-2">
+            <label style="margin: 0; font-size: var(--text-sm); font-weight: 600;">Tampilkan:</label>
+            <select class="form-select" id="entriesSelect" style="width: auto; padding: var(--space-2) var(--space-3);">
+                <option value="10">10</option>
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="-1">Semua</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div id="summaryInfo" class="stats-container" style="display: none;">
+            <span class="stats-badge">
+                <i class="fas fa-table"></i>
+                Total: <span id="totalRecords">0</span>
+            </span>
+            <span class="stats-badge success">
+                <i class="fas fa-users"></i>
+                Users: <span id="totalUsers">0</span>
+            </span>
+            <span class="stats-badge info">
+                <i class="fas fa-calendar-day"></i>
+                Days: <span id="totalDays">0</span>
+            </span>
+            <span class="badge bg-secondary">
+                <i class="fas fa-clock"></i>
+                Update: <span id="lastUpdate">-</span>
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th class="text-center">No</th>
+                        <th class="text-center">User ID</th>
+                        <th>Nama</th>
+                        <th class="text-center">Departemen</th>
+                        <th class="text-center">Tanggal</th>
+                        <th class="text-center">Waktu</th>
+                        <th class="text-center">Punch Type</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Mesin</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTableBody">
+                    <tr>
+                        <td colspan="9" class="text-center" style="padding: var(--space-8);">
+                            <i class="fas fa-inbox" style="font-size: 3rem; color: var(--gray-300);"></i>
+                            <p style="margin-top: var(--space-3); color: var(--gray-600);">Pilih mesin dan periode untuk menampilkan data</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="custom-pagination" id="customPagination"></div>
+    </div>
+
+    <div class="card-footer">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                Total: <strong id="totalFooter">0</strong> Data
+                <span id="selectedMesinInfo" style="margin-left: var(--space-4); color: var(--gray-600);"></span>
+            </div>
+            <span id="showingInfo" style="color: var(--gray-600);">Menampilkan 0 data</span>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
 <div id="loadingOverlay" class="loading-overlay" style="display: none;">
     <div class="loading-spinner">
         <div class="spinner-border text-primary">
@@ -678,241 +558,311 @@
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    let selectedMode = null;
-    let selectedMesinId = null;
-    let selectedMesinNama = '';
-    let selectedMesinIp = '';
-    let currentData = [];
-    let dataTable = null;
+let table;
+let selectedMode = null;
+let selectedMesinId = null;
+let selectedMesinNama = '';
+let selectedMesinIp = '';
+let currentData = [];
 
-    const API_MONITOR_SINGLE = "{% url 'api_get_absensi_dari_mesin' %}";
-    const API_MONITOR_ALL = "{% url 'api_get_absensi_all_machines' %}";
+const API_MONITOR_SINGLE = "{% url 'api_get_absensi_dari_mesin' %}";
+const API_MONITOR_ALL = "{% url 'api_get_absensi_all_machines' %}";
 
-    window.selectAllMachines = function(element) {
-        $('.mesin-card').removeClass('selected all-machines');
-        $(element).addClass('all-machines');
+function updateShowingInfo() {
+    const info = table.page.info();
+    const showingInfo = $('#showingInfo');
+    
+    if (info.recordsDisplay === info.recordsTotal && info.length === -1) {
+        showingInfo.text('Menampilkan semua data');
+    } else if (info.length === -1) {
+        showingInfo.text('Menampilkan semua data');
+    } else {
+        showingInfo.text('Menampilkan ' + (info.start + 1) + '-' + info.end + ' dari ' + info.recordsDisplay + ' data');
+    }
+}
 
-        selectedMode = 'all';
-        selectedMesinId = null;
-        selectedMesinNama = 'Semua Mesin';
+function renderCustomPagination() {
+    const info = table.page.info();
+    const current = info.page;
+    const total = info.pages;
+    const pagination = $('#customPagination');
 
-        $('#filterSection').slideDown(300);
+    if (total <= 1) {
+        pagination.hide();
+        updateShowingInfo();
+        return;
+    }
 
-        const today = new Date().toISOString().split('T')[0];
-        $('#tanggalMulai').val(today);
-        $('#tanggalAkhir').val(today);
+    pagination.show();
+    let html = '';
 
-        loadData();
-    };
+    html += current === 0 ?
+        '<button class="page-btn disabled" disabled>Prev</button>' :
+        '<button class="page-btn" onclick="changePage(' + (current - 1) + ')">Prev</button>';
 
-    window.selectMesin = function(mesinId, nama, ip, element) {
-        $('.mesin-card').removeClass('selected all-machines');
-        $(element).addClass('selected');
+    let start = Math.max(0, current - 2);
+    let end = Math.min(total - 1, current + 2);
 
-        selectedMode = 'single';
-        selectedMesinId = mesinId;
-        selectedMesinNama = nama;
-        selectedMesinIp = ip;
+    if (current <= 2) end = Math.min(4, total - 1);
+    if (current >= total - 3) start = Math.max(0, total - 5);
 
-        $('#filterSection').slideDown(300);
+    for (let i = start; i <= end; i++) {
+        html += i === current ?
+            '<button class="page-btn active">' + (i + 1) + '</button>' :
+            '<button class="page-btn" onclick="changePage(' + i + ')">' + (i + 1) + '</button>';
+    }
 
-        const today = new Date().toISOString().split('T')[0];
-        $('#tanggalMulai').val(today);
-        $('#tanggalAkhir').val(today);
+    html += current === total - 1 ?
+        '<button class="page-btn disabled" disabled>Next</button>' :
+        '<button class="page-btn" onclick="changePage(' + (current + 1) + ')">Next</button>';
 
-        loadData();
-    };
+    pagination.html(html);
+    updateShowingInfo();
+}
 
-    window.loadData = function() {
-        if (!selectedMode) {
-            alert('Pilih mesin terlebih dahulu!');
-            return;
-        }
+function changePage(page) {
+    table.page(page).draw('page');
+}
 
-        const tanggalMulai = $('#tanggalMulai').val();
-        const tanggalAkhir = $('#tanggalAkhir').val();
+window.selectAllMachines = function(element) {
+    $('.mesin-card').removeClass('selected all-machines');
+    $(element).addClass('all-machines');
 
-        if (!tanggalMulai || !tanggalAkhir) {
-            alert('Tanggal mulai dan akhir harus diisi!');
-            return;
-        }
+    selectedMode = 'all';
+    selectedMesinId = null;
+    selectedMesinNama = 'Semua Mesin';
 
-        $('#loadingOverlay').fadeIn(200);
+    $('#filterSection').slideDown(300);
+    $('#selectedMesinInfo').text('| ' + selectedMesinNama);
 
-        if (selectedMode === 'single') {
-            loadSingleMachine(tanggalMulai, tanggalAkhir);
-        } else {
-            loadAllMachines(tanggalMulai, tanggalAkhir);
-        }
-    };
+    const today = new Date().toISOString().split('T')[0];
+    $('#tanggalMulai').val(today);
+    $('#tanggalAkhir').val(today);
+};
 
-    function loadSingleMachine(tanggalMulai, tanggalAkhir) {
-        $('#loadingText').text('Mengambil data dari ' + selectedMesinNama + '...');
-        $('#loadingSubtext').text('Mesin: ' + selectedMesinNama);
+window.selectMesin = function(mesinId, nama, ip, element) {
+    $('.mesin-card').removeClass('selected all-machines');
+    $(element).addClass('selected');
 
-        const url = `${API_MONITOR_SINGLE}?mesin_id=${selectedMesinId}&tanggal_mulai=${tanggalMulai}&tanggal_akhir=${tanggalAkhir}`;
+    selectedMode = 'single';
+    selectedMesinId = mesinId;
+    selectedMesinNama = nama;
+    selectedMesinIp = ip;
 
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function(response) {
-                $('#loadingOverlay').fadeOut(200);
+    $('#filterSection').slideDown(300);
+    $('#selectedMesinInfo').text('| ' + selectedMesinNama);
 
-                if (response.status === 'success') {
-                    currentData = response.data.map(item => ({
-                        ...item,
-                        mesin_nama: response.mesin.nama
-                    }));
-                    displayData(currentData);
-                    showSuccessAlert(`Berhasil memuat ${response.data.length} records dari ${response.mesin.nama}!`);
-                } else {
-                    alert('Error: ' + response.msg);
-                }
-            },
-            error: function(xhr) {
-                $('#loadingOverlay').fadeOut(200);
-                const errorMsg = xhr.responseJSON?.msg || 'Koneksi gagal';
-                alert('Error: ' + errorMsg);
+    const today = new Date().toISOString().split('T')[0];
+    $('#tanggalMulai').val(today);
+    $('#tanggalAkhir').val(today);
+};
+
+window.loadData = function() {
+    if (!selectedMode) {
+        alert('Pilih mesin terlebih dahulu!');
+        return;
+    }
+
+    const tanggalMulai = $('#tanggalMulai').val();
+    const tanggalAkhir = $('#tanggalAkhir').val();
+
+    if (!tanggalMulai || !tanggalAkhir) {
+        alert('Tanggal mulai dan akhir harus diisi!');
+        return;
+    }
+
+    $('#loadingOverlay').fadeIn(200);
+
+    if (selectedMode === 'single') {
+        loadSingleMachine(tanggalMulai, tanggalAkhir);
+    } else {
+        loadAllMachines(tanggalMulai, tanggalAkhir);
+    }
+};
+
+function loadSingleMachine(tanggalMulai, tanggalAkhir) {
+    $('#loadingText').text('Mengambil data dari ' + selectedMesinNama + '...');
+    $('#loadingSubtext').text('Mesin: ' + selectedMesinNama);
+
+    const url = `${API_MONITOR_SINGLE}?mesin_id=${selectedMesinId}&tanggal_mulai=${tanggalMulai}&tanggal_akhir=${tanggalAkhir}`;
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        success: function(response) {
+            $('#loadingOverlay').fadeOut(200);
+
+            if (response.status === 'success') {
+                currentData = response.data.map(item => ({
+                    ...item,
+                    mesin_nama: response.mesin.nama
+                }));
+                displayData(currentData);
+                showSuccessAlert(`Berhasil memuat ${response.data.length} records dari ${response.mesin.nama}!`);
+            } else {
+                alert('Error: ' + response.msg);
             }
-        });
-    }
-
-    function loadAllMachines(tanggalMulai, tanggalAkhir) {
-        $('#loadingText').text('Mengambil data dari SEMUA mesin...');
-        $('#loadingSubtext').text('Mohon tunggu, sedang memproses...');
-
-        const url = `${API_MONITOR_ALL}?tanggal_mulai=${tanggalMulai}&tanggal_akhir=${tanggalAkhir}`;
-
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function(response) {
-                $('#loadingOverlay').fadeOut(200);
-
-                if (response.status === 'success') {
-                    currentData = response.data;
-                    displayData(response.data);
-                    showSuccessAlert(`Berhasil memuat data dari ${response.machines_count} mesin! Total: ${response.data.length} records`);
-                } else {
-                    alert('Error: ' + response.msg);
-                }
-            },
-            error: function(xhr) {
-                $('#loadingOverlay').fadeOut(200);
-                const errorMsg = xhr.responseJSON?.msg || 'Koneksi gagal';
-                alert('Error: ' + errorMsg);
-            }
-        });
-    }
-
-    function displayData(data) {
-        if (data.length === 0) {
-            $('#dataTableWrapper').hide();
-            $('#summaryInfo').hide();
-            $('#emptyMessage').fadeIn(300);
-            return;
+        },
+        error: function(xhr) {
+            $('#loadingOverlay').fadeOut(200);
+            const errorMsg = xhr.responseJSON?.msg || 'Koneksi gagal';
+            alert('Error: ' + errorMsg);
         }
+    });
+}
 
-        $('#emptyMessage').hide();
+function loadAllMachines(tanggalMulai, tanggalAkhir) {
+    $('#loadingText').text('Mengambil data dari SEMUA mesin...');
+    $('#loadingSubtext').text('Mohon tunggu, sedang memproses...');
 
-        const uniqueUsers = new Set(data.map(item => item.userid)).size;
-        const uniqueDays = new Set(data.map(item => item.tanggal)).size;
+    const url = `${API_MONITOR_ALL}?tanggal_mulai=${tanggalMulai}&tanggal_akhir=${tanggalAkhir}`;
 
-        $('#totalRecords').text(data.length.toLocaleString('id-ID'));
-        $('#totalUsers').text(uniqueUsers);
-        $('#totalDays').text(uniqueDays);
-        $('#lastUpdate').text(new Date().toLocaleTimeString('id-ID'));
-        $('#summaryInfo').fadeIn(300);
+    $.ajax({
+        url: url,
+        type: 'GET',
+        success: function(response) {
+            $('#loadingOverlay').fadeOut(200);
 
-        renderDataTable(data);
-        $('#dataTableWrapper').fadeIn(300);
-    }
+            if (response.status === 'success') {
+                currentData = response.data;
+                displayData(response.data);
+                showSuccessAlert(`Berhasil memuat data dari ${response.machines_count} mesin! Total: ${response.data.length} records`);
+            } else {
+                alert('Error: ' + response.msg);
+            }
+        },
+        error: function(xhr) {
+            $('#loadingOverlay').fadeOut(200);
+            const errorMsg = xhr.responseJSON?.msg || 'Koneksi gagal';
+            alert('Error: ' + errorMsg);
+        }
+    });
+}
 
-    function renderDataTable(data) {
+function displayData(data) {
+    $('#tableSection').fadeIn(300);
+
+    if (data.length === 0) {
+        $('#summaryInfo').hide();
         const tbody = $('#dataTableBody');
-        tbody.empty();
-
-        if (dataTable) {
-            dataTable.destroy();
-        }
-
-        const punchBadgeMap = {
-            0: 'punch-masuk',
-            1: 'punch-keluar',
-            2: 'punch-istirahat-keluar',
-            3: 'punch-istirahat-masuk',
-            4: 'punch-masuk',
-            5: 'punch-keluar'
-        };
-
-        data.forEach(function(item, index) {
-            const statusBadge = item.is_registered 
-                ? '<span class="badge badge-success">Terdaftar</span>'
-                : '<span class="badge badge-danger">Belum</span>';
-
-            const punchClass = punchBadgeMap[item.punch_code] || 'punch-masuk';
-
-            const row = `
-                <tr>
-                    <td class="text-center">${index + 1}</td>
-                    <td class="text-center"><span class="badge-userid">${item.userid}</span></td>
-                    <td><strong>${item.nama_display}</strong></td>
-                    <td class="text-center"><span class="badge badge-secondary">${item.departemen}</span></td>
-                    <td class="text-center"><small>${item.tanggal_display}</small></td>
-                    <td class="text-center"><strong style="color: var(--primary);">${item.waktu}</strong></td>
-                    <td class="text-center"><span class="punch-badge ${punchClass}">${item.punch_type}</span></td>
-                    <td class="text-center">${statusBadge}</td>
-                    <td class="text-center"><small class="text-muted">${item.mesin_nama || '-'}</small></td>
-                </tr>
-            `;
-            tbody.append(row);
-        });
-
-        dataTable = $('#dataTable').DataTable({
-            language: {
-                "sProcessing": "Memproses...",
-                "sZeroRecords": "Tidak ada data",
-                "sInfo": "Menampilkan _START_ - _END_ dari _TOTAL_",
-                "sInfoEmpty": "Menampilkan 0 - 0 dari 0",
-                "sInfoFiltered": "(disaring dari _MAX_ total)",
-                "sSearch": "Cari:",
-                "sLengthMenu": "Tampilkan _MENU_",
-                "oPaginate": {
-                    "sFirst": "Pertama",
-                    "sPrevious": "←",
-                    "sNext": "→",
-                    "sLast": "Terakhir"
-                }
-            },
-            pageLength: 25,
-            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
-            order: [[4, 'desc'], [5, 'desc']],
-            columnDefs: [
-                { orderable: false, targets: [7, 8] },
-                { className: "text-center", targets: [0, 7, 8] }
-            ],
-            responsive: true
-        });
-    }
-
-    function showSuccessAlert(message) {
-        const alertDiv = $(`
-            <div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3" 
-                 style="z-index: 10000; min-width: 280px; box-shadow: var(--shadow-lg); border-radius: var(--radius-sm); font-size: var(--text-sm);">
-                <i class="fas fa-check-circle"></i>
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+        tbody.html(`
+            <tr>
+                <td colspan="9" class="text-center" style="padding: var(--space-8);">
+                    <i class="fas fa-inbox" style="font-size: 3rem; color: var(--gray-300);"></i>
+                    <p style="margin-top: var(--space-3); color: var(--gray-600);">Tidak ada data untuk periode ini</p>
+                </td>
+            </tr>
         `);
         
-        $('body').append(alertDiv);
+        if (table) {
+            table.clear().draw();
+        }
         
-        setTimeout(() => {
-            alertDiv.alert('close');
-        }, 4000);
+        $('#totalFooter').text('0');
+        $('#showingInfo').text('Menampilkan 0 data');
+        return;
     }
 
+    const uniqueUsers = new Set(data.map(item => item.userid)).size;
+    const uniqueDays = new Set(data.map(item => item.tanggal)).size;
+
+    $('#totalRecords').text(data.length.toLocaleString('id-ID'));
+    $('#totalUsers').text(uniqueUsers);
+    $('#totalDays').text(uniqueDays);
+    $('#lastUpdate').text(new Date().toLocaleTimeString('id-ID'));
+    $('#totalFooter').text(data.length.toLocaleString('id-ID'));
+    $('#summaryInfo').fadeIn(300);
+
+    renderDataTable(data);
+}
+
+function renderDataTable(data) {
+    const tbody = $('#dataTableBody');
+    tbody.empty();
+
+    if (table) {
+        table.destroy();
+    }
+
+    const punchBadgeMap = {
+        0: 'punch-masuk',
+        1: 'punch-keluar',
+        2: 'punch-istirahat-keluar',
+        3: 'punch-istirahat-masuk',
+        4: 'punch-masuk',
+        5: 'punch-keluar'
+    };
+
+    data.forEach(function(item, index) {
+        const statusBadge = item.is_registered 
+            ? '<span class="badge badge-success">Terdaftar</span>'
+            : '<span class="badge badge-danger">Belum</span>';
+
+        const punchClass = punchBadgeMap[item.punch_code] || 'punch-masuk';
+
+        const row = `
+            <tr>
+                <td class="text-center"><strong>${index + 1}</strong></td>
+                <td class="text-center"><span class="badge-userid">${item.userid}</span></td>
+                <td><strong>${item.nama_display}</strong></td>
+                <td class="text-center"><span class="badge badge-secondary">${item.departemen}</span></td>
+                <td class="text-center">${item.tanggal_display}</td>
+                <td class="text-center"><span class="jam-text">${item.waktu}</span></td>
+                <td class="text-center"><span class="punch-badge ${punchClass}">${item.punch_type}</span></td>
+                <td class="text-center">${statusBadge}</td>
+                <td class="text-center"><small style="color: var(--gray-600);">${item.mesin_nama || '-'}</small></td>
+            </tr>
+        `;
+        tbody.append(row);
+    });
+
+    table = $('#dataTable').DataTable({
+        paging: true,
+        pageLength: 25,
+        lengthChange: false,
+        ordering: true,
+        searching: false,
+        info: false,
+        scrollX: true,
+        dom: 'rt',
+        language: {
+            emptyTable: 'Tidak ada data'
+        },
+        order: [[4, 'desc'], [5, 'desc']],
+        columnDefs: [
+            { orderable: false, targets: [6, 7, 8] }
+        ],
+        drawCallback: function() {
+            renderCustomPagination();
+        }
+    });
+
+    $('#entriesSelect').off('change').on('change', function() {
+        const value = parseInt($(this).val());
+        table.page.len(value).draw();
+    });
+
+    renderCustomPagination();
+}
+
+function showSuccessAlert(message) {
+    const alertDiv = $(`
+        <div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3" 
+             style="z-index: 10000; min-width: 280px; box-shadow: var(--shadow-lg); border-radius: var(--radius-sm); font-size: var(--text-sm);">
+            <i class="fas fa-check-circle"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `);
+    
+    $('body').append(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.alert('close');
+    }, 4000);
+}
+
+$(document).ready(function() {
     const today = new Date().toISOString().split('T')[0];
     $('#tanggalMulai').val(today);
     $('#tanggalAkhir').val(today);

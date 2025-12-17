@@ -179,8 +179,16 @@
 
     /* ===== CHECKBOX ===== */
     .checkbox-cell {
-        width: 50px;
+        width: 0;
+        padding: 0 !important;
+        overflow: hidden;
+        transition: all 0.3s ease;
         text-align: center;
+    }
+
+    body.selection-mode .checkbox-cell {
+        width: 50px;
+        padding: var(--space-2) var(--space-3) !important;
     }
 
     input[type="checkbox"].custom-checkbox {
@@ -193,11 +201,13 @@
         cursor: pointer;
         position: relative;
         transition: all 0.2s;
-        display: none;
+        opacity: 0;
+        transform: scale(0);
     }
 
     body.selection-mode input[type="checkbox"].custom-checkbox {
-        display: inline-block;
+        opacity: 1;
+        transform: scale(1);
     }
 
     input[type="checkbox"].custom-checkbox:hover {
@@ -248,19 +258,26 @@
         display: inline-block;
     }
 
-    /* ===== TOGGLE STATUS BUTTON ===== */
+    /* ===== TOGGLE STATUS BUTTON - DIPERKECIL ===== */
     .btn-toggle-status {
-        padding: 0 var(--space-3);
-        height: 28px;
-        font-size: var(--text-xs);
+        padding: 0 var(--space-2);
+        height: 24px;
+        font-size: 10px;
         border-radius: var(--radius-sm);
-        font-weight: 600;
+        font-weight: 700;
         border: none;
         color: white;
         transition: all 0.2s;
         display: inline-flex;
         align-items: center;
-        gap: var(--space-1);
+        gap: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    .btn-toggle-status i {
+        font-size: 9px;
     }
 
     .btn-toggle-status:hover {
@@ -810,7 +827,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-{# GANTI SELURUH BAGIAN JAVASCRIPT DI daftar_pegawai.html #}
 
 <script>
 $(document).ready(function() {
@@ -1041,19 +1057,11 @@ $(document).ready(function() {
         $('#modeLoadingState').show();
         $('#modeAccordionContainer').html('');
         
-        console.log('📥 Loading existing assignments for:', selectedIds);
-        
         const promises = selectedIds.map(pegawaiId =>
             fetch(`/api/pegawai/${pegawaiId}/mode-assignments/`)
                 .then(r => r.json())
-                .then(data => {
-                    console.log(`✅ Pegawai ${pegawaiId}:`, data);
-                    return { pegawaiId, data };
-                })
-                .catch(err => {
-                    console.error(`❌ Error pegawai ${pegawaiId}:`, err);
-                    return { pegawaiId, data: null };
-                })
+                .then(data => ({ pegawaiId, data }))
+                .catch(err => ({ pegawaiId, data: null }))
         );
         
         Promise.all(promises).then(results => {
@@ -1080,8 +1088,6 @@ $(document).ready(function() {
     }
 
     function loadModesForBulkAssign() {
-        console.log('📡 Loading modes...');
-        
         fetch('/api/pegawai/get-modes/')
             .then(response => response.json())
             .then(data => {
@@ -1101,7 +1107,6 @@ $(document).ready(function() {
             })
             .catch(error => {
                 $('#modeLoadingState').hide();
-                console.error('❌ Error:', error);
                 $('#modeAccordionContainer').html(
                     '<div class="alert alert-danger">' +
                     '<i class="fas fa-times-circle"></i>' +
@@ -1112,8 +1117,6 @@ $(document).ready(function() {
     }
 
     function renderModes(modes) {
-        console.log('🎨 Rendering', modes.length, 'modes');
-        
         let html = '';
         
         modes.forEach(mode => {
@@ -1164,7 +1167,6 @@ $(document).ready(function() {
         
         $('#modeAccordionContainer').html(html);
             
-        // ✅ ATTACH EVENT LISTENERS
         $('.mode-accordion-header').on('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -1173,20 +1175,11 @@ $(document).ready(function() {
             const modeId = parseInt(modeItem.data('mode-id'));
             const isDisabled = modeItem.data('disabled') === true;
             
-            if (isDisabled) {
-                console.log('❌ Mode', modeId, 'is disabled');
-                return;
-            }
+            if (isDisabled) return;
             
-            console.log('✅ Clicked mode:', modeId);
-            
-            // Close others
             $('.mode-accordion-item').removeClass('active');
-            
-            // Open this
             modeItem.addClass('active');
             
-            // Load groups if needed
             const modeBody = modeItem.find('.mode-accordion-body');
             if (modeBody.find('.fa-spinner').length) {
                 loadJamKerjaGroupsForMode(modeId, modeBody);
@@ -1195,8 +1188,6 @@ $(document).ready(function() {
     }
 
     function loadJamKerjaGroupsForMode(modeId, container) {
-        console.log('📡 Loading groups for mode:', modeId);
-        
         fetch(`/api/mode/${modeId}/get-jam-kerja-groups/`)
             .then(response => response.json())
             .then(data => {
@@ -1207,174 +1198,152 @@ $(document).ready(function() {
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
                 container.html('<div class="alert alert-danger"><i class="fas fa-times-circle"></i> Error</div>');
             });
     }
 
-function renderGroups(groups, modeId, container) {
-    console.log('🎨 Rendering', groups.length, 'groups for mode', modeId);
-    console.log('📋 Full groups data:', groups);
-    
-    let html = '<div class="group-selection-grid">';
+    function renderGroups(groups, modeId, container) {
+        let html = '<div class="group-selection-grid">';
 
-    groups.forEach(group => {
-        const currentAssignment = modeAssignments[modeId];
-        let isSelected = false;
-        
-        if (currentAssignment && currentAssignment.jadwal_per_hari) {
-            const assignedJadwalIds = Object.values(currentAssignment.jadwal_per_hari);
-            isSelected = assignedJadwalIds.includes(group.id);
-        }
-        
-        // ✅ BUILD jadwal_per_hari DARI group.jadwal ARRAY
-        let jadwalPerHari = {};
-        
-        if (group.jadwal && Array.isArray(group.jadwal) && group.jadwal.length > 0) {
-            // ✅ CARA 1: Dari array jadwal (dari API)
-            group.jadwal.forEach(j => {
-                jadwalPerHari[j.hari.toString()] = j.jadwal_id;
-            });
-            console.log(`✅ Group "${group.nama}" built from jadwal array:`, jadwalPerHari);
-        } else if (group.jadwal_per_hari && typeof group.jadwal_per_hari === 'object') {
-            // ✅ CARA 2: Sudah ada jadwal_per_hari object
-            jadwalPerHari = group.jadwal_per_hari;
-            console.log(`✅ Group "${group.nama}" using jadwal_per_hari object:`, jadwalPerHari);
-        } else {
-            // ❌ FALLBACK: buat dummy (seharusnya tidak sampai sini)
-            console.warn(`⚠️ Group "${group.nama}" has no jadwal! Using fallback.`);
-            const jumlahHari = group.hari_kerja || 5;
-            for (let i = 0; i < jumlahHari && i < 7; i++) {
-                jadwalPerHari[i.toString()] = group.id;
+        groups.forEach(group => {
+            const currentAssignment = modeAssignments[modeId];
+            let isSelected = false;
+            
+            if (currentAssignment && currentAssignment.jadwal_per_hari) {
+                const assignedJadwalIds = Object.values(currentAssignment.jadwal_per_hari);
+                isSelected = assignedJadwalIds.includes(group.id);
             }
-        }
-        
-        html += `
-            <div class="group-option-card ${isSelected ? 'selected' : ''}" 
-                 data-mode-id="${modeId}" 
-                 data-group-id="${group.id}" 
-                 data-group-nama="${group.nama}"
-                 data-jadwal='${JSON.stringify(jadwalPerHari)}'>
-                <div class="group-check-box">
-                    <i class="fas fa-check"></i>
+            
+            let jadwalPerHari = {};
+            
+            if (group.jadwal && Array.isArray(group.jadwal) && group.jadwal.length > 0) {
+                group.jadwal.forEach(j => {
+                    jadwalPerHari[j.hari.toString()] = j.jadwal_id;
+                });
+            } else if (group.jadwal_per_hari && typeof group.jadwal_per_hari === 'object') {
+                jadwalPerHari = group.jadwal_per_hari;
+            } else {
+                const jumlahHari = group.hari_kerja || 5;
+                for (let i = 0; i < jumlahHari && i < 7; i++) {
+                    jadwalPerHari[i.toString()] = group.id;
+                }
+            }
+            
+            html += `
+                <div class="group-option-card ${isSelected ? 'selected' : ''}" 
+                     data-mode-id="${modeId}" 
+                     data-group-id="${group.id}" 
+                     data-group-nama="${group.nama}"
+                     data-jadwal='${JSON.stringify(jadwalPerHari)}'>
+                    <div class="group-check-box">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h6 class="group-name-text">${group.nama}</h6>
+                    <div class="group-time-display">
+                        <i class="fas fa-clock"></i>
+                        <span>${group.jam_masuk} - ${group.jam_keluar}</span>
+                    </div>
+                    <div class="group-meta-info">
+                        <span class="group-meta-tag"><i class="fas fa-calendar-check"></i> ${group.hari_kerja} hari</span>
+                    </div>
                 </div>
-                <h6 class="group-name-text">${group.nama}</h6>
-                <div class="group-time-display">
-                    <i class="fas fa-clock"></i>
-                    <span>${group.jam_masuk} - ${group.jam_keluar}</span>
-                </div>
-                <div class="group-meta-info">
-                    <span class="group-meta-tag"><i class="fas fa-calendar-check"></i> ${group.hari_kerja} hari</span>
-                </div>
-            </div>
-        `;
-    });
-
-    html += '</div>';
-    container.html(html);
-    
-    // ✅ ATTACH CLICK HANDLERS
-    container.find('.group-option-card').each(function() {
-        const $card = $(this);
-        $card.on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const clickedModeId = parseInt($card.data('mode-id'));
-            const groupId = parseInt($card.data('group-id'));
-            const groupNama = $card.data('group-nama');
-            const jadwalData = JSON.parse($card.attr('data-jadwal'));
-            
-            console.log('✅ Clicked group:', groupNama);
-            console.log('✅ jadwal_per_hari from data-jadwal:', jadwalData);
-            console.log('✅ Total hari:', Object.keys(jadwalData).length);
-            
-            // ✅ SIMPAN
-            modeAssignments[clickedModeId] = {
-                group_id: groupId,
-                group_nama: groupNama,
-                jadwal_per_hari: jadwalData  // ✅ DATA LENGKAP!
-            };
-            
-            console.log('✅ Final modeAssignments:', modeAssignments);
-            
-            // UPDATE UI
-            container.find('.group-option-card').removeClass('selected');
-            $card.addClass('selected');
-            
-            const modeItem = $(`.mode-accordion-item[data-mode-id="${clickedModeId}"]`);
-            modeItem.addClass('selected');
-            const badge = modeItem.find('.mode-status-badge');
-            badge.removeClass('pending').addClass('completed');
-            badge.html('<i class="fas fa-check-circle"></i> Dipilih');
+            `;
         });
-    });
-}
-// ========== CONFIRM ASSIGN ==========
-$('#btnConfirmAssignMode').on('click', function() {
-    const completedModes = Object.keys(modeAssignments).length;
-    if (completedModes === 0) {
-        Swal.fire('Perhatian!', 'Minimal pilih 1 grup', 'warning');
-        return;
+
+        html += '</div>';
+        container.html(html);
+        
+        container.find('.group-option-card').each(function() {
+            const $card = $(this);
+            $card.on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const clickedModeId = parseInt($card.data('mode-id'));
+                const groupId = parseInt($card.data('group-id'));
+                const groupNama = $card.data('group-nama');
+                const jadwalData = JSON.parse($card.attr('data-jadwal'));
+                
+                modeAssignments[clickedModeId] = {
+                    group_id: groupId,
+                    group_nama: groupNama,
+                    jadwal_per_hari: jadwalData
+                };
+                
+                container.find('.group-option-card').removeClass('selected');
+                $card.addClass('selected');
+                
+                const modeItem = $(`.mode-accordion-item[data-mode-id="${clickedModeId}"]`);
+                modeItem.addClass('selected');
+                const badge = modeItem.find('.mode-status-badge');
+                badge.removeClass('pending').addClass('completed');
+                badge.html('<i class="fas fa-check-circle"></i> Dipilih');
+            });
+        });
     }
 
-    // ✅ KIRIM SEMUA MODE (TANPA FILTER)
-    const validAssignments = selectedIds.map(pegawaiId => {
-        return { 
-            pegawai_id: pegawaiId, 
-            modes: modeAssignments  // ✅ Kirim semua mode yang dipilih
-        };
-    });
-    
-    const modeList = allModesData
-        .filter(m => modeAssignments[m.id])
-        .map(m => `${m.nama} → ${modeAssignments[m.id].group_nama}`)
-        .join('<br>');
-
-    Swal.fire({
-        title: 'Konfirmasi Assignment',
-        html: `<strong>${selectedIds.length} pegawai</strong> akan di-assign:<br><br>${modeList}<br><br><small style="color: #059669;">✅ Mode yang sama akan diupdate, mode lain tetap ada</small>`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, Assign',
-        cancelButtonText: 'Batal',
-        confirmButtonColor: 'var(--primary)',
-        reverseButtons: true
-    }).then(result => {
-        if (result.isConfirmed) {
-            const btn = $('#btnConfirmAssignMode');
-            const originalHtml = btn.html();
-            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
-            
-            fetch('/api/save-mode-assignment-bulk/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    assignments: JSON.stringify(validAssignments)
-                })
-            }).then(r => r.json()).then(data => {
-                btn.prop('disabled', false).html(originalHtml);
-                
-                if (data.status === 'success' || data.status === 'warning') {
-                    Swal.fire('Berhasil!', data.msg, 'success').then(() => {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('modalBulkAssignMode'));
-                        modal.hide();
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire('Gagal!', data.msg, 'error');
-                }
-            }).catch(error => {
-                btn.prop('disabled', false).html(originalHtml);
-                console.error('Error:', error);
-                Swal.fire('Error!', 'Terjadi kesalahan', 'error');
-            });
+    $('#btnConfirmAssignMode').on('click', function() {
+        const completedModes = Object.keys(modeAssignments).length;
+        if (completedModes === 0) {
+            Swal.fire('Perhatian!', 'Minimal pilih 1 grup', 'warning');
+            return;
         }
+
+        const validAssignments = selectedIds.map(pegawaiId => {
+            return { 
+                pegawai_id: pegawaiId, 
+                modes: modeAssignments
+            };
+        });
+        
+        const modeList = allModesData
+            .filter(m => modeAssignments[m.id])
+            .map(m => `${m.nama} → ${modeAssignments[m.id].group_nama}`)
+            .join('<br>');
+
+        Swal.fire({
+            title: 'Konfirmasi Assignment',
+            html: `<strong>${selectedIds.length} pegawai</strong> akan di-assign:<br><br>${modeList}<br><br><small style="color: #059669;">✅ Mode yang sama akan diupdate, mode lain tetap ada</small>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Assign',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: 'var(--primary)',
+            reverseButtons: true
+        }).then(result => {
+            if (result.isConfirmed) {
+                const btn = $('#btnConfirmAssignMode');
+                const originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+                
+                fetch('/api/save-mode-assignment-bulk/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        assignments: JSON.stringify(validAssignments)
+                    })
+                }).then(r => r.json()).then(data => {
+                    btn.prop('disabled', false).html(originalHtml);
+                    
+                    if (data.status === 'success' || data.status === 'warning') {
+                        Swal.fire('Berhasil!', data.msg, 'success').then(() => {
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('modalBulkAssignMode'));
+                            modal.hide();
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Gagal!', data.msg, 'error');
+                    }
+                }).catch(error => {
+                    btn.prop('disabled', false).html(originalHtml);
+                    Swal.fire('Error!', 'Terjadi kesalahan', 'error');
+                });
+            }
+        });
     });
-});
 
     $('#btnSyncFingerprint').on('click', function() {
         const btn = $(this);

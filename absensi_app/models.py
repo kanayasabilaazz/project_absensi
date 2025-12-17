@@ -646,39 +646,75 @@ class Absensi(models.Model):
         super().save(*args, **kwargs)
     
     def hitung_status_keterlambatan(self):
-        """Hitung status keterlambatan dan pulang cepat"""
+        """
+        ✅ FIXED: Hitung keterlambatan berdasarkan MODE AKTIF pada tanggal absensi
+        
+        LOGIC:
+        1. Ambil mode yang AKTIF pada tanggal ini (bisa mode khusus atau normal)
+        2. Ambil jadwal SPESIFIK pegawai untuk mode tersebut
+        3. Validasi terlambat berdasarkan jadwal yang berlaku
+        """
         if not self.tap_masuk:
             return
         
-        from .services import WorkModeService
-        jam_kerja_info = WorkModeService.get_jam_kerja_for_pegawai(
-            self.pegawai, 
-            self.tanggal
-        )
+        from .services import LayananModeKerja
+        from datetime import datetime, timedelta
         
-        if not jam_kerja_info or not jam_kerja_info.get('jadwal'):
+        # ✅ STEP 1: Ambil MODE yang AKTIF pada tanggal ini
+        mode_info = LayananModeKerja.ambil_mode_aktif(self.tanggal)
+        
+        if not mode_info or not mode_info['mode']:
+            print(f"⚠️ No active mode for {self.tanggal}")
             return
         
-        jadwal = jam_kerja_info['jadwal']
-        is_hari_kerja = jadwal.jam_masuk and jadwal.jam_keluar
+        mode = mode_info['mode']
+        periode = mode_info['periode']
         
-        if not is_hari_kerja:
+        # ✅ STEP 2: Ambil JADWAL SPESIFIK pegawai
+        jadwal_info = LayananModeKerja.ambil_jadwal_pegawai(self.pegawai, self.tanggal)
+        
+        if not jadwal_info or not jadwal_info.get('jadwal'):
+            print(f"⚠️ No schedule for {self.pegawai.nama_lengkap} on {self.tanggal}")
             return
         
+        jadwal = jadwal_info['jadwal']
+        
+        # ✅ STEP 3: Validasi TERLAMBAT (berdasarkan jadwal yang berlaku)
         if jadwal.jam_masuk:
             tap_masuk_standar = datetime.combine(self.tanggal, jadwal.jam_masuk)
             tap_masuk_actual = datetime.combine(self.tanggal, self.tap_masuk)
             toleransi = timedelta(minutes=jadwal.toleransi_terlambat)
-            self.is_late = tap_masuk_actual > tap_masuk_standar + toleransi
+            
+            self.is_late = tap_masuk_actual > (tap_masuk_standar + toleransi)
+            
+            # 🔍 DEBUG LOG
+            if self.is_late:
+                print(f"🔴 TERLAMBAT: {self.pegawai.nama_lengkap}")
+                print(f"   Mode: {mode.nama} {f'(Periode: {periode.nama})' if periode else '(Default)'}")
+                print(f"   Jadwal: {jadwal.group_name}")
+                print(f"   Expected: {jadwal.jam_masuk}")
+                print(f"   Actual: {self.tap_masuk}")
+                print(f"   Toleransi: {jadwal.toleransi_terlambat} menit")
         
+        # ✅ STEP 4: Validasi PULANG CEPAT
         if self.tap_pulang and jadwal.jam_keluar:
             tap_pulang_standar = datetime.combine(self.tanggal, jadwal.jam_keluar)
             tap_pulang_actual = datetime.combine(self.tanggal, self.tap_pulang)
             toleransi_keluar = timedelta(minutes=jadwal.toleransi_pulang_cepat)
-            self.is_early_departure = tap_pulang_actual < tap_pulang_standar - toleransi_keluar
+            
+            self.is_early_departure = tap_pulang_actual < (tap_pulang_standar - toleransi_keluar)
+            
+            # 🔍 DEBUG LOG
+            if self.is_early_departure:
+                print(f"🔴 PULANG CEPAT: {self.pegawai.nama_lengkap}")
+                print(f"   Mode: {mode.nama} {f'(Periode: {periode.nama})' if periode else '(Default)'}")
+                print(f"   Jadwal: {jadwal.group_name}")
+                print(f"   Expected: {jadwal.jam_keluar}")
+                print(f"   Actual: {self.tap_pulang}")
+                print(f"   Toleransi: {jadwal.toleransi_pulang_cepat} menit")
         else:
             self.is_early_departure = False
-    
+
     def calculate_total_jam_kerja(self):
         """Hitung total jam kerja dengan pengurangan waktu istirahat"""
         if not self.tap_masuk or not self.tap_pulang:

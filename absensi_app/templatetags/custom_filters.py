@@ -410,3 +410,61 @@ def subtract(value, arg):
         return int(value) - int(arg)
     except (ValueError, TypeError):
         return value
+    
+@register.filter
+def get_tap_status_class(absensi, tap_type='masuk'):
+    """
+    ✅ FIXED: Tentukan class CSS berdasarkan mode aktif pada tanggal absensi
+    
+    Usage: 
+        {{ absensi|get_tap_status_class:'masuk' }}
+        {{ absensi|get_tap_status_class:'pulang' }}
+    
+    Returns:
+        'text-danger' jika terlambat/pulang cepat
+        'text-success' jika normal
+    """
+    if tap_type == 'masuk':
+        if absensi.is_late:
+            return 'text-danger fw-bold'
+        return 'text-success'
+    
+    elif tap_type == 'pulang':
+        if absensi.is_early_departure:
+            return 'text-danger fw-bold'
+        return 'text-success'
+    
+    return ''
+
+
+@register.filter
+def get_mode_info_for_date(pegawai, tanggal):
+    """
+    ✅ NEW: Ambil info mode yang aktif pada tanggal tertentu
+    
+    Usage: {{ pegawai|get_mode_info_for_date:absensi.tanggal }}
+    
+    Returns:
+        dict: {mode_nama, mode_warna, periode_nama, is_mode_khusus}
+    """
+    from absensi_app.services import LayananModeKerja
+    
+    mode_info = LayananModeKerja.ambil_mode_aktif(tanggal)
+    
+    if not mode_info or not mode_info['mode']:
+        return {
+            'mode_nama': 'Normal',
+            'mode_warna': '#3B82F6',
+            'periode_nama': None,
+            'is_mode_khusus': False
+        }
+    
+    mode = mode_info['mode']
+    periode = mode_info['periode']
+    
+    return {
+        'mode_nama': mode.nama,
+        'mode_warna': mode.warna,
+        'periode_nama': periode.nama if periode else None,
+        'is_mode_khusus': periode is not None
+    }
