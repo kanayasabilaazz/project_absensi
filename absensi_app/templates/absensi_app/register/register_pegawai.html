@@ -753,7 +753,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(response => {
                 if (response.status === 'success' && response.groups && response.groups.length > 0) {
-                    renderJamKerjaGroups(response.groups, modeId, modeBodyElement, response.mode);
+                    const modeData = allModesData.find(m => m.id === modeId) || { nama: '' };
+                    renderJamKerjaGroups(response.groups, modeId, modeBodyElement, modeData);
                 } else {
                     const errorMsg = response.msg || `Tidak ada grup jam kerja untuk mode ini`;
                     modeBodyElement.innerHTML = `

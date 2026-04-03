@@ -491,11 +491,13 @@
                                         <i class="fas fa-briefcase"></i>
                                         {{ group_name|title }}
                                     </div>
+                                    <!-- ✅ FIX: pakai jumlah_hari_aktif bukan days|length -->
                                     <div class="schedule-group-subtitle">
-                                        {{ group_data.days|length }} hari kerja
+                                        {{ group_data.jumlah_hari_aktif }} hari kerja
                                     </div>
                                 </div>
-                                <span class="badge">{{ group_data.days|length }} hari</span>
+                                <!-- ✅ FIX: pakai jumlah_hari_aktif bukan days|length -->
+                                <span class="badge">{{ group_data.jumlah_hari_aktif }} hari</span>
                             </div>
                             <div class="schedule-table">
                                 <table>
@@ -769,7 +771,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (header && modeColor) {
         header.style.background = `linear-gradient(135deg, ${modeColor} 0%, ${modeColor}dd 100%)`;
     }
-    
+
     document.body.addEventListener('click', function(e) {
         const btn = e.target.closest('.btn-hapus-periode');
         if (btn) {
@@ -785,17 +787,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function hapusPeriode(periodeId, periodeName, btn) {
     if (!confirm(`Yakin hapus periode "${periodeName}"?`)) return;
-    
+
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
     if (!csrfToken) {
         alert('CSRF token tidak ditemukan');
         return;
     }
-    
+
     const originalHTML = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    
+
     fetch(`/pengaturan/periode/${periodeId}/hapus/`, {
         method: 'POST',
         headers: {

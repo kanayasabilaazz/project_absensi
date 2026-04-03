@@ -6542,59 +6542,57 @@ def edit_mode_jam_kerja(request, pk):
 
 @login_required
 def detail_mode_jam_kerja(request, pk):
-    """Menampilkan detail mode jam kerja, jadwal per grup, periode, dan pengecualian."""
+    """Menampilkan detail mode jam kerja."""
     if not request.user.is_staff:
         messages.error(request, "Akses ditolak.")
         return redirect('dashboard')
-    
+
     mode = get_object_or_404(MasterModeJamKerja, pk=pk)
-    
     all_jadwal = mode.jadwal_list.all().order_by('group_name', 'hari', 'urutan')
-    
+
     from collections import defaultdict
-    
-    jadwal_by_group = defaultdict(lambda: {
-        'group_name': '',
-        'days': {}
-    })
-    
+    jadwal_by_group = defaultdict(lambda: {'group_name': '', 'days': {}})
     hari_names = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
-    
+
+    # Inisialisasi group
     for jadwal in all_jadwal:
         group_name = jadwal.group_name
-        
         if not jadwal_by_group[group_name]['group_name']:
             jadwal_by_group[group_name]['group_name'] = group_name
-            
             for hari_idx in range(7):
                 jadwal_by_group[group_name]['days'][hari_idx] = {
                     'hari_idx': hari_idx,
                     'hari_nama': hari_names[hari_idx],
                     'jadwal_list': []
                 }
-    
+
+    # Isi jadwal per hari
     for jadwal in all_jadwal:
-        group_name = jadwal.group_name
-        hari = jadwal.hari
-        
-        jadwal_by_group[group_name]['days'][hari]['jadwal_list'].append(jadwal)
-    
+        jadwal_by_group[jadwal.group_name]['days'][jadwal.hari]['jadwal_list'].append(jadwal)
+
+    # Hitung hanya hari yang benar-benar ada jadwalnya
+    for group_name, group_data in jadwal_by_group.items():
+        group_data['jumlah_hari_aktif'] = sum(
+            1 for d in group_data['days'].values()
+            if d['jadwal_list']
+        )
+
     jadwal_by_group = dict(jadwal_by_group)
-    
+
     today = date.today()
     periode_aktif = mode.periode_list.filter(
         is_active=True,
         tanggal_mulai__lte=today,
         tanggal_selesai__gte=today
     ).first()
-    
+
     periode_mendatang = mode.periode_list.filter(
         is_active=True,
         tanggal_mulai__gt=today
     ).order_by('tanggal_mulai')[:5]
-    
+
     pegawai_count = mode.pegawai_list.filter(is_active=True).count()
-    
+
     context = {
         'mode': mode,
         'jadwal_by_dept': jadwal_by_group,
@@ -6603,6 +6601,7 @@ def detail_mode_jam_kerja(request, pk):
         'periode_aktif': periode_aktif,
         'periode_mendatang': periode_mendatang,
         'pegawai_count': pegawai_count,
+        'today': today,
     }
     return render(request, 'absensi_app/pengaturan/mode_jam_kerja/detail.html', context)
 
