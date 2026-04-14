@@ -211,16 +211,17 @@
         margin-top: 2px;
     }
 
+    /* Stat card gradients — sesuai palet base.html */
     .bg-gradient-blue {
-        background: linear-gradient(135deg, #1e40af 0%, var(--primary) 100%);
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
     }
 
     .bg-gradient-green {
-        background: linear-gradient(135deg, #059669 0%, var(--success) 100%);
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
     }
 
     .bg-gradient-amber {
-        background: linear-gradient(135deg, #d97706 0%, var(--warning) 100%);
+        background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
     }
 
     /* CONTROLS */
@@ -267,7 +268,7 @@
     .refresh-btn {
         height: 36px;
         padding: 0 var(--space-3);
-        background: var(--gray-800);
+        background: var(--primary);
         color: white;
         border: none;
         border-radius: var(--radius-sm);
@@ -281,7 +282,7 @@
     }
 
     .refresh-btn:hover {
-        background: var(--gray-900);
+        background: var(--primary-hover);
     }
 
     /* SEARCH */
@@ -315,11 +316,11 @@
         font-size: var(--text-sm);
     }
 
-    /* TABLE - PERSIS SEPERTI RIWAYAT */
+    /* TABLE */
     .table-wrapper {
         border-radius: var(--radius);
         overflow: hidden;
-        border: 1px solid #e5e7eb;
+        border: 1px solid var(--gray-200);
         background: white;
     }
 
@@ -331,14 +332,13 @@
     }
 
     .table thead th {
-        background: #f3f4f6 !important;
-        background-color: #f3f4f6 !important;
-        color: #374151 !important;
+        background: #0a0f1e !important;
+        color: #a0aec0 !important;
         font-weight: 600 !important;
         padding: 12px 16px !important;
         font-size: 13px !important;
         text-align: center !important;
-        border-bottom: 1px solid #e5e7eb !important;
+        border-bottom: 2px solid #1e2a40 !important;
         white-space: nowrap !important;
         vertical-align: middle !important;
     }
@@ -346,16 +346,16 @@
     .table tbody td {
         padding: 12px 16px !important;
         font-size: 14px !important;
-        color: #111827 !important;
+        color: var(--gray-900) !important;
         background: #ffffff !important;
         background-color: #ffffff !important;
-        border-bottom: 1px solid #f3f4f6 !important;
+        border-bottom: 1px solid var(--gray-100) !important;
         vertical-align: middle !important;
     }
 
     .table tbody tr:hover td {
-        background: #f9fafb !important;
-        background-color: #f9fafb !important;
+        background: var(--gray-50) !important;
+        background-color: var(--gray-50) !important;
     }
 
     .table tbody tr:last-child td {
@@ -364,7 +364,7 @@
 
     /* BADGES */
     .badge-userid {
-        background: #3b82f6 !important;
+        background: var(--primary) !important;
         color: #ffffff !important;
         padding: 4px 10px !important;
         border-radius: 6px !important;
@@ -375,7 +375,7 @@
     }
 
     .libur-badge {
-        background: #10b981 !important;
+        background: var(--success) !important;
         color: #ffffff !important;
         padding: 4px 10px !important;
         border-radius: 6px !important;
@@ -389,44 +389,44 @@
     .jam-text {
         font-weight: 700 !important;
         font-size: 14px !important;
-        color: #3b82f6 !important;
+        color: var(--primary) !important;
     }
 
     .jam-text.late {
-        color: #ef4444 !important;
+        color: var(--danger) !important;
     }
 
     .jam-text.early {
-        color: #ef4444 !important;
+        color: var(--danger) !important;
     }
 
     .jam-text.violation {
-        color: #ef4444 !important;
+        color: var(--accent) !important;
     }
 
     .total-jam-text {
         font-weight: 700 !important;
         font-size: 14px !important;
-        color: #3b82f6 !important;
+        color: var(--primary) !important;
     }
 
     .total-jam-text.violation {
-        color: #ef4444 !important;
+        color: var(--accent) !important;
     }
 
     .user-name {
         font-weight: 600 !important;
-        color: #111827 !important;
+        color: var(--gray-900) !important;
         text-decoration: none !important;
     }
 
     .user-name:hover {
-        color: #3b82f6 !important;
+        color: var(--primary) !important;
     }
 
     .badge-secondary {
-        background: #e5e7eb !important;
-        color: #4b5563 !important;
+        background: var(--gray-200) !important;
+        color: var(--gray-700) !important;
         padding: 4px 10px !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
@@ -434,7 +434,7 @@
     }
 
     .badge-success {
-        background: #d1fae5 !important;
+        background: var(--success-light) !important;
         color: #065f46 !important;
         padding: 4px 10px !important;
         border-radius: 6px !important;
@@ -443,7 +443,7 @@
     }
 
     .badge-warning {
-        background: #fef3c7 !important;
+        background: var(--warning-light) !important;
         color: #92400e !important;
         padding: 4px 10px !important;
         border-radius: 6px !important;
@@ -452,7 +452,7 @@
     }
 
     .badge-danger {
-        background: #fee2e2 !important;
+        background: var(--danger-light) !important;
         color: #991b1b !important;
         padding: 4px 10px !important;
         border-radius: 6px !important;
@@ -461,8 +461,8 @@
     }
 
     .badge-info {
-        background: #bfdbfe !important;
-        color: #1e40af !important;
+        background: var(--primary-light) !important;
+        color: var(--primary) !important;
         padding: 4px 10px !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
@@ -565,10 +565,11 @@
     }
 
     .modal-header {
-        background: var(--gray-800);
+        background: var(--primary);
         color: white;
         padding: var(--space-4);
         border: none;
+        border-left: 3px solid var(--accent);
     }
 
     .modal-header .btn-close {
@@ -712,11 +713,11 @@
                 <span class="detail-number">{{ sakit_count|default:"0" }}</span>
                 <span class="detail-label">Sakit</span>
             </div>
-            <div class="detail-item" onclick="showDetail('Izin', '#3b82f6')">
+            <div class="detail-item" onclick="showDetail('Izin', '#1a3a6b')">
                 <span class="detail-number">{{ izin_count|default:"0" }}</span>
                 <span class="detail-label">Izin</span>
             </div>
-            <div class="detail-item" onclick="showDetail('Absen', '#ef4444')">
+            <div class="detail-item" onclick="showDetail('Absen', '#cc1a1a')">
                 <span class="detail-number">{{ absen_count|default:"0" }}</span>
                 <span class="detail-label">Absen</span>
             </div>
@@ -878,8 +879,8 @@ let lastLoadedDate = null;
 const COLORS = {
     HADIR: { line: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', icon: 'check-circle' },
     SAKIT: { line: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)', icon: 'thermometer-half' },
-    IZIN: { line: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', icon: 'file-signature' },
-    ABSEN: { line: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', icon: 'times-circle' },
+    IZIN:  { line: '#1a3a6b', bg: 'rgba(26, 58, 107, 0.1)',  icon: 'file-signature' },
+    ABSEN: { line: '#cc1a1a', bg: 'rgba(204, 26, 26, 0.1)',  icon: 'times-circle' },
 };
 
 function adjustColor(color, amount) {
@@ -899,10 +900,10 @@ function loadModeToday() {
             if (data.status === 'success' && data.mode) {
                 const mode = data.mode;
                 const modeCard = document.querySelector('.mode-card');
-                
-                if (modeCard && mode.warna) {
-                    const darkerColor = adjustColor(mode.warna, -20);
-                    modeCard.style.background = `linear-gradient(135deg, ${mode.warna} 0%, ${darkerColor} 100%)`;
+
+                // Paksa selalu navy, abaikan warna dari API
+                if (modeCard) {
+                    modeCard.style.background = 'linear-gradient(135deg, #1a3a6b 0%, #122b52 100%)';
                 }
 
                 const modeIcon = document.getElementById('modeIcon');
@@ -1161,7 +1162,6 @@ document.getElementById('searchInput').addEventListener('input', function() {
             row.style.display = 'none';
             return;
         }
-
         if (row.textContent.toLowerCase().includes(searchTerm)) {
             row.style.display = '';
             visibleCount++;
@@ -1185,10 +1185,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let chartLabels = [], chartDataHadir = [], chartDataSakit = [], chartDataIzin = [], chartDataAbsen = [];
 
     try {
-        chartLabels = JSON.parse('{{ chart_labels|escapejs|default:"[]" }}');
+        chartLabels    = JSON.parse('{{ chart_labels|escapejs|default:"[]" }}');
         chartDataHadir = JSON.parse('{{ chart_data_hadir|escapejs|default:"[]" }}');
         chartDataSakit = JSON.parse('{{ chart_data_sakit|escapejs|default:"[]" }}');
-        chartDataIzin = JSON.parse('{{ chart_data_izin|escapejs|default:"[]" }}');
+        chartDataIzin  = JSON.parse('{{ chart_data_izin|escapejs|default:"[]" }}');
         chartDataAbsen = JSON.parse('{{ chart_data_absen|escapejs|default:"[]" }}');
     } catch (e) {
         console.error('Error parsing chart data:', e);
@@ -1273,7 +1273,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                        backgroundColor: 'rgba(10, 15, 30, 0.95)',
                         padding: 12,
                         titleFont: { size: 12, weight: 'bold' },
                         bodyFont: { size: 11 },
@@ -1307,7 +1307,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const summaryItems = [
             { status: 'Hadir', color: COLORS.HADIR.line, label: 'Total Hadir', icon: COLORS.HADIR.icon },
             { status: 'Sakit', color: COLORS.SAKIT.line, label: 'Total Sakit', icon: COLORS.SAKIT.icon },
-            { status: 'Izin', color: COLORS.IZIN.line, label: 'Total Izin', icon: COLORS.IZIN.icon },
+            { status: 'Izin',  color: COLORS.IZIN.line,  label: 'Total Izin',  icon: COLORS.IZIN.icon  },
             { status: 'Absen', color: COLORS.ABSEN.line, label: 'Total Absen', icon: COLORS.ABSEN.icon },
         ];
 

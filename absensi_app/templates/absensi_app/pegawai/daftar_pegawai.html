@@ -91,11 +91,11 @@
     }
 
     .bg-gradient-green {
-        background: linear-gradient(135deg, #059669 0%, var(--success) 100%);
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
     }
 
     .bg-gradient-amber {
-        background: linear-gradient(135deg, #d97706 0%, var(--warning) 100%);
+        background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
     }
 
     .bg-gradient-gray {
@@ -230,35 +230,82 @@
         transform: translate(-50%, -50%);
     }
 
-    /* ===== TABLE ===== */
-    .table tbody tr.selected {
+    /* ===== TABLE — sama persis seperti riwayat absensi ===== */
+    .table-wrapper {
+        border-radius: var(--radius);
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        background: white;
+    }
+
+    .table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin: 0 !important;
+        background: white !important;
+    }
+
+    .table thead th {
+        background: #f3f4f6 !important;
+        background-color: #f3f4f6 !important;
+        color: #374151 !important;
+        font-weight: 600 !important;
+        padding: 12px 16px !important;
+        font-size: 13px !important;
+        text-align: center !important;
+        border-bottom: 1px solid #e5e7eb !important;
+        white-space: nowrap !important;
+        vertical-align: middle !important;
+    }
+
+    .table tbody td {
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+        color: #111827 !important;
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        vertical-align: middle !important;
+    }
+
+    .table tbody tr:hover td {
+        background: #f9fafb !important;
+        background-color: #f9fafb !important;
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    .table tbody tr.selected td {
         background: var(--primary-light) !important;
+        background-color: var(--primary-light) !important;
         border-left: 3px solid var(--primary);
     }
 
     /* ===== BADGES ===== */
     .userid-badge {
-        background: var(--primary);
-        color: white;
-        padding: 2px var(--space-2);
-        border-radius: var(--radius-sm);
-        font-weight: 700;
-        font-size: var(--text-xs);
-        font-family: 'Courier New', monospace;
-        display: inline-block;
+        background: var(--primary) !important;
+        color: white !important;
+        padding: 4px 10px !important;
+        border-radius: 6px !important;
+        font-weight: 700 !important;
+        font-size: 12px !important;
+        font-family: 'Courier New', monospace !important;
+        display: inline-block !important;
     }
 
     .badge-secondary {
-        background: var(--gray-100);
-        color: var(--gray-700);
-        padding: 2px var(--space-2);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: var(--text-xs);
-        display: inline-block;
+        background: #e5e7eb !important;
+        color: #4b5563 !important;
+        padding: 4px 10px !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        font-size: 12px !important;
+        display: inline-block !important;
     }
 
-    /* ===== TOGGLE STATUS BUTTON - DIPERKECIL ===== */
+    /* ===== TOGGLE STATUS BUTTON ===== */
     .btn-toggle-status {
         padding: 0 var(--space-2);
         height: 24px;
@@ -276,29 +323,56 @@
         white-space: nowrap;
     }
 
-    .btn-toggle-status i {
-        font-size: 9px;
-    }
+    .btn-toggle-status i { font-size: 9px; }
 
     .btn-toggle-status:hover {
         transform: translateY(-1px);
         box-shadow: var(--shadow);
     }
 
-    .btn-toggle-status.btn-success-toggle {
-        background: var(--success);
+    .btn-toggle-status.btn-success-toggle { background: var(--success); }
+    .btn-toggle-status.btn-success-toggle:hover { background: #059669; }
+    .btn-toggle-status.btn-danger-toggle { background: var(--danger); }
+    .btn-toggle-status.btn-danger-toggle:hover { background: #dc2626; }
+
+    /* ===== PAGINATION ===== */
+    .custom-pagination {
+        display: flex;
+        gap: var(--space-1);
+        justify-content: center;
+        padding: var(--space-4) 0;
+        list-style: none;
+        margin: 0;
     }
 
-    .btn-toggle-status.btn-success-toggle:hover {
-        background: #059669;
+    .page-btn {
+        background: white;
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: var(--space-2) var(--space-3);
+        font-weight: 600;
+        font-size: var(--text-sm);
+        cursor: pointer;
+        min-width: 36px;
+        text-align: center;
+        transition: all 0.2s;
     }
 
-    .btn-toggle-status.btn-danger-toggle {
-        background: var(--danger);
+    .page-btn:hover:not(.disabled):not(.active) {
+        background: var(--gray-100);
+        border-color: var(--gray-400);
     }
 
-    .btn-toggle-status.btn-danger-toggle:hover {
-        background: #dc2626;
+    .page-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
     /* ===== MODE ACCORDION ===== */
@@ -326,9 +400,7 @@
         transition: all 0.2s;
     }
 
-    .mode-accordion-header:hover {
-        background: var(--gray-100);
-    }
+    .mode-accordion-header:hover { background: var(--gray-100); }
 
     .mode-accordion-item.selected .mode-accordion-header {
         background: rgba(59, 130, 246, 0.05);
@@ -357,10 +429,7 @@
         font-size: var(--text-sm);
     }
 
-    .mode-info small {
-        color: var(--gray-600);
-        font-size: var(--text-xs);
-    }
+    .mode-info small { color: var(--gray-600); font-size: var(--text-xs); }
 
     .mode-status-badge {
         padding: var(--space-1) var(--space-3);
@@ -372,15 +441,8 @@
         gap: var(--space-1);
     }
 
-    .mode-status-badge.pending {
-        background: var(--warning-light);
-        color: #92400e;
-    }
-
-    .mode-status-badge.completed {
-        background: var(--success-light);
-        color: #065f46;
-    }
+    .mode-status-badge.pending { background: var(--warning-light); color: #92400e; }
+    .mode-status-badge.completed { background: var(--success-light); color: #065f46; }
 
     .mode-chevron {
         width: 28px;
@@ -406,9 +468,7 @@
         border-top: 1px solid var(--gray-200);
     }
 
-    .mode-accordion-item.active .mode-accordion-body {
-        display: block;
-    }
+    .mode-accordion-item.active .mode-accordion-body { display: block; }
 
     /* ===== GROUP SELECTION GRID ===== */
     .group-selection-grid {
@@ -442,9 +502,7 @@
     .group-option-card.selected::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
+        top: 0; left: 0; right: 0;
         height: 3px;
         background: var(--primary);
         border-radius: var(--radius) var(--radius) 0 0;
@@ -469,13 +527,8 @@
         color: white;
     }
 
-    .group-option-card.selected .group-check-box i {
-        display: block;
-    }
-
-    .group-check-box i {
-        display: none;
-    }
+    .group-check-box i { display: none; }
+    .group-option-card.selected .group-check-box i { display: block; }
 
     .group-name-text {
         font-weight: 600;
@@ -504,11 +557,7 @@
         color: var(--primary);
     }
 
-    .group-meta-info {
-        display: flex;
-        gap: var(--space-1);
-        flex-wrap: wrap;
-    }
+    .group-meta-info { display: flex; gap: var(--space-1); flex-wrap: wrap; }
 
     .group-meta-tag {
         font-size: var(--text-xs);
@@ -523,23 +572,10 @@
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .bulk-actions-bar {
-            flex-direction: column;
-            gap: var(--space-3);
-        }
-
-        .bulk-actions {
-            width: 100%;
-            flex-direction: column;
-        }
-
-        .group-selection-grid {
-            grid-template-columns: 1fr;
-        }
+        .stats-grid { grid-template-columns: 1fr; }
+        .bulk-actions-bar { flex-direction: column; gap: var(--space-3); }
+        .bulk-actions { width: 100%; flex-direction: column; }
+        .group-selection-grid { grid-template-columns: 1fr; }
     }
 </style>
 {% endblock %}
@@ -551,27 +587,21 @@
         <i class="fas fa-user-check stat-icon"></i>
         <h6>Pegawai Aktif</h6>
         <div class="stat-number">{{ total_active }}</div>
-        <p class="stat-footer">
-            <i class="fas fa-users"></i> Total aktif
-        </p>
+        <p class="stat-footer"><i class="fas fa-users"></i> Total aktif</p>
     </a>
 
     <a href="?status_filter=pending" class="stat-card bg-gradient-amber {% if status_filter == 'pending' %}active{% endif %}">
         <i class="fas fa-clock stat-icon"></i>
         <h6>Menunggu Registrasi</h6>
         <div class="stat-number">{{ total_pending }}</div>
-        <p class="stat-footer">
-            <i class="fas fa-fingerprint"></i> Belum scan
-        </p>
+        <p class="stat-footer"><i class="fas fa-fingerprint"></i> Belum scan</p>
     </a>
 
     <a href="?status_filter=inactive" class="stat-card bg-gradient-gray {% if status_filter == 'inactive' %}active{% endif %}">
         <i class="fas fa-user-lock stat-icon"></i>
         <h6>Pegawai Nonaktif</h6>
         <div class="stat-number">{{ total_inactive }}</div>
-        <p class="stat-footer">
-            <i class="fas fa-user-slash"></i> Total nonaktif
-        </p>
+        <p class="stat-footer"><i class="fas fa-user-slash"></i> Total nonaktif</p>
     </a>
 </div>
 
@@ -583,7 +613,6 @@
     <div class="card-body">
         <form method="get" id="searchForm">
             <input type="hidden" name="status_filter" value="{{ status_filter }}" id="statusFilterInput">
-            
             <div class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label">Departemen</label>
@@ -594,7 +623,6 @@
                         {% endfor %}
                     </select>
                 </div>
-
                 <div class="col-md-3">
                     <label class="form-label">Jabatan</label>
                     <select class="form-select" name="jabatan" id="filterJabatan">
@@ -604,20 +632,17 @@
                         {% endfor %}
                     </select>
                 </div>
-
                 <div class="col-md-4">
                     <label class="form-label">Pencarian</label>
-                    <input type="text" name="search_query" class="form-control" 
+                    <input type="text" name="search_query" class="form-control"
                            placeholder="Cari User ID, Nama, Jabatan..."
                            value="{{ request.GET.search_query }}" id="searchInput">
                 </div>
-
                 <div class="col-md-1 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
-
                 <div class="col-md-1 d-flex align-items-end">
                     <button type="button" class="btn btn-secondary w-100" id="btnToggleSelection">
                         <i class="fas fa-check-square"></i>
@@ -675,22 +700,33 @@
 <div class="card">
     <div class="card-header">
         <h5><i class="fas fa-users"></i> Data Pegawai</h5>
+        <div class="d-flex align-items-center gap-2">
+            <label style="margin: 0; font-size: var(--text-sm); font-weight: 600;">Tampilkan:</label>
+            <select class="form-select" id="entriesSelect" style="width: auto; padding: var(--space-2) var(--space-3);">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="-1" selected>Semua</option>
+            </select>
+        </div>
     </div>
+
     <div class="card-body" style="padding: 0; overflow-x: auto;">
-        <div style="min-width: 1000px;">
-            <table class="table" id="pegawaiTable" style="margin: 0;">
+        <div class="table-wrapper">
+            <table class="table" id="pegawaiTable">
                 <thead>
                     <tr>
                         <th class="checkbox-cell">
                             <input type="checkbox" class="custom-checkbox" id="selectAll">
                         </th>
-                        <th class="text-center">No</th>
-                        <th class="text-center">User ID</th>
+                        <th>No</th>
+                        <th>User ID</th>
                         <th>Nama</th>
-                        <th class="text-center">Departemen</th>
-                        <th class="text-center">Jabatan</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Aksi</th>
+                        <th>Departemen</th>
+                        <th>Jabatan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -700,29 +736,29 @@
                             <td class="checkbox-cell">
                                 <input type="checkbox" class="custom-checkbox row-checkbox" value="{{ pegawai.id }}">
                             </td>
-                            <td class="text-center"><strong>{{ forloop.counter }}</strong></td>
-                            <td class="text-center">
+                            <td style="text-align: center;"><strong>{{ forloop.counter }}</strong></td>
+                            <td style="text-align: center;">
                                 <span class="userid-badge">{{ pegawai.userid }}</span>
                             </td>
                             <td><strong>{{ pegawai.nama_lengkap }}</strong></td>
-                            <td class="text-center">
+                            <td style="text-align: center;">
                                 {% if pegawai.departemen %}
                                     <span class="badge-secondary">{{ pegawai.departemen.nama }}</span>
                                 {% else %}
                                     <span style="color: var(--gray-400);">-</span>
                                 {% endif %}
                             </td>
-                            <td class="text-center">
+                            <td style="text-align: center;">
                                 {% if pegawai.jabatan %}
                                     <span class="badge-secondary">{{ pegawai.jabatan.nama }}</span>
                                 {% else %}
                                     <span style="color: var(--gray-400);">-</span>
                                 {% endif %}
                             </td>
-                            <td class="text-center">
+                            <td style="text-align: center;">
                                 {% if pegawai.is_active %}
-                                    <form method="post" action="{% url 'toggle_pegawai_status' pegawai.pk %}" 
-                                          style="display:inline;" 
+                                    <form method="post" action="{% url 'toggle_pegawai_status' pegawai.pk %}"
+                                          style="display:inline;"
                                           onsubmit="return confirm('Yakin ingin menonaktifkan pegawai ini?');">
                                         {% csrf_token %}
                                         <button type="submit" class="btn-toggle-status btn-success-toggle">
@@ -730,8 +766,8 @@
                                         </button>
                                     </form>
                                 {% else %}
-                                    <form method="post" action="{% url 'toggle_pegawai_status' pegawai.pk %}" 
-                                          style="display:inline;" 
+                                    <form method="post" action="{% url 'toggle_pegawai_status' pegawai.pk %}"
+                                          style="display:inline;"
                                           onsubmit="return confirm('Yakin ingin mengaktifkan kembali pegawai ini?');">
                                         {% csrf_token %}
                                         <button type="submit" class="btn-toggle-status btn-danger-toggle">
@@ -740,7 +776,7 @@
                                     </form>
                                 {% endif %}
                             </td>
-                            <td class="text-center">
+                            <td style="text-align: center;">
                                 <div class="d-flex gap-1 justify-content-center">
                                     <a href="{% url 'Pegawai_detail' pk=pegawai.pk %}" class="btn btn-primary btn-sm">
                                         <i class="fas fa-eye"></i>
@@ -760,7 +796,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="8" class="text-center" style="padding: var(--space-8);">
+                            <td colspan="8" style="text-align: center; padding: var(--space-8);">
                                 <i class="fas fa-inbox" style="font-size: 3rem; color: var(--gray-300);"></i>
                                 <h6 style="margin-top: var(--space-3); color: var(--gray-700); font-weight: 600;">Tidak Ada Data</h6>
                                 <p style="color: var(--gray-500); margin: 0;">
@@ -778,9 +814,15 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="custom-pagination" id="customPagination"></div>
     </div>
+
     <div class="card-footer">
         Total: <strong id="totalPegawai">{{ pegawai_list|length }}</strong> Pegawai
+        <span id="showingInfo" style="color: var(--gray-600); margin-left: var(--space-4);">
+            Menampilkan semua data
+        </span>
     </div>
 </div>
 
@@ -798,7 +840,7 @@
                 <div class="alert alert-success">
                     <i class="fas fa-check-circle"></i>
                     <div>
-                        <strong>Pegawai Terpilih:</strong> 
+                        <strong>Pegawai Terpilih:</strong>
                         <span id="selectedCountModalMode" class="badge badge-success">0</span>
                     </div>
                 </div>
@@ -829,40 +871,95 @@
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+let dtTable;
+
+function updateShowingInfo() {
+    const info = dtTable.page.info();
+    const showingInfo = $('#showingInfo');
+    if (info.length === -1 || info.recordsDisplay === info.recordsTotal) {
+        showingInfo.text('Menampilkan semua data');
+    } else {
+        showingInfo.text('Menampilkan ' + (info.start + 1) + '-' + info.end + ' dari ' + info.recordsDisplay + ' data');
+    }
+}
+
+function renderCustomPagination() {
+    const info = dtTable.page.info();
+    const current = info.page;
+    const total = info.pages;
+    const pagination = $('#customPagination');
+
+    if (total <= 1) {
+        pagination.hide();
+        updateShowingInfo();
+        return;
+    }
+
+    pagination.show();
+    let html = '';
+
+    html += current === 0
+        ? '<button class="page-btn disabled" disabled>Prev</button>'
+        : '<button class="page-btn" onclick="changePage(' + (current - 1) + ')">Prev</button>';
+
+    let start = Math.max(0, current - 2);
+    let end = Math.min(total - 1, current + 2);
+    if (current <= 2) end = Math.min(4, total - 1);
+    if (current >= total - 3) start = Math.max(0, total - 5);
+
+    for (let i = start; i <= end; i++) {
+        html += i === current
+            ? '<button class="page-btn active">' + (i + 1) + '</button>'
+            : '<button class="page-btn" onclick="changePage(' + i + ')">' + (i + 1) + '</button>';
+    }
+
+    html += current === total - 1
+        ? '<button class="page-btn disabled" disabled>Next</button>'
+        : '<button class="page-btn" onclick="changePage(' + (current + 1) + ')">Next</button>';
+
+    pagination.html(html);
+    updateShowingInfo();
+}
+
+function changePage(page) {
+    dtTable.page(page).draw('page');
+}
+
 $(document).ready(function() {
-    const table = $('#pegawaiTable').DataTable({
-        language: {
-            oPaginate: {
-                sFirst: "Pertama",
-                sPrevious: "←",
-                sNext: "→",
-                sLast: "Terakhir"
-            },
-            sEmptyTable: "Tidak ada data",
-            sZeroRecords: "Tidak ada data yang cocok",
-            sInfo: "Menampilkan _START_ - _END_ dari _TOTAL_",
-            sInfoEmpty: "Menampilkan 0 - 0 dari 0",
-            sLengthMenu: "Tampilkan _MENU_"
-        },
-        pageLength: 25,
-        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
-        order: [[2, 'asc']],
+    dtTable = $('#pegawaiTable').DataTable({
+        paging: true,
+        pageLength: -1,
+        lengthChange: false,
+        ordering: true,
         searching: false,
+        info: false,
+        scrollX: false,
+        dom: 'rt',
+        language: { emptyTable: 'Tidak ada data' },
+        order: [[2, 'asc']],
         columnDefs: [
             { orderable: false, targets: [0, 6, 7] }
-        ]
+        ],
+        drawCallback: function() {
+            renderCustomPagination();
+        }
     });
-    
+
+    $('#entriesSelect').on('change', function() {
+        dtTable.page.len(parseInt($(this).val())).draw();
+    });
+
+    renderCustomPagination();
+
+    // ========== SELECTION LOGIC ==========
     let selectedIds = [];
     let selectionMode = false;
     let allModesData = [];
     let modeAssignments = {};
     let pegawaiExistingAssignments = {};
-    
-    // ========== SELECTION LOGIC ==========
+
     $('#btnToggleSelection').on('click', function() {
         selectionMode = !selectionMode;
-        
         if (selectionMode) {
             $('body').addClass('selection-mode');
             $(this).html('<i class="fas fa-times"></i>');
@@ -878,36 +975,25 @@ $(document).ready(function() {
     });
 
     $('#selectAll').on('change', function() {
-        if (!selectionMode) {
-            $(this).prop('checked', false);
-            return;
-        }
-        
+        if (!selectionMode) { $(this).prop('checked', false); return; }
         const isChecked = $(this).prop('checked');
-        table.rows({ page: 'current', search: 'applied' }).nodes().to$().find('.row-checkbox').prop('checked', isChecked);
-        
+        dtTable.rows({ page: 'current', search: 'applied' }).nodes().to$().find('.row-checkbox').prop('checked', isChecked);
         selectedIds = [];
         if (isChecked) {
-            table.rows({ page: 'current', search: 'applied' }).nodes().to$().find('.row-checkbox:checked').each(function() {
+            dtTable.rows({ page: 'current', search: 'applied' }).nodes().to$().find('.row-checkbox:checked').each(function() {
                 selectedIds.push($(this).val());
             });
             $('tr').has('.row-checkbox:checked').addClass('selected');
         } else {
             $('tr').removeClass('selected');
         }
-        
         updateBulkBar();
     });
 
     $(document).on('change', '.row-checkbox', function() {
-        if (!selectionMode) {
-            $(this).prop('checked', false);
-            return;
-        }
-        
+        if (!selectionMode) { $(this).prop('checked', false); return; }
         const id = $(this).val();
         const row = $(this).closest('tr');
-        
         if ($(this).prop('checked')) {
             if (!selectedIds.includes(id)) selectedIds.push(id);
             row.addClass('selected');
@@ -916,7 +1002,6 @@ $(document).ready(function() {
             row.removeClass('selected');
             $('#selectAll').prop('checked', false);
         }
-        
         updateBulkBar();
     });
 
@@ -924,7 +1009,6 @@ $(document).ready(function() {
         selectedIds = [...new Set(selectedIds)];
         $('#selectedCount').text(selectedIds.length);
         $('#selectedCountModalMode').text(selectedIds.length);
-        
         if (selectedIds.length > 0) {
             $('#bulkActionsBar').addClass('show');
         } else {
@@ -935,105 +1019,66 @@ $(document).ready(function() {
 
     // ========== BULK ACTIONS ==========
     $('#btnBulkActivate').on('click', function() {
-        if (!selectedIds.length) {
-            Swal.fire('Perhatian!', 'Pilih minimal 1 pegawai', 'warning');
-            return;
-        }
-
+        if (!selectedIds.length) { Swal.fire('Perhatian!', 'Pilih minimal 1 pegawai', 'warning'); return; }
         Swal.fire({
             title: 'Aktifkan Pegawai?',
             html: `<strong>${selectedIds.length} pegawai</strong> akan diaktifkan`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Aktifkan',
-            cancelButtonText: 'Batal',
-            confirmButtonColor: 'var(--success)',
-            reverseButtons: true
+            icon: 'question', showCancelButton: true,
+            confirmButtonText: 'Ya, Aktifkan', cancelButtonText: 'Batal',
+            confirmButtonColor: 'var(--success)', reverseButtons: true
         }).then(result => {
             if (result.isConfirmed) {
                 fetch("{% url 'bulk_activate_pegawai' %}", {
                     method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({ pegawai_ids: selectedIds.join(',') })
                 }).then(r => r.json()).then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire('Berhasil!', data.msg, 'success').then(() => location.reload());
-                    } else {
-                        Swal.fire('Gagal!', data.msg, 'error');
-                    }
+                    if (data.status === 'success') Swal.fire('Berhasil!', data.msg, 'success').then(() => location.reload());
+                    else Swal.fire('Gagal!', data.msg, 'error');
                 }).catch(() => Swal.fire('Error!', 'Terjadi kesalahan', 'error'));
             }
         });
     });
 
     $('#btnBulkDeactivate').on('click', function() {
-        if (!selectedIds.length) {
-            Swal.fire('Perhatian!', 'Pilih minimal 1 pegawai', 'warning');
-            return;
-        }
-
+        if (!selectedIds.length) { Swal.fire('Perhatian!', 'Pilih minimal 1 pegawai', 'warning'); return; }
         Swal.fire({
             title: 'Non-aktifkan Pegawai?',
             html: `<strong>${selectedIds.length} pegawai</strong> akan di-non-aktifkan`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Non-aktifkan',
-            cancelButtonText: 'Batal',
-            confirmButtonColor: 'var(--gray-600)',
-            reverseButtons: true
+            icon: 'warning', showCancelButton: true,
+            confirmButtonText: 'Ya, Non-aktifkan', cancelButtonText: 'Batal',
+            confirmButtonColor: 'var(--gray-600)', reverseButtons: true
         }).then(result => {
             if (result.isConfirmed) {
                 fetch("{% url 'bulk_deactivate_pegawai' %}", {
                     method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({ pegawai_ids: selectedIds.join(',') })
                 }).then(r => r.json()).then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire('Berhasil!', data.msg, 'success').then(() => location.reload());
-                    } else {
-                        Swal.fire('Gagal!', data.msg, 'error');
-                    }
+                    if (data.status === 'success') Swal.fire('Berhasil!', data.msg, 'success').then(() => location.reload());
+                    else Swal.fire('Gagal!', data.msg, 'error');
                 }).catch(() => Swal.fire('Error!', 'Terjadi kesalahan', 'error'));
             }
         });
     });
 
     $('#btnBulkDelete').on('click', function() {
-        if (!selectedIds.length) {
-            Swal.fire('Perhatian!', 'Pilih minimal 1 pegawai', 'warning');
-            return;
-        }
-
+        if (!selectedIds.length) { Swal.fire('Perhatian!', 'Pilih minimal 1 pegawai', 'warning'); return; }
         Swal.fire({
             title: 'Hapus Permanen?',
             html: `<strong>${selectedIds.length} pegawai</strong> akan dihapus <strong>PERMANEN</strong>`,
-            icon: 'error',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Hapus',
-            cancelButtonText: 'Batal',
-            confirmButtonColor: 'var(--danger)',
-            reverseButtons: true
+            icon: 'error', showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus', cancelButtonText: 'Batal',
+            confirmButtonColor: 'var(--danger)', reverseButtons: true
         }).then(result => {
             if (result.isConfirmed) {
                 fetch("{% url 'bulk_delete_pegawai' %}", {
                     method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({ pegawai_ids: selectedIds.join(',') })
                 }).then(r => r.json()).then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire('Berhasil!', data.msg, 'success').then(() => location.reload());
-                    } else {
-                        Swal.fire('Gagal!', data.msg, 'error');
-                    }
+                    if (data.status === 'success') Swal.fire('Berhasil!', data.msg, 'success').then(() => location.reload());
+                    else Swal.fire('Gagal!', data.msg, 'error');
                 }).catch(() => Swal.fire('Error!', 'Terjadi kesalahan', 'error'));
             }
         });
@@ -1041,37 +1086,24 @@ $(document).ready(function() {
 
     // ========== BULK ASSIGN MODE ==========
     $('#btnBulkAssignMode').on('click', function() {
-        if (!selectedIds.length) {
-            Swal.fire('Perhatian!', 'Pilih minimal 1 pegawai', 'warning');
-            return;
-        }
-        
-        modeAssignments = {};
-        allModesData = [];
-        pegawaiExistingAssignments = {};
-        
+        if (!selectedIds.length) { Swal.fire('Perhatian!', 'Pilih minimal 1 pegawai', 'warning'); return; }
+        modeAssignments = {}; allModesData = []; pegawaiExistingAssignments = {};
         loadExistingAssignmentsForSelectedPegawai();
     });
 
     function loadExistingAssignmentsForSelectedPegawai() {
         $('#modeLoadingState').show();
         $('#modeAccordionContainer').html('');
-        
         const promises = selectedIds.map(pegawaiId =>
             fetch(`/api/pegawai/${pegawaiId}/mode-assignments/`)
                 .then(r => r.json())
                 .then(data => ({ pegawaiId, data }))
                 .catch(err => ({ pegawaiId, data: null }))
         );
-        
         Promise.all(promises).then(results => {
             results.forEach(({ pegawaiId, data }) => {
                 if (data && data.status === 'success') {
-                    pegawaiExistingAssignments[pegawaiId] = {
-                        nama: data.pegawai.nama,
-                        modes: {}
-                    };
-                    
+                    pegawaiExistingAssignments[pegawaiId] = { nama: data.pegawai.nama, modes: {} };
                     data.modes.forEach(mode => {
                         if (mode.is_assigned && mode.assignment_data && mode.assignment_data.jadwal_per_hari) {
                             pegawaiExistingAssignments[pegawaiId].modes[mode.id] = {
@@ -1082,7 +1114,6 @@ $(document).ready(function() {
                     });
                 }
             });
-            
             loadModesForBulkAssign();
         });
     }
@@ -1092,44 +1123,28 @@ $(document).ready(function() {
             .then(response => response.json())
             .then(data => {
                 $('#modeLoadingState').hide();
-                
                 if (data.status === 'success' && data.modes.length > 0) {
                     allModesData = data.modes;
                     renderModes(data.modes);
                 } else {
-                    $('#modeAccordionContainer').html(
-                        '<div class="alert alert-warning">' +
-                        '<i class="fas fa-exclamation-triangle"></i>' +
-                        '<div>Tidak ada mode yang tersedia</div>' +
-                        '</div>'
-                    );
+                    $('#modeAccordionContainer').html('<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i><div>Tidak ada mode yang tersedia</div></div>');
                 }
             })
-            .catch(error => {
+            .catch(() => {
                 $('#modeLoadingState').hide();
-                $('#modeAccordionContainer').html(
-                    '<div class="alert alert-danger">' +
-                    '<i class="fas fa-times-circle"></i>' +
-                    '<div>Gagal memuat mode</div>' +
-                    '</div>'
-                );
+                $('#modeAccordionContainer').html('<div class="alert alert-danger"><i class="fas fa-times-circle"></i><div>Gagal memuat mode</div></div>');
             });
     }
 
     function renderModes(modes) {
         let html = '';
-        
         modes.forEach(mode => {
             let assignedCount = 0;
             selectedIds.forEach(pId => {
-                if (pegawaiExistingAssignments[pId] && pegawaiExistingAssignments[pId].modes[mode.id]) {
-                    assignedCount++;
-                }
+                if (pegawaiExistingAssignments[pId] && pegawaiExistingAssignments[pId].modes[mode.id]) assignedCount++;
             });
-            
             const isCompleted = modeAssignments[mode.id] !== undefined;
             const hasExisting = assignedCount > 0;
-            
             let badgeHtml = '';
             if (hasExisting && !isCompleted) {
                 badgeHtml = `<span class="mode-status-badge" style="background: #dbeafe; color: #0369a1;"><i class="fas fa-info-circle"></i> ${assignedCount}/${selectedIds.length} Sudah</span>`;
@@ -1138,7 +1153,6 @@ $(document).ready(function() {
             } else {
                 badgeHtml = '<span class="mode-status-badge pending"><i class="fas fa-clock"></i> Belum</span>';
             }
-            
             html += `
                 <div class="mode-accordion-item ${isCompleted ? 'selected' : ''}" data-mode-id="${mode.id}">
                     <div class="mode-accordion-header">
@@ -1164,22 +1178,15 @@ $(document).ready(function() {
                 </div>
             `;
         });
-        
         $('#modeAccordionContainer').html(html);
-            
+
         $('.mode-accordion-header').on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
+            e.preventDefault(); e.stopPropagation();
             const modeItem = $(this).closest('.mode-accordion-item');
             const modeId = parseInt(modeItem.data('mode-id'));
-            const isDisabled = modeItem.data('disabled') === true;
-            
-            if (isDisabled) return;
-            
+            if (modeItem.data('disabled') === true) return;
             $('.mode-accordion-item').removeClass('active');
             modeItem.addClass('active');
-            
             const modeBody = modeItem.find('.mode-accordion-body');
             if (modeBody.find('.fa-spinner').length) {
                 loadJamKerjaGroupsForMode(modeId, modeBody);
@@ -1191,53 +1198,37 @@ $(document).ready(function() {
         fetch(`/api/mode/${modeId}/get-jam-kerja-groups/`)
             .then(response => response.json())
             .then(data => {
-                if (data.status === 'success' && data.groups.length > 0) {
-                    renderGroups(data.groups, modeId, container);
-                } else {
-                    container.html('<div class="alert alert-warning"><i class="fas fa-info-circle"></i> Tidak ada grup</div>');
-                }
+                if (data.status === 'success' && data.groups.length > 0) renderGroups(data.groups, modeId, container);
+                else container.html('<div class="alert alert-warning"><i class="fas fa-info-circle"></i> Tidak ada grup</div>');
             })
-            .catch(error => {
-                container.html('<div class="alert alert-danger"><i class="fas fa-times-circle"></i> Error</div>');
-            });
+            .catch(() => container.html('<div class="alert alert-danger"><i class="fas fa-times-circle"></i> Error</div>'));
     }
 
     function renderGroups(groups, modeId, container) {
         let html = '<div class="group-selection-grid">';
-
         groups.forEach(group => {
             const currentAssignment = modeAssignments[modeId];
             let isSelected = false;
-            
             if (currentAssignment && currentAssignment.jadwal_per_hari) {
                 const assignedJadwalIds = Object.values(currentAssignment.jadwal_per_hari);
                 isSelected = assignedJadwalIds.includes(group.id);
             }
-            
             let jadwalPerHari = {};
-            
             if (group.jadwal && Array.isArray(group.jadwal) && group.jadwal.length > 0) {
-                group.jadwal.forEach(j => {
-                    jadwalPerHari[j.hari.toString()] = j.jadwal_id;
-                });
+                group.jadwal.forEach(j => { jadwalPerHari[j.hari.toString()] = j.jadwal_id; });
             } else if (group.jadwal_per_hari && typeof group.jadwal_per_hari === 'object') {
                 jadwalPerHari = group.jadwal_per_hari;
             } else {
                 const jumlahHari = group.hari_kerja || 5;
-                for (let i = 0; i < jumlahHari && i < 7; i++) {
-                    jadwalPerHari[i.toString()] = group.id;
-                }
+                for (let i = 0; i < jumlahHari && i < 7; i++) jadwalPerHari[i.toString()] = group.id;
             }
-            
             html += `
-                <div class="group-option-card ${isSelected ? 'selected' : ''}" 
-                     data-mode-id="${modeId}" 
-                     data-group-id="${group.id}" 
+                <div class="group-option-card ${isSelected ? 'selected' : ''}"
+                     data-mode-id="${modeId}"
+                     data-group-id="${group.id}"
                      data-group-nama="${group.nama}"
                      data-jadwal='${JSON.stringify(jadwalPerHari)}'>
-                    <div class="group-check-box">
-                        <i class="fas fa-check"></i>
-                    </div>
+                    <div class="group-check-box"><i class="fas fa-check"></i></div>
                     <h6 class="group-name-text">${group.nama}</h6>
                     <div class="group-time-display">
                         <i class="fas fa-clock"></i>
@@ -1249,30 +1240,20 @@ $(document).ready(function() {
                 </div>
             `;
         });
-
         html += '</div>';
         container.html(html);
-        
+
         container.find('.group-option-card').each(function() {
             const $card = $(this);
             $card.on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
+                e.preventDefault(); e.stopPropagation();
                 const clickedModeId = parseInt($card.data('mode-id'));
                 const groupId = parseInt($card.data('group-id'));
                 const groupNama = $card.data('group-nama');
                 const jadwalData = JSON.parse($card.attr('data-jadwal'));
-                
-                modeAssignments[clickedModeId] = {
-                    group_id: groupId,
-                    group_nama: groupNama,
-                    jadwal_per_hari: jadwalData
-                };
-                
+                modeAssignments[clickedModeId] = { group_id: groupId, group_nama: groupNama, jadwal_per_hari: jadwalData };
                 container.find('.group-option-card').removeClass('selected');
                 $card.addClass('selected');
-                
                 const modeItem = $(`.mode-accordion-item[data-mode-id="${clickedModeId}"]`);
                 modeItem.addClass('selected');
                 const badge = modeItem.find('.mode-status-badge');
@@ -1284,60 +1265,38 @@ $(document).ready(function() {
 
     $('#btnConfirmAssignMode').on('click', function() {
         const completedModes = Object.keys(modeAssignments).length;
-        if (completedModes === 0) {
-            Swal.fire('Perhatian!', 'Minimal pilih 1 grup', 'warning');
-            return;
-        }
-
-        const validAssignments = selectedIds.map(pegawaiId => {
-            return { 
-                pegawai_id: pegawaiId, 
-                modes: modeAssignments
-            };
-        });
-        
+        if (completedModes === 0) { Swal.fire('Perhatian!', 'Minimal pilih 1 grup', 'warning'); return; }
+        const validAssignments = selectedIds.map(pegawaiId => ({ pegawai_id: pegawaiId, modes: modeAssignments }));
         const modeList = allModesData
             .filter(m => modeAssignments[m.id])
             .map(m => `${m.nama} → ${modeAssignments[m.id].group_nama}`)
             .join('<br>');
-
         Swal.fire({
             title: 'Konfirmasi Assignment',
             html: `<strong>${selectedIds.length} pegawai</strong> akan di-assign:<br><br>${modeList}<br><br><small style="color: #059669;">✅ Mode yang sama akan diupdate, mode lain tetap ada</small>`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Assign',
-            cancelButtonText: 'Batal',
-            confirmButtonColor: 'var(--primary)',
-            reverseButtons: true
+            icon: 'question', showCancelButton: true,
+            confirmButtonText: 'Ya, Assign', cancelButtonText: 'Batal',
+            confirmButtonColor: 'var(--primary)', reverseButtons: true
         }).then(result => {
             if (result.isConfirmed) {
                 const btn = $('#btnConfirmAssignMode');
                 const originalHtml = btn.html();
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
-                
                 fetch('/api/save-mode-assignment-bulk/', {
                     method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        assignments: JSON.stringify(validAssignments)
-                    })
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ assignments: JSON.stringify(validAssignments) })
                 }).then(r => r.json()).then(data => {
                     btn.prop('disabled', false).html(originalHtml);
-                    
                     if (data.status === 'success' || data.status === 'warning') {
                         Swal.fire('Berhasil!', data.msg, 'success').then(() => {
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('modalBulkAssignMode'));
-                            modal.hide();
+                            bootstrap.Modal.getInstance(document.getElementById('modalBulkAssignMode')).hide();
                             location.reload();
                         });
                     } else {
                         Swal.fire('Gagal!', data.msg, 'error');
                     }
-                }).catch(error => {
+                }).catch(() => {
                     btn.prop('disabled', false).html(originalHtml);
                     Swal.fire('Error!', 'Terjadi kesalahan', 'error');
                 });
@@ -1348,28 +1307,18 @@ $(document).ready(function() {
     $('#btnSyncFingerprint').on('click', function() {
         const btn = $(this);
         const originalHtml = btn.html();
-        btn.prop('disabled', true);
-        btn.html('<i class="fas fa-spinner fa-spin"></i> Syncing...');
-        
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Syncing...');
         $.ajax({
             url: "{% url 'sync_fingerprint_from_machine' %}",
             method: 'POST',
-            data: { 
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                mesin_id: '1'
-            },
+            data: { csrfmiddlewaretoken: '{{ csrf_token }}', mesin_id: '1' },
             success: function(response) {
-                btn.prop('disabled', false);
-                btn.html(originalHtml);
-                if (response.status === 'success') {
-                    Swal.fire('Berhasil!', response.msg, 'success').then(() => location.reload());
-                } else {
-                    Swal.fire('Informasi', response.msg, 'info');
-                }
+                btn.prop('disabled', false).html(originalHtml);
+                if (response.status === 'success') Swal.fire('Berhasil!', response.msg, 'success').then(() => location.reload());
+                else Swal.fire('Informasi', response.msg, 'info');
             },
             error: function(xhr) {
-                btn.prop('disabled', false);
-                btn.html(originalHtml);
+                btn.prop('disabled', false).html(originalHtml);
                 const response = xhr.responseJSON || {};
                 Swal.fire('Gagal!', response.msg || 'Terjadi kesalahan', 'error');
             }
