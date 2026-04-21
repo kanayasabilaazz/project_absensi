@@ -230,7 +230,7 @@
         transform: translate(-50%, -50%);
     }
 
-    /* ===== TABLE — sama persis seperti riwayat absensi ===== */
+    /* ===== TABLE ===== */
     .table-wrapper {
         border-radius: var(--radius);
         overflow: hidden;
@@ -682,16 +682,24 @@
     </div>
 </div>
 
-<!-- Sync Section -->
+<!-- ✅ Sync Section dengan Dropdown Pilih Mesin -->
 {% if status_filter == 'pending' and total_pending > 0 %}
 <div class="sync-section">
     <h6><i class="fas fa-fingerprint"></i> Sinkronisasi Fingerprint</h6>
-    <button type="button" class="btn btn-warning" id="btnSyncFingerprint">
-        <i class="fas fa-sync"></i> Sync dari Mesin
-    </button>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+        <select class="form-select" id="selectMesinSync" style="width: auto; min-width: 250px;">
+            <option value="">-- Pilih Mesin --</option>
+            {% for mesin in mesin_list %}
+            <option value="{{ mesin.id }}">{{ mesin.nama }} ({{ mesin.ip_address }})</option>
+            {% endfor %}
+        </select>
+        <button type="button" class="btn btn-warning" id="btnSyncFingerprint">
+            <i class="fas fa-sync"></i> Sync dari Mesin
+        </button>
+    </div>
     <div class="sync-hint">
         <i class="fas fa-info-circle"></i>
-        <span>Klik untuk sync fingerprint dari mesin setelah pegawai scan sidik jari</span>
+        <span>Pilih mesin lalu klik Sync setelah pegawai scan sidik jari di mesin tersebut</span>
     </div>
 </div>
 {% endif %}
@@ -874,51 +882,59 @@
 let dtTable;
 
 function updateShowingInfo() {
-    const info = dtTable.page.info();
-    const showingInfo = $('#showingInfo');
-    if (info.length === -1 || info.recordsDisplay === info.recordsTotal) {
-        showingInfo.text('Menampilkan semua data');
-    } else {
-        showingInfo.text('Menampilkan ' + (info.start + 1) + '-' + info.end + ' dari ' + info.recordsDisplay + ' data');
-    }
+    if (!dtTable) return;
+    try {
+        const info = dtTable.page.info();
+        const showingInfo = $('#showingInfo');
+        if (info.length === -1 || info.recordsDisplay === info.recordsTotal) {
+            showingInfo.text('Menampilkan semua data');
+        } else {
+            showingInfo.text('Menampilkan ' + (info.start + 1) + '-' + info.end + ' dari ' + info.recordsDisplay + ' data');
+        }
+    } catch(e) { /* ignore */ }
 }
 
 function renderCustomPagination() {
-    const info = dtTable.page.info();
-    const current = info.page;
-    const total = info.pages;
-    const pagination = $('#customPagination');
+    if (!dtTable) return;
+    try {
+        const info = dtTable.page.info();
+        const current = info.page;
+        const total = info.pages;
+        const pagination = $('#customPagination');
 
-    if (total <= 1) {
-        pagination.hide();
+        if (total <= 1) {
+            pagination.hide();
+            updateShowingInfo();
+            return;
+        }
+
+        pagination.show();
+        let html = '';
+
+        html += current === 0
+            ? '<button class="page-btn disabled" disabled>Prev</button>'
+            : '<button class="page-btn" onclick="changePage(' + (current - 1) + ')">Prev</button>';
+
+        let start = Math.max(0, current - 2);
+        let end = Math.min(total - 1, current + 2);
+        if (current <= 2) end = Math.min(4, total - 1);
+        if (current >= total - 3) start = Math.max(0, total - 5);
+
+        for (let i = start; i <= end; i++) {
+            html += i === current
+                ? '<button class="page-btn active">' + (i + 1) + '</button>'
+                : '<button class="page-btn" onclick="changePage(' + i + ')">' + (i + 1) + '</button>';
+        }
+
+        html += current === total - 1
+            ? '<button class="page-btn disabled" disabled>Next</button>'
+            : '<button class="page-btn" onclick="changePage(' + (current + 1) + ')">Next</button>';
+
+        pagination.html(html);
         updateShowingInfo();
-        return;
+    } catch(e) {
+        $('#customPagination').hide();
     }
-
-    pagination.show();
-    let html = '';
-
-    html += current === 0
-        ? '<button class="page-btn disabled" disabled>Prev</button>'
-        : '<button class="page-btn" onclick="changePage(' + (current - 1) + ')">Prev</button>';
-
-    let start = Math.max(0, current - 2);
-    let end = Math.min(total - 1, current + 2);
-    if (current <= 2) end = Math.min(4, total - 1);
-    if (current >= total - 3) start = Math.max(0, total - 5);
-
-    for (let i = start; i <= end; i++) {
-        html += i === current
-            ? '<button class="page-btn active">' + (i + 1) + '</button>'
-            : '<button class="page-btn" onclick="changePage(' + i + ')">' + (i + 1) + '</button>';
-    }
-
-    html += current === total - 1
-        ? '<button class="page-btn disabled" disabled>Next</button>'
-        : '<button class="page-btn" onclick="changePage(' + (current + 1) + ')">Next</button>';
-
-    pagination.html(html);
-    updateShowingInfo();
 }
 
 function changePage(page) {
@@ -926,30 +942,38 @@ function changePage(page) {
 }
 
 $(document).ready(function() {
-    dtTable = $('#pegawaiTable').DataTable({
-        paging: true,
-        pageLength: -1,
-        lengthChange: false,
-        ordering: true,
-        searching: false,
-        info: false,
-        scrollX: false,
-        dom: 'rt',
-        language: { emptyTable: 'Tidak ada data' },
-        order: [[2, 'asc']],
-        columnDefs: [
-            { orderable: false, targets: [0, 6, 7] }
-        ],
-        drawCallback: function() {
-            renderCustomPagination();
-        }
-    });
+    const rowCount = $('#pegawaiTable tbody tr').length;
+    const hasData = rowCount > 0 && !$('#pegawaiTable tbody tr td[colspan]').length;
 
-    $('#entriesSelect').on('change', function() {
-        dtTable.page.len(parseInt($(this).val())).draw();
-    });
+    if (hasData) {
+        dtTable = $('#pegawaiTable').DataTable({
+            paging: true,
+            pageLength: -1,
+            lengthChange: false,
+            ordering: true,
+            searching: false,
+            info: false,
+            scrollX: false,
+            dom: 'rt',
+            language: { emptyTable: 'Tidak ada data' },
+            order: [[2, 'asc']],
+            columnDefs: [
+                { orderable: false, targets: [0, 6, 7] }
+            ],
+            drawCallback: function() {
+                renderCustomPagination();
+            }
+        });
 
-    renderCustomPagination();
+        $('#entriesSelect').on('change', function() {
+            dtTable.page.len(parseInt($(this).val())).draw();
+        });
+
+        renderCustomPagination();
+    } else {
+        $('#customPagination').hide();
+        $('#showingInfo').text('Tidak ada data');
+    }
 
     // ========== SELECTION LOGIC ==========
     let selectedIds = [];
@@ -977,15 +1001,25 @@ $(document).ready(function() {
     $('#selectAll').on('change', function() {
         if (!selectionMode) { $(this).prop('checked', false); return; }
         const isChecked = $(this).prop('checked');
-        dtTable.rows({ page: 'current', search: 'applied' }).nodes().to$().find('.row-checkbox').prop('checked', isChecked);
         selectedIds = [];
-        if (isChecked) {
-            dtTable.rows({ page: 'current', search: 'applied' }).nodes().to$().find('.row-checkbox:checked').each(function() {
-                selectedIds.push($(this).val());
-            });
-            $('tr').has('.row-checkbox:checked').addClass('selected');
+        if (dtTable) {
+            dtTable.rows({ page: 'current', search: 'applied' }).nodes().to$().find('.row-checkbox').prop('checked', isChecked);
+            if (isChecked) {
+                dtTable.rows({ page: 'current', search: 'applied' }).nodes().to$().find('.row-checkbox:checked').each(function() {
+                    selectedIds.push($(this).val());
+                });
+                $('tr').has('.row-checkbox:checked').addClass('selected');
+            } else {
+                $('tr').removeClass('selected');
+            }
         } else {
-            $('tr').removeClass('selected');
+            $('.row-checkbox').prop('checked', isChecked);
+            if (isChecked) {
+                $('.row-checkbox:checked').each(function() {
+                    selectedIds.push($(this).val());
+                });
+            }
+            $('tr').has('.row-checkbox:checked').toggleClass('selected', isChecked);
         }
         updateBulkBar();
     });
@@ -1304,26 +1338,43 @@ $(document).ready(function() {
         });
     });
 
+    // ========== SYNC FINGERPRINT ==========
     $('#btnSyncFingerprint').on('click', function() {
+        // ✅ Validasi: harus pilih mesin dulu
+        const mesinId = $('#selectMesinSync').val();
+        if (!mesinId) {
+            Swal.fire('Perhatian!', 'Pilih mesin terlebih dahulu sebelum sync', 'warning');
+            return;
+        }
+
         const btn = $(this);
         const originalHtml = btn.html();
         btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Syncing...');
-        $.ajax({
-            url: "{% url 'sync_fingerprint_from_machine' %}",
+
+        fetch("{% url 'sync_fingerprint_from_machine' %}", {
             method: 'POST',
-            data: { csrfmiddlewaretoken: '{{ csrf_token }}', mesin_id: '1' },
-            success: function(response) {
-                btn.prop('disabled', false).html(originalHtml);
-                if (response.status === 'success') Swal.fire('Berhasil!', response.msg, 'success').then(() => location.reload());
-                else Swal.fire('Informasi', response.msg, 'info');
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            error: function(xhr) {
-                btn.prop('disabled', false).html(originalHtml);
-                const response = xhr.responseJSON || {};
-                Swal.fire('Gagal!', response.msg || 'Terjadi kesalahan', 'error');
+            // ✅ Kirim mesin_id yang dipilih
+            body: new URLSearchParams({ mesin_id: mesinId })
+        })
+        .then(r => r.json())
+        .then(response => {
+            btn.prop('disabled', false).html(originalHtml);
+            if (response.status === 'success') {
+                Swal.fire('Berhasil!', response.msg, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Informasi', response.msg || 'Tidak ada data baru', 'info');
             }
+        })
+        .catch(() => {
+            btn.prop('disabled', false).html(originalHtml);
+            Swal.fire('Gagal!', 'Terjadi kesalahan koneksi', 'error');
         });
     });
+
 });
 </script>
 {% endblock %}

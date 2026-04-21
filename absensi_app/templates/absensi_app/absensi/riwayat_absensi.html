@@ -708,10 +708,12 @@
 
                         <td style="text-align: center;">
                             {% if absensi.tap_istirahat_keluar %}
-                                <span class="jam-text">{{ absensi.tap_istirahat_keluar|date:"H:i" }}</span>
+                                <span class="jam-text {% if absensi.has_violation %}violation{% endif %}">
+                                    {{ absensi.tap_istirahat_keluar|date:"H:i" }}
+                                </span>
                             {% elif absensi.tap_masuk and absensi.tap_pulang %}
                                 <span class="jam-text violation">
-                                    12:00 <i class="fas fa-exclamation-circle" style="font-size: 10px;"></i>
+                                    Est. 12:00 <i class="fas fa-exclamation-circle" style="font-size: 10px;" title="Tidak ada tap istirahat"></i>
                                 </span>
                             {% else %}
                                 <span class="badge badge-secondary">-</span>
@@ -720,10 +722,12 @@
 
                         <td style="text-align: center;">
                             {% if absensi.tap_istirahat_masuk %}
-                                <span class="jam-text">{{ absensi.tap_istirahat_masuk|date:"H:i" }}</span>
+                                <span class="jam-text {% if absensi.has_violation %}violation{% endif %}">
+                                    {{ absensi.tap_istirahat_masuk|date:"H:i" }}
+                                </span>
                             {% elif absensi.tap_masuk and absensi.tap_pulang %}
                                 <span class="jam-text violation">
-                                    14:00 <i class="fas fa-exclamation-circle" style="font-size: 10px;"></i>
+                                    Est. 14:00 <i class="fas fa-exclamation-circle" style="font-size: 10px;" title="Tidak ada tap istirahat"></i>
                                 </span>
                             {% else %}
                                 <span class="badge badge-secondary">-</span>
@@ -741,9 +745,12 @@
                         </td>
 
                         <td style="text-align: center;">
-                            {% if absensi.total_jam_kerja %}
+                            {% if absensi.total_jam_kerja and absensi.total_jam_kerja != '-' %}
                                 <span class="total-jam-text {% if absensi.has_violation %}violation{% endif %}">
                                     {{ absensi.total_jam_kerja }}
+                                    {% if absensi.has_violation %}
+                                        <i class="fas fa-exclamation-triangle" style="font-size: 10px;" title="Tidak ada tap istirahat"></i>
+                                    {% endif %}
                                 </span>
                             {% else %}
                                 <span class="badge badge-secondary">-</span>

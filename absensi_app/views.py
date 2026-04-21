@@ -1095,18 +1095,21 @@ def daftar_Pegawai(request):
     #  8: Build context
     # ========================================
     context = {
-        'pegawai_list': pegawai_display_list,  # ✅ Gunakan list yang sudah diproses
-        'search_form': search_form,
-        'status_filter': status_filter,
-        'total_active': total_active,
-        'total_pending': total_pending,
-        'total_inactive': total_inactive,
-        'departemen_list': MasterDepartemen.objects.filter(is_active=True).order_by('nama'),
-        'jabatan_list': MasterJabatan.objects.filter(is_active=True).order_by('nama'),
-        'mode_jam_kerja_list': MasterModeJamKerja.objects.filter(is_active=True).order_by('nama'),
-        'cabang_aktif': cabang_aktif,
-    }
-    
+            'pegawai_list': pegawai_display_list,
+            'search_form': search_form,
+            'status_filter': status_filter,
+            'total_active': total_active,
+            'total_pending': total_pending,
+            'total_inactive': total_inactive,
+            'departemen_list': MasterDepartemen.objects.filter(is_active=True).order_by('nama'),
+            'jabatan_list': MasterJabatan.objects.filter(is_active=True).order_by('nama'),
+            'mode_jam_kerja_list': MasterModeJamKerja.objects.filter(is_active=True).order_by('nama'),
+            'cabang_aktif': cabang_aktif,
+            # ✅ TAMBAHAN: kirim mesin_list ke template untuk dropdown sync
+            'mesin_list': MasterMesin.objects.filter(
+                is_active=True, cabang=cabang_aktif
+            ).order_by('nama') if cabang_aktif else MasterMesin.objects.filter(is_active=True).order_by('nama'),
+        }
     return render(request, 'absensi_app/pegawai/daftar_pegawai.html', context)
 
 @login_required
@@ -2844,44 +2847,85 @@ def sync_fingerprint_from_machine(request):
         return JsonResponse({"status": "error", "msg": "Akses ditolak"}, status=403)
     
     try:
-        ip_address = request.POST.get('ip_address', '15.59.254.211')
+        cabang_aktif = get_active_cabang(request)
+
+        # ✅ Cek mesin_id dari POST dulu, fallback ke mesin pertama di cabang
+        mesin_id = request.POST.get('mesin_id')
+        if mesin_id:
+            mesin = get_object_or_404(MasterMesin, id=mesin_id, is_active=True)
+        else:
+            mesin = MasterMesin.objects.filter(
+                is_active=True,
+                cabang=cabang_aktif
+            ).first() if cabang_aktif else MasterMesin.objects.filter(is_active=True).first()
+
+        if not mesin:
+            return JsonResponse({
+                "status": "error",
+                "msg": "Tidak ada mesin aktif di cabang ini"
+            }, status=404)
+
+        ip_address = request.POST.get('ip_address') or mesin.ip_address
+        port = mesin.port or 4370
+
         pegawai_id = request.POST.get('pegawai_id')
-        
+
         if pegawai_id:
             pegawai_list = [get_object_or_404(Pegawai, id=pegawai_id)]
         else:
             pegawai_with_fp = get_pegawai_with_fingerprint()
-            pegawai_list = Pegawai.objects.filter(
-                is_active=True,
-                uid_mesin__isnull=False
-            ).exclude(uid_mesin=0).exclude(id__in=pegawai_with_fp)
-        
+
+            pegawai_query = Pegawai.objects.filter(
+                is_active=True
+            ).exclude(id__in=pegawai_with_fp)
+
+            if cabang_aktif:
+                pegawai_query = pegawai_query.filter(cabang=cabang_aktif)
+
+            pegawai_list = list(pegawai_query)
+
         if not pegawai_list:
             return JsonResponse({
                 "status": "info",
                 "msg": "Tidak ada pegawai yang perlu disinkronisasi",
                 "synced_count": 0
             })
-        
-        conn = connect_to_fingerprint_machine(ip_address)
+
+        conn = connect_to_fingerprint_machine(ip_address, port=port)
         conn.disable_device()
         all_templates = conn.get_templates()
         all_users = conn.get_users()
         conn.enable_device()
-        
+
         synced_count = 0
         new_templates_count = 0
         failed_list = []
-        
+
         for pegawai in pegawai_list:
             try:
-                pegawai_templates = [t for t in all_templates if t.uid == pegawai.uid_mesin]
-                
+                target_user = next(
+                    (u for u in all_users if str(getattr(u, 'user_id', u.uid)) == str(pegawai.userid)),
+                    None
+                )
+
+                if not target_user:
+                    failed_list.append({
+                        'userid': pegawai.userid,
+                        'nama': pegawai.nama_lengkap,
+                        'reason': 'User tidak ditemukan di mesin'
+                    })
+                    continue
+
+                if not pegawai.uid_mesin or pegawai.uid_mesin != target_user.uid:
+                    pegawai.uid_mesin = target_user.uid
+                    pegawai.save(update_fields=['uid_mesin'])
+
+                pegawai_templates = [t for t in all_templates if t.uid == target_user.uid]
+
                 if pegawai_templates:
-                    old_count = pegawai.fingerprint_templates.count()
-                    if old_count > 0:
+                    if pegawai.fingerprint_templates.count() > 0:
                         pegawai.fingerprint_templates.all().delete()
-                    
+
                     for template in pegawai_templates:
                         FingerprintTemplate.objects.create(
                             pegawai=pegawai,
@@ -2892,7 +2936,7 @@ def sync_fingerprint_from_machine(request):
                             template=template.template
                         )
                         new_templates_count += 1
-                    
+
                     synced_count += 1
                 else:
                     failed_list.append({
@@ -2907,18 +2951,18 @@ def sync_fingerprint_from_machine(request):
                     'reason': str(e)
                 })
                 continue
-        
+
         conn.disconnect()
-        
+
         msg = f"Berhasil sinkronisasi {synced_count} pegawai dengan {new_templates_count} template sidik jari"
-        
+
         if failed_list:
             msg += f"\n\nGagal sinkronisasi {len(failed_list)} pegawai:\n"
             for item in failed_list[:5]:
                 msg += f"- {item['nama']} ({item['userid']}): {item['reason']}\n"
             if len(failed_list) > 5:
                 msg += f"... dan {len(failed_list) - 5} pegawai lainnya"
-        
+
         return JsonResponse({
             "status": "success",
             "msg": msg,
@@ -2927,10 +2971,9 @@ def sync_fingerprint_from_machine(request):
             "failed_count": len(failed_list),
             "failed_details": failed_list
         })
-    
+
     except Exception as e:
         return JsonResponse({"status": "error", "msg": str(e)}, status=500)
-
 
 @login_required
 def batalkan_pegawai_pending(request):
@@ -3505,30 +3548,36 @@ def riwayat_absensi(request):
     mesin_list = mesin_list.order_by('nama')
     
     # ✅ HITUNG TOTAL JAM KERJA + AMBIL INFO MODE PER ABSENSI
+# HITUNG TOTAL JAM KERJA + CEK VIOLATIONS
     absensi_with_stats = []
     
     for absensi in absensi_list:
-        # Hitung total jam
         total_jam = absensi.calculate_total_jam_kerja()
-        
-        # ✅ AMBIL MODE YANG AKTIF PADA TANGGAL ABSENSI INI
         mode_pada_tanggal = WorkModeService.get_mode_for_date(absensi.tanggal)
-        
-        # Cek violation
-        has_violation = False
-        if absensi.tap_masuk and absensi.tap_pulang:
-            if not absensi.tap_istirahat_keluar or not absensi.tap_istirahat_masuk:
-                has_violation = True
 
-        # Tambahkan attribute
-        absensi.total_jam_kerja = total_jam.get('formatted', '-') if total_jam else '-'
-        absensi.has_violation = has_violation
-        
-        # ✅ TAMBAHKAN INFO MODE
-        absensi.mode_warna = mode_pada_tanggal.get('warna_mode', '#6b7280')  # default gray
-        absensi.mode_nama = mode_pada_tanggal.get('nama_mode', 'Normal')
-        absensi.is_mode_khusus = mode_pada_tanggal.get('is_mode_khusus', False)
-        
+        # Cek violation istirahat melebihi 1 jam
+        is_istirahat_violation = False
+        if absensi.tap_istirahat_keluar and absensi.tap_istirahat_masuk:
+            from datetime import datetime as dt
+            keluar = dt.combine(absensi.tanggal, absensi.tap_istirahat_keluar)
+            masuk  = dt.combine(absensi.tanggal, absensi.tap_istirahat_masuk)
+            durasi_istirahat = (masuk - keluar).total_seconds() / 60
+            if durasi_istirahat > 60:
+                is_istirahat_violation = True
+        elif absensi.tap_masuk and absensi.tap_pulang:
+            # Tidak ada tap istirahat sama sekali
+            is_istirahat_violation = True
+
+        # Gabungan violation
+        has_violation = absensi.is_late or absensi.is_early_departure or is_istirahat_violation
+
+        absensi.total_jam_kerja       = total_jam.get('formatted', '-') if total_jam else '-'
+        absensi.has_violation         = has_violation
+        absensi.is_istirahat_violation = is_istirahat_violation
+        absensi.mode_warna            = mode_pada_tanggal.get('warna_mode', '#6b7280')
+        absensi.mode_nama             = mode_pada_tanggal.get('nama_mode', 'Normal')
+        absensi.is_mode_khusus        = mode_pada_tanggal.get('is_mode_khusus', False)
+
         absensi_with_stats.append(absensi)
 
     context = {
